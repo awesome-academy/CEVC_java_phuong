@@ -2,6 +2,9 @@ package com.foodorder.foodapp.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,14 +27,17 @@ public class Order extends BaseModel {
 
   @ManyToOne
   @JoinColumn(name = "user_id", nullable = false)
+  @JsonBackReference
   private User user;
 
   @ManyToOne
   @JoinColumn(name = "order_status_id", nullable = false)
+  @JsonBackReference
   private OrderStatus orderStatus;
 
   @OneToMany(mappedBy = "order", cascade = CascadeType.REMOVE)
-  private List<OrderItem> items;
+  @JsonManagedReference
+  private List<OrderItem> orderItems;
 
   @Column(name = "reason_cancel", length = 1000)
   private String reasonCancel;

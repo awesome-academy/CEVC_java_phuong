@@ -1,5 +1,7 @@
 package com.foodorder.foodapp.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -20,10 +22,12 @@ public class User extends BaseModel {
 
   @ManyToOne
   @JoinColumn(name = "role_id", nullable = false)
+  @JsonBackReference
   private Role role;
 
   @ManyToOne
   @JoinColumn(name = "auth_provider_id", nullable = false)
+  @JsonBackReference
   private AuthProvider authProvider;
 
   @Column(name = "full_name", nullable = false, length = 100)

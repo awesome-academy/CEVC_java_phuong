@@ -1,5 +1,6 @@
 package com.foodorder.foodapp.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.foodorder.foodapp.enums.ESuggestion;
 
 import jakarta.persistence.Column;
@@ -24,6 +25,7 @@ public class Suggestion extends BaseModel {
 
   @ManyToOne
   @JoinColumn(name = "user_id", nullable = false)
+  @JsonBackReference
   private User user;
 
   @Column(length = 150)

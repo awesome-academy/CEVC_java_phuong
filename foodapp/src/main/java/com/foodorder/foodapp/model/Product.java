@@ -2,6 +2,8 @@ package com.foodorder.foodapp.model;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -22,10 +24,12 @@ public class Product extends BaseModel {
 
   @ManyToOne
   @JoinColumn(name = "category_id", nullable = false)
+  @JsonBackReference
   private Category category;
 
   @ManyToOne
   @JoinColumn(name = "product_type_id", nullable = false)
+  @JsonBackReference
   private ProductType productType;
 
   @Column(nullable = false, length = 150)
