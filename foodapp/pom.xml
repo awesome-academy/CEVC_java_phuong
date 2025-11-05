@@ -45,20 +45,17 @@
 	  </dependency>
 
 
-	  <dependency>
-	    <groupId>org.postgresql</groupId>
-	    <artifactId>postgresql</artifactId>
-	    <version>42.7.7</version>
-	  </dependency>
+  <dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
+    <version>42.7.7</version>
+  </dependency>
 
-
-	  <dependency>
-	    <groupId>org.springframework.boot</groupId>
-	    <artifactId>spring-boot-starter-data-jpa</artifactId>
-	    <version>3.5.3</version>
-	  </dependency>
-
-
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+    <version>3.5.3</version>
+  </dependency>
 	  <dependency>
 	    <groupId>org.springframework.boot</groupId>
 	    <artifactId>spring-boot-starter-validation</artifactId>
@@ -86,6 +83,20 @@
 	    <version>1.18.38</version>
 	  </dependency>
 
+	  <!-- Flyway for database migration -->
+	  <dependency>
+	    <groupId>org.flywaydb</groupId>
+	    <artifactId>flyway-core</artifactId>
+	    <version>10.20.1</version>
+	  </dependency>
+
+	  <!-- Flyway PostgreSQL support -->
+	  <dependency>
+	    <groupId>org.flywaydb</groupId>
+	    <artifactId>flyway-database-postgresql</artifactId>
+	    <version>10.20.1</version>
+	  </dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -103,6 +114,31 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+
+			<!-- Flyway Maven Plugin for manual migration -->
+			<plugin>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-maven-plugin</artifactId>
+				<version>9.22.3</version>
+				<configuration>
+					<!-- Load from .env: jdbc:postgresql://localhost:5432/foodapp_dev_db -->
+					<url>${DB_URL:jdbc:postgresql://localhost:5432/foodapp_dev_db}</url>
+					<user>${DB_USERNAME:postgres}</user>
+					<password>${DB_PASSWORD:123456}</password>
+					<locations>
+						<location>classpath:db/migration</location>
+					</locations>
+					<baselineOnMigrate>true</baselineOnMigrate>
+					<validateOnMigrate>true</validateOnMigrate>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.postgresql</groupId>
+						<artifactId>postgresql</artifactId>
+						<version>42.7.7</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 		</plugins>
 	</build>
