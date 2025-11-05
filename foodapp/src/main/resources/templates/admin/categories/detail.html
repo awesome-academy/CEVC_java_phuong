@@ -33,11 +33,60 @@
         <!--end::Container-->
       </div>
       <!--end::App Content Header-->
-      <!--begin::App Content-->
       <div class="app-content">
         <!--begin::Container-->
         <div class="container-fluid">
-          Detail content
+          <!--begin::Row-->
+          <div class="row g-4">
+            <!--begin::Col-->
+            <div class="col-md-9">
+              <!--begin::Quick Example-->
+              <div class="card card-primary card-outline mb-4">
+                <!--begin::Header-->
+                <!--end::Header-->
+                <!--begin::Form-->
+                <form>
+                  <!--begin::Body-->
+                  <div class="card-body">
+                    <div class="mb-3">
+                      <label for="exampleInputEmail1" class="form-label fw-bold">ID: </label>
+                      <p th:text="${category.id}"></p>
+                    </div>
+                    <div class="mb-3">
+                      <label for="exampleInputEmail1" class="form-label fw-bold">Name: </label>
+                      <p th:text="${category.name}"></p>
+                    </div>
+                    <div class="mb-3">
+                      <label for="exampleInputEmail1" class="form-label fw-bold">Parent Category Name: </label>
+                      <p th:text="${category.parent?.name ?: 'N/A'}"></p>
+                    </div>
+                    <div class="mb-3">
+                      <label for="exampleInputEmail1" class="form-label fw-bold">Priority: </label>
+                      <p th:text="${category.priority}"></p>
+                    </div>
+                    <div class="mb-3">
+                      <label for="exampleInputEmail1" class="form-label fw-bold">Created At: </label>
+                      <p th:text="${category.createdAt}"></p>
+                    </div>
+                    <div class="mb-3">
+                      <label for="exampleInputEmail1" class="form-label fw-bold">Updated At: </label>
+                      <p th:text="${category.updatedAt}"></p>
+                    </div>
+                  </div>
+                  <!--end::Body-->
+                  <!--begin::Footer-->
+                  <div class="card-footer">
+                    <a th:href="@{/admin/categories}">Back to index</a>
+                  </div>
+                  <!--end::Footer-->
+                </form>
+                <!--end::Form-->
+              </div>
+              <!--end::Quick Example-->
+            </div>
+            <!--end::Col-->
+          </div>
+          <!--end::Row-->
         </div>
         <!--end::Container-->
       </div>

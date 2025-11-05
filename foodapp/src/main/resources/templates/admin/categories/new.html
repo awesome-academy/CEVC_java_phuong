@@ -7,55 +7,106 @@
   <th:block th:replace="~{admin/layouts/static :: css_links}"></th:block>
 </head>
 
-<body class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">
-  <!--begin::App Wrapper-->
-  <div class="app-wrapper">
-    <!--begin::Header-->
-    <th:block th:replace="~{admin/layouts/header :: header}"></th:block>
-    <!--end::Header-->
-    <!--begin::Sidebar-->
-    <th:block th:replace="~{admin/layouts/sidebar :: sidebar}"></th:block>
-    <!--end::Sidebar-->
-    <!--begin::App Main-->
-    <main class="app-main">
-      <!--begin::App Content Header-->
-      <div class="app-content-header">
-        <!--begin::Container-->
-        <div class="container-fluid">
-          <!--begin::Row-->
-          <div class="row">
-            <div class="col-sm-6">
-              <h3 class="mb-0">New</h3>
-            </div>
+<!--begin::App Wrapper-->
+<div class="app-wrapper">
+  <!--begin::Header-->
+  <th:block th:replace="~{admin/layouts/header :: header}"></th:block>
+  <!--end::Header-->
+  <!--begin::Sidebar-->
+  <th:block th:replace="~{admin/layouts/sidebar :: sidebar}"></th:block>
+  <!--end::Sidebar-->
+  <!--begin::App Main-->
+  <main class="app-main">
+    <!--begin::App Content Header-->
+    <div class="app-content-header">
+      <!--begin::Container-->
+      <div class="container-fluid">
+        <!--begin::Row-->
+        <div class="row">
+          <div class="col-sm-6">
+            <h3 class="mb-0">New</h3>
           </div>
-          <!--end::Row-->
         </div>
-        <!--end::Container-->
+        <!--end::Row-->
       </div>
-      <!--end::App Content Header-->
-      <!--begin::App Content-->
-      <div class="app-content">
-        <!--begin::Container-->
-        <div class="container-fluid">
-          New content
+      <!--end::Container-->
+    </div>
+    <!--end::App Content Header-->
+    <!--begin::App Content-->
+    <div class="app-content">
+      <!--begin::Container-->
+      <div class="container-fluid">
+        <!--begin::Row-->
+        <div class="row g-4">
+          <!--begin::Col-->
+          <div class="col-md-9">
+            <!--begin::Quick Example-->
+            <div class="card card-primary card-outline mb-4">
+              <!--begin::Header-->
+              <!--end::Header-->
+              <!--begin::Form-->
+              <form th:action="@{/admin/categories/new}" th:object="${category}" method="post"
+                enctype="multipart/form-data">
+                <!--begin::Body-->
+                <div class="card-body">
+                  <div class="mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <input type="text" class="form-control" th:field="*{name}" />
+                    <div th:if="${#fields.hasErrors('name')}" class="error-detail">
+                      <span th:errors="*{name}" style="color:red;"></span>
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="parentCategory" class="form-label">Parent Category</label>
+                    <select class="form-select" th:field="*{parentId}">
+                      <option value="">Choose...</option>
+                      <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+                    </select>
+                    <div th:if="${#fields.hasErrors('parentId')}" class="error-detail">
+                      <span th:errors="*{parentId}" style="color:red;"></span>
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="priority" class="form-label">Priority</label>
+                    <input type="number" class="form-control" th:field="*{priority}" />
+                    <div th:if="${#fields.hasErrors('priority')}" class="error-detail">
+                      <span th:errors="*{priority}" style="color:red;"></span>
+                    </div>
+                  </div>
+
+                </div>
+                <!--end::Body-->
+                <!--begin::Footer-->
+                <div class="card-footer">
+                  <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+                <!--end::Footer-->
+              </form>
+              <!--end::Form-->
+            </div>
+            <!--end::Quick Example-->
+          </div>
+          <!--end::Col-->
         </div>
-        <!--end::Container-->
+        <!--end::Row-->
       </div>
-      <!--end::App Content-->
-    </main>
-    <!--end::App Main-->
-    <!--begin::Footer-->
-    <th:block th:replace="~{admin/layouts/footer :: footer}"></th:block>
-    <!--end::Footer-->
-  </div>
-  <!--end::App Wrapper-->
-  <!--begin::Script-->
-  <!--begin::Third Party Plugin(OverlayScrollbars)-->
-  <th:block th:replace="~{admin/layouts/static :: js_scripts}"></th:block>
-  <!--end::OverlayScrollbars Configure-->
-  <!-- OPTIONAL SCRIPTS -->
-  <!-- sortablejs -->
-  <!--end::Script-->
+      <!--end::Container-->
+    </div>
+    <!--end::App Content-->
+  </main>
+  <!--end::App Main-->
+  <!--begin::Footer-->
+  <th:block th:replace="~{admin/layouts/footer :: footer}"></th:block>
+  <!--end::Footer-->
+</div>
+<!--end::App Wrapper-->
+<!--begin::Script-->
+<!--begin::Third Party Plugin(OverlayScrollbars)-->
+<th:block th:replace="~{admin/layouts/static :: js_scripts}"></th:block>
+<!--end::OverlayScrollbars Configure-->
+<!-- OPTIONAL SCRIPTS -->
+<!-- sortablejs -->
+<!--end::Script-->
 </body>
 
 </html>

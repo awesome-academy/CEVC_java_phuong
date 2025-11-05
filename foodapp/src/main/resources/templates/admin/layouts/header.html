@@ -7,6 +7,8 @@
 
 <body>
   <nav class="app-header navbar navbar-expand bg-body" th:fragment="header">
+    <th:block th:replace="~{admin/layouts/toast_message :: success_toast}"></th:block>
+    <th:block th:replace="~{admin/layouts/toast_message :: failed_toast}"></th:block>
     <!--begin::Container-->
     <div class="container-fluid">
       <!--begin::End Navbar Links-->
