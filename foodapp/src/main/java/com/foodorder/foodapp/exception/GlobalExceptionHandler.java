@@ -22,71 +22,78 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
             ex.getMessage(),
             404,
-            "Not Found"
+            "RESOURCE_NOT_FOUND"
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, Object> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
-       Map<String, Object> response = new HashMap<>();
-       response.put("status", HttpStatus.BAD_REQUEST.value());
-       response.put("error", "Validate Failed");
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        Map<String, String> fieldErrors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error -> {
+            fieldErrors.put(error.getField(), error.getDefaultMessage());
+        });
 
-       Map<String, String> fieldErrors = new HashMap<>();
-       ex.getBindingResult().getFieldErrors().forEach(error -> {
-           fieldErrors.put(error.getField(), error.getDefaultMessage());
-       });
-       response.put("fieldErrors", fieldErrors);
-       return response;
+        ErrorResponse errorResponse = new ErrorResponse(
+            "Request validation failed",
+            HttpStatus.BAD_REQUEST.value(),
+            "VALIDATION_ERROR",
+            fieldErrors
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, Object> handleConstraintViolationException(ConstraintViolationException ex) {
-        Map <String, Object> response = new HashMap<>();
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("error", "Validation Failed");
-
+    public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException ex) {
         Map<String, String> constraintViolations = new HashMap<>();
         ex.getConstraintViolations().forEach(violation -> {
             String propertyPath = violation.getPropertyPath().toString();
             String fieldName = propertyPath.substring(propertyPath.lastIndexOf('.') + 1);
             constraintViolations.put(fieldName, violation.getMessage());
         });
-        response.put("constraintViolations", constraintViolations);
 
-        return response;
+        ErrorResponse errorResponse = new ErrorResponse(
+            "Constraint validation failed",
+            HttpStatus.BAD_REQUEST.value(),
+            "CONSTRAINT_VIOLATION",
+            constraintViolations
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, Object> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("error", "Invalid request body");
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+        String message;
+        String rootCause = ex.getMostSpecificCause().getMessage();
 
-        String message = ex.getMostSpecificCause().getMessage();
-        if (message.contains("java.lang.Long")) {
-            message = "departmentId must be a valid number";
+        if (rootCause != null && rootCause.contains("java.lang.Long")) {
+            message = "Invalid number format. Please provide a valid number.";
+        } else {
+            message = "Invalid request format. Please check your request body and try again.";
         }
 
-        response.put("message", message);
-        return response;
+        ErrorResponse errorResponse = new ErrorResponse(
+            message,
+            HttpStatus.BAD_REQUEST.value(),
+            "INVALID_REQUEST_BODY"
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public Map<String, Object> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
-      Map<String, Object> response = new HashMap<>();
-      response.put("status", HttpStatus.BAD_REQUEST.value());
-      response.put("error", "Invalid path or parameter type");
-
+  public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
       Map<String, String> errors = new HashMap<>();
 
       String field = ex.getName();
-      String expectedType = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown";
+      Class<?> requiredType = ex.getRequiredType();
+      String expectedType = requiredType != null ? requiredType.getSimpleName() : "unknown";
       String message = String.format(
           "Invalid value for parameter '%s': expected type %s",
           field,
@@ -94,17 +101,23 @@ public class GlobalExceptionHandler {
       );
 
       errors.put(field, message);
-      response.put("errors", errors);
 
-      return response;
+      ErrorResponse errorResponse = new ErrorResponse(
+          "Invalid path or parameter type",
+          HttpStatus.BAD_REQUEST.value(),
+          "INVALID_PARAMETER_TYPE",
+          errors
+      );
+
+      return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
   }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
         ErrorResponse errorResponse = new ErrorResponse(
-            ex.getMessage(),
+            "An unexpected error occurred. Please try again later.",
             500,
-            "Internal Server Error"
+            "INTERNAL_SERVER_ERROR"
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }

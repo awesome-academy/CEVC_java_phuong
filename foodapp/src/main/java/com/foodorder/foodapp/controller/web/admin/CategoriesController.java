@@ -20,6 +20,8 @@ import com.foodorder.foodapp.dto.category.DetailCategoryDTO;
 import com.foodorder.foodapp.dto.category.ListCategoryDTO;
 import com.foodorder.foodapp.dto.category.SearchCategoryDTO;
 import com.foodorder.foodapp.dto.category.UpdateCategoryDTO;
+import com.foodorder.foodapp.exception.BadRequestException;
+import com.foodorder.foodapp.exception.ResourceNotFoundException;
 import com.foodorder.foodapp.service.CategoryService;
 import org.springframework.data.domain.Page;
 
@@ -50,11 +52,17 @@ public class CategoriesController {
   }
 
   @GetMapping("/{id}")
-  public String detailCategory(@NonNull @PathVariable Long id, Model model) {
-    DetailCategoryDTO category = categoryService.getCategoryById(id);
-    model.addAttribute("category", category);
+  public String detailCategory(@NonNull @PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
+    try {
+      DetailCategoryDTO category = categoryService.getCategoryById(id);
+      model.addAttribute("category", category);
 
-    return "admin/categories/detail";
+      return "admin/categories/detail";
+    } catch (ResourceNotFoundException e) {
+      redirectAttributes.addFlashAttribute("failedMessage", e.getMessage());
+
+      return "redirect:/admin/categories";
+    }
   }
 
   @GetMapping("/new")
@@ -78,11 +86,11 @@ public class CategoriesController {
     if (bindingResult.hasErrors()) {
       List<ListCategoryDTO> categories  = categoryService.getCategorySelectOptions();
       model.addAttribute("categories", categories);
-      model.addAttribute("failedMessage", "Create category failed!");
+      model.addAttribute("failedMessage", "toast.create.failed");
       return "admin/categories/new";
     }
     categoryService.createCategory(createCategoryDTO);
-    redirectAttributes.addFlashAttribute("successMessage", "Create category successfully!");
+    redirectAttributes.addFlashAttribute("successMessage", "toast.create.success");
 
     return "redirect:/admin/categories";
   }
@@ -114,12 +122,12 @@ public class CategoriesController {
     if (bindingResult.hasErrors()) {
       List<ListCategoryDTO> categories  = categoryService.getCategorySelectOptions();
       model.addAttribute("categories", categories);
-      model.addAttribute("failedMessage", "Update category failed!");
+      model.addAttribute("failedMessage", "toast.update.failed");
       return "admin/categories/edit";
     }
 
     categoryService.updateCategory(updateCategoryDTO);
-    redirectAttributes.addFlashAttribute("successMessage", "Update category successfully!");
+    redirectAttributes.addFlashAttribute("successMessage", "toast.update.success");
 
     return "redirect:/admin/categories";
   }
@@ -130,9 +138,15 @@ public class CategoriesController {
     RedirectAttributes redirectAttributes,
     Model model
   ) {
-    categoryService.deleteCategory(id);
-    redirectAttributes.addFlashAttribute("successMessage", "Delete category successfully!");
+    try {
+      categoryService.deleteCategory(id);
+      redirectAttributes.addFlashAttribute("successMessage", "toast.delete.success");
 
-    return "redirect:/admin/categories";
+      return "redirect:/admin/categories";
+    } catch (BadRequestException e) {
+      redirectAttributes.addFlashAttribute("failedMessage", e.getMessage());
+
+      return "redirect:/admin/categories";
+    }
   }
 }

@@ -7,6 +7,6 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper=false)
 public class UpdateCategoryDTO extends CreateCategoryDTO {
-  @NotNull(message = "ID is required")
+  @NotNull(message = "{validation.category.id.required}")
   private Long id;
 }

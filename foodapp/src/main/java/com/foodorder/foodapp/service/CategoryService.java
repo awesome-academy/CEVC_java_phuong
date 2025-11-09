@@ -10,6 +10,7 @@ import org.springframework.lang.NonNull;
 
 import com.foodorder.foodapp.repository.CategoryRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 import com.foodorder.foodapp.dto.category.CreateCategoryDTO;
@@ -17,6 +18,7 @@ import com.foodorder.foodapp.dto.category.DetailCategoryDTO;
 import com.foodorder.foodapp.dto.category.ListCategoryDTO;
 import com.foodorder.foodapp.dto.category.SearchCategoryDTO;
 import com.foodorder.foodapp.dto.category.UpdateCategoryDTO;
+import com.foodorder.foodapp.exception.BadRequestException;
 import com.foodorder.foodapp.exception.ResourceNotFoundException;
 import com.foodorder.foodapp.model.Category;
 import java.util.List;
@@ -50,7 +52,7 @@ public class CategoryService {
 
   public DetailCategoryDTO getCategoryById(@NonNull Long id) {
     Category category = categoryRepository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
+        .orElseThrow(() -> new ResourceNotFoundException("category.not.found"));
 
     return modelMapper.map(category, DetailCategoryDTO.class);
   }
@@ -61,7 +63,7 @@ public class CategoryService {
 
     if (parentId != null) {
       Category parentCategory = categoryRepository.findById(parentId)
-          .orElseThrow(() -> new ResourceNotFoundException("Parent category not found with id: " + parentId));
+          .orElseThrow(() -> new ResourceNotFoundException("parent.category.not.found"));
 
       category.setParent(parentCategory);
     }
@@ -75,7 +77,7 @@ public class CategoryService {
 
     if (parentId != null) {
       Category parentCategory = categoryRepository.findById(parentId)
-          .orElseThrow(() -> new ResourceNotFoundException("Parent category not found with id: " + parentId));
+          .orElseThrow(() -> new ResourceNotFoundException("parent.category.not.found"));
 
       category.setParent(parentCategory);
     }
@@ -83,10 +85,16 @@ public class CategoryService {
     return modelMapper.map(category, DetailCategoryDTO.class);
   }
 
+  @Transactional
   public void deleteCategory(Long id) {
     Category category = categoryRepository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
+        .orElseThrow(() -> new ResourceNotFoundException("category.not.found"));
 
+    if (!category.getProducts().isEmpty()) {
+      throw new BadRequestException("category.product.exists");
+    }
+
+    categoryRepository.detachChildren(id);
     categoryRepository.delete(category);
   }
 }

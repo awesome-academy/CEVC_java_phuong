@@ -11,11 +11,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateCategoryDTO {
-  @NotBlank(message = "Name is required")
-  @Size(max = 100, message = "Name must not exceed 100 characters")
+  @NotBlank(message = "{validation.category.name.required}")
+  @Size(max = 100, message = "{validation.category.name.max}")
   private String name;
 
-  @NotNull(message = "Priority is required")
+  @NotNull(message = "{validation.category.priority.required}")
   private Integer priority;
 
   private Long parentId;
