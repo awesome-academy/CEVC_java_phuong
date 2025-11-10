@@ -30,7 +30,7 @@ public class Category extends BaseModel {
   @JsonBackReference
   private Category parent;
 
-  @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "parent", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
   @JsonManagedReference
   private List<Category> children;
 

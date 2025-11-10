@@ -36,4 +36,4 @@ build/
 .env
 
 # Logs
-logs/*.log
+logs/*

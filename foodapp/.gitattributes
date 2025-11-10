@@ -1,2 +1,10 @@
 /mvnw text eol=lf
 *.cmd text eol=crlf
+src/main/resources/static/css/adminlte/** linguist-generated=true
+src/main/resources/static/css/bootstrap-icons/** linguist-generated=true
+src/main/resources/static/css/fontsource/** linguist-generated=true
+src/main/resources/static/css/overlayscrollbars/** linguist-generated=true
+src/main/resources/static/js/adminlte/** linguist-generated=true
+src/main/resources/static/js/bootstrap/** linguist-generated=true
+src/main/resources/static/js/popperjs/** linguist-generated=true
+src/main/resources/static/js/overlayscrollbars/** linguist-generated=true

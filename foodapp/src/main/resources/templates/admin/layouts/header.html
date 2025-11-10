@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <title>Layout Base</title>
+</head>
+
+<body>
+  <nav class="app-header navbar navbar-expand bg-body" th:fragment="header">
+    <th:block th:replace="~{admin/layouts/toast_message :: success_toast}"></th:block>
+    <th:block th:replace="~{admin/layouts/toast_message :: failed_toast}"></th:block>
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <!--begin::End Navbar Links-->
+      <ul class="navbar-nav ms-auto">
+        <!--end::Fullscreen Toggle-->
+        <!--begin::User Menu Dropdown-->
+        <li class="nav-item dropdown user-menu">
+          <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+            <span class="d-none d-md-inline">Nguyen Van A</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+            <!--begin::Menu Footer-->
+            <li class="user-footer">
+              <form th:action="@{/logout}" method="post">
+                <button type="submit" class="btn btn-default btn-flat float-end">Sign out</button>
+              </form>
+            </li>
+            <!--end::Menu Footer-->
+          </ul>
+        </li>
+        <!--end::User Menu Dropdown-->
+      </ul>
+      <!--end::End Navbar Links-->
+    </div>
+    <!--end::Container-->
+  </nav>
+</body>
+
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <title>Layout Base</title>
+</head>
+
+<body>
+  <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark" th:fragment="sidebar">
+    <!--begin::Sidebar Brand-->
+    <div class="sidebar-brand">
+      <!--begin::Brand Link-->
+      <a href="#" class="brand-link">
+        <!--begin::Brand Image-->
+        <img th:src="@{/images/AdminLTELogo.png}" alt="AdminLTE Logo" class="brand-image opacity-75 shadow" />
+        <!--end::Brand Image-->
+        <!--begin::Brand Text-->
+        <span class="brand-text fw-light">AdminLTE 4</span>
+        <!--end::Brand Text-->
+      </a>
+      <!--end::Brand Link-->
+    </div>
+    <!--end::Sidebar Brand-->
+    <!--begin::Sidebar Wrapper-->
+    <div class="sidebar-wrapper">
+      <nav class="mt-2">
+        <!--begin::Sidebar Menu-->
+        <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="navigation"
+          aria-label="Main navigation" data-accordion="false" id="navigation">
+          <li class="nav-header">OVERVIEW</li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="bi bi-bar-chart-fill"></i>
+              <p>
+                Statistics
+              </p>
+            </a>
+          </li>
+          <li class="nav-header">SYSTEM</li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="bi bi-person-plus-fill"></i>
+              <p>Users</p>
+            </a>
+          </li>
+          <li class="nav-header">APPLICATION</li>
+          <li class="nav-item">
+            <a th:href="@{/admin/categories}" class="nav-link">
+              <i class="bi bi-list-columns"></i>
+              <p>Categories</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="bi bi-fork-knife"></i>
+              <p>Products</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="bi bi-bag-plus-fill"></i>
+              <p>Orders</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon bi bi-hand-thumbs-up-fill"></i>
+              <p>Suggestions</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="bi bi-star-fill"></i>
+              <p>Evaluations</p>
+            </a>
+          </li>
+          <li class="nav-header">SETTING</li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="bi bi-gear"></i>
+              <p>Settings</p>
+            </a>
+          </li>
+        </ul>
+        <!--end::Sidebar Menu-->
+      </nav>
+    </div>
+    <!--end::Sidebar Wrapper-->
+  </aside>
+</body>
+
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Index page</title>
+  <th:block th:replace="~{admin/layouts/static :: css_links}"></th:block>
+</head>
+
+<body class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">
+  <!--begin::App Wrapper-->
+  <div class="app-wrapper">
+    <!--begin::Header-->
+    <th:block th:replace="~{admin/layouts/header :: header}"></th:block>
+    <!--end::Header-->
+    <!--begin::Sidebar-->
+    <th:block th:replace="~{admin/layouts/sidebar :: sidebar}"></th:block>
+    <!--end::Sidebar-->
+    <!--begin::App Main-->
+    <main class="app-main">
+      <!--begin::App Content Header-->
+      <div class="app-content-header">
+        <!--begin::Container-->
+        <div class="container-fluid">
+          <!--begin::Row-->
+          <div class="row">
+            <div class="col-sm-6">
+              <h3 class="mb-0">Index</h3>
+            </div>
+          </div>
+          <!--end::Row-->
+        </div>
+        <!--end::Container-->
+      </div>
+      <!--end::App Content Header-->
+      <!--begin::App Content-->
+      <div class="app-content">
+        <!--begin::Container-->
+        <div class="container-fluid">
+          <!--begin::Row-->
+          <div class="row">
+            <!-- /.col -->
+            <div class="col-md-12">
+              <!-- /.card -->
+              <div class="card">
+                <div class="card-header">
+                  <div class="row">
+                    <div class="col-sm-6">
+                      <form th:action="@{/admin/categories}" th:object="${search}" method="get">
+                        <div class="d-flex gap-4 align-items-center">
+                          <div class="filter-box d-flex gap-2 align-items-center">
+                            <div>Filter by:</div>
+                            <div>
+                              <input type="text" class="form-control" placeholder="Input name..." name="name"
+                                th:value="*{name}" />
+                            </div>
+                          </div>
+                          <button class="btn btn-secondary" type="submit">Search</button>
+                        </div>
+                      </form>
+                    </div>
+                    <div class="col-sm-6 text-end">
+                      <a th:href="@{/admin/categories/new}" class="btn btn-primary">Add New</a>
+                    </div>
+                  </div>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body p-0">
+                  <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th style="width: 10px">ID</th>
+                        <th>Name</th>
+                        <th>Parent Category Name</th>
+                        <th>Priority</th>
+                        <th>Created At</th>
+                        <th style="width: 150px">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr class="align-middle" th:each="category, iterStat : ${categories}">
+                        <td th:text="${category.id}"></td>
+                        <td>
+                          <a th:href="@{/admin/categories/{id}(id=${category.id})}" th:text="${category.name}"></a>
+                        </td>
+                        <td th:text="${category.parent?.name}"></td>
+                        <td th:text="${category.priority}"></td>
+                        <td th:text="${category.createdAt}"></td>
+                        <td>
+                          <a th:href="@{/admin/categories/{id}/edit(id=${category.id})}"
+                            class="btn btn-sm btn-primary">Edit</a>
+                          <a th:href="@{/admin/categories/{id}/delete(id=${category.id})}"
+                            class="btn btn-sm btn-danger">Delete</a>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer">
+                  <div class="row">
+                    <div class="col-sm-6">
+                      <form th:action="@{/admin/categories}" th:object="${search}" method="get" id="perPageForm">
+                        <input type="hidden" name="name" th:value="${search.name}" />
+                        <div class="per-page-box d-flex gap-2 align-items-center">
+                          <div>Per page:</div>
+                          <div>
+                            <select class="form-select form-select-sm" name="perPage"
+                              onchange="document.getElementById('perPageForm').submit()">
+                              <option value="5" th:selected="*{perPage} == 5">5</option>
+                              <option value="10" th:selected="*{perPage} == 10">10</option>
+                              <option value="15" th:selected="*{perPage} == 15">15</option>
+                            </select>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                    <div class="col-sm-6">
+                      <ul class="pagination pagination-sm float-end" th:if="${totalPages > 1}">
+                        <li class="page-item" th:classappend="${search.page} == ${1} ? 'disabled'">
+                          <a class="page-link"
+                            th:href="@{/admin/categories(page=${search.page - 1}, perPage=${search.perPage}, name=${search.name})}">&laquo;</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages-1)}"
+                          th:classappend="${i + 1} == ${search.page} ? 'active'">
+                          <a class="page-link"
+                            th:href="@{/admin/categories(page=${i + 1}, perPage=${search.perPage}, name=${search.name})}"
+                            th:text="${i + 1}">
+                          </a>
+                        </li>
+                        <li class="page-item" th:classappend="${search.page} == ${totalPages} ? 'disabled'">
+                          <a class="page-link"
+                            th:href="@{/admin/categories(page=${search.page + 1}, perPage=${search.perPage}, name=${search.name})}">
+                            &raquo;
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+
+                </div>
+              </div>
+              <!-- /.card -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!--end::Row-->
+        </div>
+        <!--end::Container-->
+      </div>
+      <!--end::App Content-->
+    </main>
+    <!--end::App Main-->
+    <!--begin::Footer-->
+    <th:block th:replace="~{admin/layouts/footer :: footer}"></th:block>
+    <!--end::Footer-->
+  </div>
+  <!--end::App Wrapper-->
+  <!--begin::Script-->
+  <!--begin::Third Party Plugin(OverlayScrollbars)-->
+  <th:block th:replace="~{admin/layouts/static :: js_scripts}"></th:block>
+  <!--end::OverlayScrollbars Configure-->
+  <!-- OPTIONAL SCRIPTS -->
+  <!-- sortablejs -->
+  <!--end::Script-->
+</body>
+
+</html>
