@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <title>New product page</title>
+  <th:block th:replace="~{admin/layouts/static :: css_links}"></th:block>
+</head>
+
+<!--begin::App Wrapper-->
+<div class="app-wrapper">
+  <!--begin::Header-->
+  <th:block th:replace="~{admin/layouts/header :: header}"></th:block>
+  <!--end::Header-->
+  <!--begin::Sidebar-->
+  <th:block th:replace="~{admin/layouts/sidebar :: sidebar}"></th:block>
+  <!--end::Sidebar-->
+  <!--begin::App Main-->
+  <main class="app-main">
+    <!--begin::App Content Header-->
+    <div class="app-content-header">
+      <!--begin::Container-->
+      <div class="container-fluid">
+        <!--begin::Row-->
+        <div class="row">
+          <div class="col-sm-6">
+            <h3 class="mb-0">New product</h3>
+          </div>
+        </div>
+        <!--end::Row-->
+      </div>
+      <!--end::Container-->
+    </div>
+    <!--end::App Content Header-->
+    <!--begin::App Content-->
+    <div class="app-content">
+      <!--begin::Container-->
+      <div class="container-fluid">
+        <!--begin::Row-->
+        <div class="row g-4">
+          <!--begin::Col-->
+          <div class="col-md-9">
+            <!--begin::Quick Example-->
+            <div class="card card-primary card-outline mb-4">
+              <!--begin::Header-->
+              <!--end::Header-->
+              <!--begin::Form-->
+              <form th:action="@{/admin/products/new}" th:object="${product}" method="post"
+                enctype="multipart/form-data">
+                <!--begin::Body-->
+                <div class="card-body">
+                  <div class="mb-3">
+                    <label for="name" class="form-label fw-bold">
+                      Name <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" class="form-control" th:field="*{name}" placeholder="Input name" />
+                    <div th:if="${#fields.hasErrors('name')}" class="error-detail">
+                      <span th:errors="*{name}" class="text-danger"></span>
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="description" class="form-label fw-bold">Description</label>
+                    <textarea class="form-control" id="description" rows="5" th:field="*{description}"
+                      placeholder="Input description"></textarea>
+                    <div th:if="${#fields.hasErrors('description')}" class="error-detail">
+                      <span th:errors="*{description}" class="text-danger"></span>
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="category" class="form-label fw-bold">Category <span class="text-danger">*</span></label>
+                    <select class="form-select" th:field="*{categoryId}">
+                      <option value="">Choose...</option>
+                      <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+                    </select>
+                    <div th:if="${#fields.hasErrors('categoryId')}" class="error-detail">
+                      <span th:errors="*{categoryId}" class="text-danger"></span>
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="productType" class="form-label fw-bold">Product Type <span
+                        class="text-danger">*</span></label>
+                    <select class="form-select" th:field="*{productTypeId}">
+                      <option value="">Choose...</option>
+                      <option th:each="type : ${productTypes}" th:value="${type.id}" th:text="${type.name}"></option>
+                    </select>
+                    <div th:if="${#fields.hasErrors('productTypeId')}" class="error-detail">
+                      <span th:errors="*{categoryId}" class="text-danger"></span>
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="price" class="form-label fw-bold">Price <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" th:field="*{price}" placeholder="Input price" />
+                    <div th:if="${#fields.hasErrors('price')}" class="error-detail">
+                      <span th:errors="*{price}" class="text-danger"></span>
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="quantity" class="form-label fw-bold">Quantity <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" th:field="*{quantity}" placeholder="Input quantity" />
+                    <div th:if="${#fields.hasErrors('quantity')}" class="error-detail">
+                      <span th:errors="*{quantity}" class="text-danger"></span>
+                    </div>
+                  </div>
+                  <div class="mb-3 d-flex flex-row align-items-center gap-3">
+                    <label for="isActive" class="form-label mb-0 fw-bold">Is Active <span
+                        class="text-danger">*</span></label>
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" th:field="*{isActive}" id="is-public" value="true"
+                        checked />
+                      <label class="form-check-label" for="is-public"> Public </label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" th:field="*{isActive}" id="is-unpublic"
+                        value="false" />
+                      <label class="form-check-label" for="is-unpublic"> Unpublic </label>
+                    </div>
+                    <div th:if="${#fields.hasErrors('isActive')}" class="error-detail">
+                      <span th:errors="*{isActive}" class="text-danger"></span>
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="image" class="form-label fw-bold">Image</label>
+                    <input type="file" class="form-control" th:field="*{imageFile}" accept="image/*" />
+                    <div th:if="${#fields.hasErrors('imageFile')}" class="error-detail">
+                      <span th:errors="*{imageFile}" class="text-danger"></span>
+                    </div>
+                  </div>
+                </div>
+                <!--end::Body-->
+                <!--begin::Footer-->
+                <div class="card-footer">
+                  <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+                <!--end::Footer-->
+              </form>
+              <!--end::Form-->
+            </div>
+            <!--end::Quick Example-->
+          </div>
+          <!--end::Col-->
+        </div>
+        <!--end::Row-->
+      </div>
+      <!--end::Container-->
+    </div>
+    <!--end::App Content-->
+  </main>
+  <!--end::App Main-->
+  <!--begin::Footer-->
+  <th:block th:replace="~{admin/layouts/footer :: footer}"></th:block>
+  <!--end::Footer-->
+</div>
+<!--end::App Wrapper-->
+<!--begin::Script-->
+<!--begin::Third Party Plugin(OverlayScrollbars)-->
+<th:block th:replace="~{admin/layouts/static :: js_scripts}"></th:block>
+<!--end::OverlayScrollbars Configure-->
+<!-- OPTIONAL SCRIPTS -->
+<!-- sortablejs -->
+<!--end::Script-->
+</body>
+
+</html>

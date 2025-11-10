@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Detail product</title>
+  <th:block th:replace="~{admin/layouts/static :: css_links}"></th:block>
+</head>
+
+<body class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">
+  <!--begin::App Wrapper-->
+  <div class="app-wrapper">
+    <!--begin::Header-->
+    <th:block th:replace="~{admin/layouts/header :: header}"></th:block>
+    <!--end::Header-->
+    <!--begin::Sidebar-->
+    <th:block th:replace="~{admin/layouts/sidebar :: sidebar}"></th:block>
+    <!--end::Sidebar-->
+    <!--begin::App Main-->
+    <main class="app-main">
+      <!--begin::App Content Header-->
+      <div class="app-content-header">
+        <!--begin::Container-->
+        <div class="container-fluid">
+          <!--begin::Row-->
+          <div class="row">
+            <div class="col-sm-6">
+              <h3 class="mb-0">Detail product</h3>
+            </div>
+          </div>
+          <!--end::Row-->
+        </div>
+        <!--end::Container-->
+      </div>
+      <!--end::App Content Header-->
+      <div class="app-content">
+        <!--begin::Container-->
+        <div class="container-fluid">
+          <!--begin::Row-->
+          <div class="row g-4">
+            <!--begin::Col-->
+            <div class="col-md-9">
+              <!--begin::Quick Example-->
+              <div class="card card-primary card-outline mb-4">
+                <!--begin::Header-->
+                <!--end::Header-->
+                <!--begin::Form-->
+                <form>
+                  <!--begin::Body-->
+                  <div class="card-body">
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">ID: </label>
+                      <p th:text="${product.id}"></p>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">Name: </label>
+                      <p th:text="${product.name}"></p>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">Category Name: </label>
+                      <p th:text="${product.category.name ?: 'N/A'}"></p>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">Product Type: </label>
+                      <p th:text="${product.productType.name ?: 'N/A'}"></p>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">Description: </label>
+                      <p th:text="${product.description}"></p>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">Price: </label>
+                      <p th:text="${product.price}"></p>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">Quantity: </label>
+                      <p th:text="${product.quantity}"></p>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">Average Rating: </label>
+                      <p th:text="${product.averageRating}"></p>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">Is Active: </label>
+                      <p th:text="${product.isActive == true ? 'Published' : 'Unpublished'}"></p>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">Created At: </label>
+                      <p th:text="${product.createdAt}"></p>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">Updated At: </label>
+                      <p th:text="${product.updatedAt}"></p>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">Image : </label>
+                      <img th:if="${product.image}" th:src="@{${product.image}}" class="image-medium">
+                    </div>
+                  </div>
+                  <!--end::Body-->
+                  <!--begin::Footer-->
+                  <div class=" card-footer">
+                    <a th:href="@{/admin/products}">Back to index</a>
+                  </div>
+                  <!--end::Footer-->
+                </form>
+                <!--end::Form-->
+              </div>
+              <!--end::Quick Example-->
+            </div>
+            <!--end::Col-->
+          </div>
+          <!--end::Row-->
+        </div>
+        <!--end::Container-->
+      </div>
+      <!--end::App Content-->
+    </main>
+    <!--end::App Main-->
+    <!--begin::Footer-->
+    <th:block th:replace="~{admin/layouts/footer :: footer}"></th:block>
+    <!--end::Footer-->
+  </div>
+  <!--end::App Wrapper-->
+  <!--begin::Script-->
+  <!--begin::Third Party Plugin(OverlayScrollbars)-->
+  <th:block th:replace="~{admin/layouts/static :: js_scripts}"></th:block>
+  <!--end::OverlayScrollbars Configure-->
+  <!-- OPTIONAL SCRIPTS -->
+  <!-- sortablejs -->
+  <!--end::Script-->
+</body>
+
+</html>
