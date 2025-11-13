@@ -1,7 +1,6 @@
 package com.foodorder.foodapp.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
@@ -24,7 +23,6 @@ import com.foodorder.foodapp.dto.product.ListProductDTO;
 import com.foodorder.foodapp.dto.product.SearchProductDTO;
 import com.foodorder.foodapp.dto.product.UpdateProductDTO;
 import com.foodorder.foodapp.dto.product_type.ProductTypeDTO;
-import com.foodorder.foodapp.dto.category.CategoryDTO;
 import com.foodorder.foodapp.exception.ResourceNotFoundException;
 import com.foodorder.foodapp.model.Category;
 import com.foodorder.foodapp.model.Product;
@@ -44,7 +42,7 @@ public class ProductService {
   private final CategoryRepository categoryRepository;
   private final ModelMapper modelMapper;
   private final OrderRepository orderRepository;
-  private final FilesStorageService filesStorageService;
+  private final ImageUploadService imageUploadService;
 
   public Page<ListProductDTO> getAllProducts(SearchProductDTO params) {
     int pageIndex = Math.max(0, params.getPage() - 1);
@@ -81,32 +79,33 @@ public class ProductService {
     Long productTypeId = createProductDTO.getProductTypeId();
 
     String imagePath = null;
-    MultipartFile file = createProductDTO.getImageFile();
-    if (file != null && !file.isEmpty()) {
-      imagePath = filesStorageService.save(file);
-    }
+    try {
+      imagePath = imageUploadService.uploadImage(createProductDTO.getImageFile());
+      Product product = new Product();
+      product.setName(createProductDTO.getName());
+      product.setDescription(createProductDTO.getDescription());
+      product.setPrice(createProductDTO.getPrice());
+      product.setQuantity(createProductDTO.getQuantity());
+      product.setIsActive(createProductDTO.getIsActive());
+      product.setImage(imagePath);
 
-    Product product = new Product();
-    product.setName(createProductDTO.getName());
-    product.setDescription(createProductDTO.getDescription());
-    product.setPrice(createProductDTO.getPrice());
-    product.setQuantity(createProductDTO.getQuantity());
-    product.setIsActive(createProductDTO.getIsActive());
-    product.setImage(imagePath);
+      if (categoryId != null) {
+        Category category = categoryRepository.findById(categoryId)
+            .orElseThrow(() -> new ResourceNotFoundException("category.not.found"));
+        product.setCategory(category);
+      }
+      if (productTypeId != null) {
+        var productType = productTypeRepository.findById(productTypeId)
+            .orElseThrow(() -> new ResourceNotFoundException("product_type.not.found"));
+        product.setProductType(productType);
+      }
 
-    if (categoryId != null) {
-      Category category = categoryRepository.findById(categoryId)
-          .orElseThrow(() -> new ResourceNotFoundException("category.not.found"));
-      product.setCategory(category);
+      product = productRepository.save(product);
+      return modelMapper.map(product, DetailProductDTO.class);
+    } catch (Exception e) {
+      imageUploadService.deleteImage(imagePath);
+      throw e;
     }
-    if (productTypeId != null) {
-      var productType = productTypeRepository.findById(productTypeId)
-          .orElseThrow(() -> new ResourceNotFoundException("product_type.not.found"));
-      product.setProductType(productType);
-    }
-
-    product = productRepository.save(product);
-    return modelMapper.map(product, DetailProductDTO.class);
   }
 
   public DetailProductDTO updateProduct(UpdateProductDTO updateProductDTO) {
@@ -116,38 +115,36 @@ public class ProductService {
     Product exitProduct = productRepository.findById(updateProductDTO.getId())
         .orElseThrow(() -> new ResourceNotFoundException("product.not.found"));
 
-    MultipartFile file = updateProductDTO.getImageFile();
-    if (file != null && !file.isEmpty()) {
-      // Delete old image
-      String oldImagePath = exitProduct.getImage();
-      if (oldImagePath != null && !oldImagePath.isEmpty()) {
-        String[] segments = oldImagePath.split("/");
-        String oldFilename = segments[segments.length - 1];
-        filesStorageService.delete(oldFilename);
+    String oldImagePath = exitProduct.getImage();
+    String newImagePath = null;
+    try {
+      newImagePath = imageUploadService.uploadImage(updateProductDTO.getImageFile());
+      if (newImagePath != null) {
+        exitProduct.setImage(newImagePath);
       }
-      // Save new image
-      String imageUrl = filesStorageService.save(file);
-      exitProduct.setImage(imageUrl);
+      modelMapper.map(updateProductDTO, exitProduct);
+
+      if (categoryId != null) {
+        Category parentCategory = categoryRepository.findById(categoryId)
+            .orElseThrow(() -> new ResourceNotFoundException("category.not.found"));
+
+        exitProduct.setCategory(parentCategory);
+      }
+      if (productTypeId != null) {
+        var productType = productTypeRepository.findById(productTypeId)
+            .orElseThrow(() -> new ResourceNotFoundException("product_type.not.found"));
+
+        exitProduct.setProductType(productType);
+      }
+
+      exitProduct = productRepository.save(exitProduct);
+      imageUploadService.deleteImage(oldImagePath);
+
+      return modelMapper.map(exitProduct, DetailProductDTO.class);
+    } catch (Exception e) {
+      imageUploadService.deleteImage(newImagePath);
+      throw e;
     }
-
-    modelMapper.map(updateProductDTO, exitProduct);
-
-    if (categoryId != null) {
-      Category parentCategory = categoryRepository.findById(categoryId)
-          .orElseThrow(() -> new ResourceNotFoundException("category.not.found"));
-
-      exitProduct.setCategory(parentCategory);
-    }
-
-    if (productTypeId != null) {
-      var productType = productTypeRepository.findById(productTypeId)
-          .orElseThrow(() -> new ResourceNotFoundException("product_type.not.found"));
-
-      exitProduct.setProductType(productType);
-    }
-
-    exitProduct = productRepository.save(exitProduct);
-    return modelMapper.map(exitProduct, DetailProductDTO.class);
   }
 
   public void deleteProduct(Long id) {

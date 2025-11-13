@@ -22,6 +22,7 @@ import com.foodorder.foodapp.dto.product.ListProductDTO;
 import com.foodorder.foodapp.dto.product.SearchProductDTO;
 import com.foodorder.foodapp.dto.product.UpdateProductDTO;
 import com.foodorder.foodapp.dto.product_type.ProductTypeDTO;
+import com.foodorder.foodapp.enums.MessageCode;
 import com.foodorder.foodapp.exception.BadRequestException;
 import com.foodorder.foodapp.exception.ResourceNotFoundException;
 import com.foodorder.foodapp.service.CategoryService;
@@ -40,6 +41,13 @@ public class ProductsController {
   private final CategoryService categoryService;
   private final ModelMapper modelMapper;
 
+  private void addSelectOptionsToModel(Model model) {
+    List<ListCategoryDTO> categories = categoryService.getCategorySelectOptions();
+    List<ProductTypeDTO> productTypes = productService.getAllProductTypes();
+    model.addAttribute("categories", categories);
+    model.addAttribute("productTypes", productTypes);
+  }
+
   @GetMapping
   public String indexProduct(
       @RequestParam(required = false) String name,
@@ -50,10 +58,7 @@ public class ProductsController {
       Model model) {
     SearchProductDTO params = new SearchProductDTO(name, categoryId, productTypeId, page, perPage);
     Page<ListProductDTO> products = productService.getAllProducts(params);
-    List<ListCategoryDTO> categories = categoryService.getCategorySelectOptions();
-    List<ProductTypeDTO> productTypes = productService.getAllProductTypes();
-    model.addAttribute("categories", categories);
-    model.addAttribute("productTypes", productTypes);
+    addSelectOptionsToModel(model);
     model.addAttribute("search", params);
     model.addAttribute("products", products);
     model.addAttribute("totalPages", products.getTotalPages());
@@ -78,10 +83,7 @@ public class ProductsController {
   @GetMapping("/new")
   public String newProduct(
       Model model) {
-    List<ListCategoryDTO> categories = categoryService.getCategorySelectOptions();
-    List<ProductTypeDTO> productTypes = productService.getAllProductTypes();
-    model.addAttribute("categories", categories);
-    model.addAttribute("productTypes", productTypes);
+    addSelectOptionsToModel(model);
     model.addAttribute("product", new CreateProductDTO());
 
     return "admin/products/new";
@@ -94,25 +96,19 @@ public class ProductsController {
       RedirectAttributes redirectAttributes,
       Model model) {
     if (bindingResult.hasErrors()) {
-      List<ListCategoryDTO> categories = categoryService.getCategorySelectOptions();
-      List<ProductTypeDTO> productTypes = productService.getAllProductTypes();
-
-      model.addAttribute("categories", categories);
-      model.addAttribute("productTypes", productTypes);
-      model.addAttribute("failedMessage", "toast.create.failed");
+      addSelectOptionsToModel(model);
+      model.addAttribute("failedMessage", MessageCode.CREATE_FAILED.getCode());
       return "admin/products/new";
     }
     productService.createProduct(createProductDTO);
-    redirectAttributes.addFlashAttribute("successMessage", "toast.create.success");
+    redirectAttributes.addFlashAttribute("successMessage", MessageCode.CREATE_SUCCESS.getCode());
 
     return "redirect:/admin/products";
   }
 
   @GetMapping("/{id}/edit")
   public String editProduct(@NonNull @PathVariable Long id, Model model) {
-    List<ListCategoryDTO> categories = categoryService.getCategorySelectOptions();
-    List<ProductTypeDTO> productTypes = productService.getAllProductTypes();
-
+    addSelectOptionsToModel(model);
     DetailProductDTO product = productService.getProductById(id);
     UpdateProductDTO updateProductDTO = modelMapper.map(product, UpdateProductDTO.class);
 
@@ -123,8 +119,6 @@ public class ProductsController {
       updateProductDTO.setProductTypeId(product.getProductType().getId());
     }
 
-    model.addAttribute("categories", categories);
-    model.addAttribute("productTypes", productTypes);
     model.addAttribute("product", updateProductDTO);
 
     return "admin/products/edit";
@@ -138,17 +132,14 @@ public class ProductsController {
       RedirectAttributes redirectAttributes,
       Model model) {
     if (bindingResult.hasErrors()) {
-      List<ListCategoryDTO> categories = categoryService.getCategorySelectOptions();
-      List<ProductTypeDTO> productTypes = productService.getAllProductTypes();
-      model.addAttribute("productTypes", productTypes);
-      model.addAttribute("categories", categories);
-      model.addAttribute("failedMessage", "toast.update.failed");
+      addSelectOptionsToModel(model);
+      model.addAttribute("failedMessage", MessageCode.UPDATE_FAILED.getCode());
 
       return "admin/products/edit";
     }
 
     productService.updateProduct(updateProductDTO);
-    redirectAttributes.addFlashAttribute("successMessage", "toast.update.success");
+    redirectAttributes.addFlashAttribute("successMessage", MessageCode.UPDATE_SUCCESS.getCode());
 
     return "redirect:/admin/products";
   }
@@ -160,7 +151,7 @@ public class ProductsController {
       Model model) {
     try {
       productService.deleteProduct(id);
-      redirectAttributes.addFlashAttribute("successMessage", "toast.delete.success");
+      redirectAttributes.addFlashAttribute("successMessage", MessageCode.DELETE_SUCCESS.getCode());
 
       return "redirect:/admin/products";
     } catch (BadRequestException e) {

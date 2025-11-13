@@ -20,6 +20,7 @@ import com.foodorder.foodapp.dto.category.DetailCategoryDTO;
 import com.foodorder.foodapp.dto.category.ListCategoryDTO;
 import com.foodorder.foodapp.dto.category.SearchCategoryDTO;
 import com.foodorder.foodapp.dto.category.UpdateCategoryDTO;
+import com.foodorder.foodapp.enums.MessageCode;
 import com.foodorder.foodapp.exception.BadRequestException;
 import com.foodorder.foodapp.exception.ResourceNotFoundException;
 import com.foodorder.foodapp.service.CategoryService;
@@ -35,15 +36,19 @@ public class CategoriesController {
   private final CategoryService categoryService;
   private final ModelMapper modelMapper;
 
+  private void addSelectOptionsToModel(Model model) {
+    List<ListCategoryDTO> categories = categoryService.getCategorySelectOptions();
+    model.addAttribute("categories", categories);
+  }
+
   @GetMapping
   public String indexCategory(
-    @RequestParam(required = false) String name,
-    @RequestParam(defaultValue = "1") int page,
-    @RequestParam(defaultValue = "5") int perPage,
-    Model model
-  ) {
+      @RequestParam(required = false) String name,
+      @RequestParam(defaultValue = "1") int page,
+      @RequestParam(defaultValue = "5") int perPage,
+      Model model) {
     SearchCategoryDTO params = new SearchCategoryDTO(name, page, perPage);
-    Page<ListCategoryDTO> categories  = categoryService.getAllCategories(params);
+    Page<ListCategoryDTO> categories = categoryService.getAllCategories(params);
     model.addAttribute("search", params);
     model.addAttribute("categories", categories);
     model.addAttribute("totalPages", categories.getTotalPages());
@@ -66,11 +71,8 @@ public class CategoriesController {
   }
 
   @GetMapping("/new")
-  public String newCategory(
-    Model model
-  ) {
-    List<ListCategoryDTO> categories  = categoryService.getCategorySelectOptions();
-    model.addAttribute("categories", categories);
+  public String newCategory(Model model) {
+    addSelectOptionsToModel(model);
     model.addAttribute("category", new CreateCategoryDTO());
 
     return "admin/categories/new";
@@ -78,26 +80,23 @@ public class CategoriesController {
 
   @PostMapping("/new")
   public String createCategory(
-    @Valid @ModelAttribute("category") CreateCategoryDTO createCategoryDTO,
-    BindingResult bindingResult,
-    RedirectAttributes redirectAttributes,
-    Model model
-  ) {
+      @Valid @ModelAttribute("category") CreateCategoryDTO createCategoryDTO,
+      BindingResult bindingResult,
+      RedirectAttributes redirectAttributes,
+      Model model) {
     if (bindingResult.hasErrors()) {
-      List<ListCategoryDTO> categories  = categoryService.getCategorySelectOptions();
-      model.addAttribute("categories", categories);
-      model.addAttribute("failedMessage", "toast.create.failed");
+      addSelectOptionsToModel(model);
+      model.addAttribute("failedMessage", MessageCode.CREATE_FAILED.getCode());
       return "admin/categories/new";
     }
     categoryService.createCategory(createCategoryDTO);
-    redirectAttributes.addFlashAttribute("successMessage", "toast.create.success");
+    redirectAttributes.addFlashAttribute("successMessage", MessageCode.CREATE_SUCCESS.getCode());
 
     return "redirect:/admin/categories";
   }
 
   @GetMapping("/{id}/edit")
   public String editCategory(@NonNull @PathVariable Long id, Model model) {
-    List<ListCategoryDTO> categories  = categoryService.getCategorySelectOptions();
     DetailCategoryDTO category = categoryService.getCategoryById(id);
 
     UpdateCategoryDTO updateCategoryDTO = modelMapper.map(category, UpdateCategoryDTO.class);
@@ -105,7 +104,7 @@ public class CategoriesController {
       updateCategoryDTO.setParentId(category.getParent().getId());
     }
 
-    model.addAttribute("categories", categories);
+    addSelectOptionsToModel(model);
     model.addAttribute("category", updateCategoryDTO);
 
     return "admin/categories/edit";
@@ -113,34 +112,31 @@ public class CategoriesController {
 
   @PostMapping("/{id}/edit")
   public String updateCategory(
-    @PathVariable Long id,
-    @Valid @ModelAttribute("category") UpdateCategoryDTO updateCategoryDTO,
-    BindingResult bindingResult,
-    RedirectAttributes redirectAttributes,
-    Model model
-  ) {
+      @PathVariable Long id,
+      @Valid @ModelAttribute("category") UpdateCategoryDTO updateCategoryDTO,
+      BindingResult bindingResult,
+      RedirectAttributes redirectAttributes,
+      Model model) {
     if (bindingResult.hasErrors()) {
-      List<ListCategoryDTO> categories  = categoryService.getCategorySelectOptions();
-      model.addAttribute("categories", categories);
-      model.addAttribute("failedMessage", "toast.update.failed");
+      addSelectOptionsToModel(model);
+      model.addAttribute("failedMessage", MessageCode.UPDATE_FAILED.getCode());
       return "admin/categories/edit";
     }
 
     categoryService.updateCategory(updateCategoryDTO);
-    redirectAttributes.addFlashAttribute("successMessage", "toast.update.success");
+    redirectAttributes.addFlashAttribute("successMessage", MessageCode.UPDATE_SUCCESS.getCode());
 
     return "redirect:/admin/categories";
   }
 
   @GetMapping("/{id}/delete")
   public String deleteCategory(
-    @PathVariable Long id,
-    RedirectAttributes redirectAttributes,
-    Model model
-  ) {
+      @PathVariable Long id,
+      RedirectAttributes redirectAttributes,
+      Model model) {
     try {
       categoryService.deleteCategory(id);
-      redirectAttributes.addFlashAttribute("successMessage", "toast.delete.success");
+      redirectAttributes.addFlashAttribute("successMessage", MessageCode.DELETE_SUCCESS.getCode());
 
       return "redirect:/admin/categories";
     } catch (BadRequestException e) {

@@ -1,5 +1,6 @@
 package com.foodorder.foodapp.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -11,16 +12,22 @@ import java.util.stream.Stream;
 @Service
 @SuppressWarnings("null")
 public class FileSystemStorageService implements FilesStorageService {
+  private final Path rootLocation;
+  private final String folder;
 
-  private final Path ROOT_LOCATION = Paths
-      .get(System.getProperty("user.dir"), "foodapp", "src", "main", "resources", "static", "uploads").toAbsolutePath();
-  private final String FOLDER = "/uploads/";
+  public FileSystemStorageService(
+      @Value("${app.upload.location}") String uploadLocation,
+      @Value("${app.upload.folder}") String folder) {
+    this.rootLocation = Paths.get(uploadLocation).toAbsolutePath().normalize();
+    this.folder = folder;
+    init();
+  }
 
   @Override
   public void init() {
     try {
-      if (!Files.exists(ROOT_LOCATION)) {
-        Files.createDirectories(ROOT_LOCATION);
+      if (!Files.exists(rootLocation)) {
+        Files.createDirectories(rootLocation);
       }
     } catch (Exception e) {
       throw new RuntimeException("Could not initialize folder for upload!");
@@ -30,13 +37,16 @@ public class FileSystemStorageService implements FilesStorageService {
   @Override
   public String save(MultipartFile file) {
     try {
-      if (!Files.exists(ROOT_LOCATION)) {
-        Files.createDirectories(ROOT_LOCATION);
+      if (!Files.exists(rootLocation)) {
+        Files.createDirectories(rootLocation);
       }
-      String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename().replaceAll("\\s", "_");
-      Path destinationFile = ROOT_LOCATION.resolve(filename).normalize().toAbsolutePath();
+      String originalName = Paths.get(file.getOriginalFilename()).getFileName().toString();
+      String safeName = originalName.replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
+      String filename = System.currentTimeMillis() + "_" + safeName;
+
+      Path destinationFile = rootLocation.resolve(filename).normalize().toAbsolutePath();
       Files.copy(file.getInputStream(), destinationFile, StandardCopyOption.REPLACE_EXISTING);
-      return FOLDER + filename;
+      return folder + filename;
     } catch (Exception e) {
       throw new RuntimeException("Failed to store file: " + e.getMessage());
     }
@@ -45,7 +55,7 @@ public class FileSystemStorageService implements FilesStorageService {
   @Override
   public Resource load(String filename) {
     try {
-      Path file = ROOT_LOCATION.resolve(filename);
+      Path file = rootLocation.resolve(filename);
       Resource resource = new UrlResource(file.toUri());
       if (resource.exists() || resource.isReadable()) {
         return resource;
@@ -60,7 +70,7 @@ public class FileSystemStorageService implements FilesStorageService {
   @Override
   public void delete(String filename) {
     try {
-      Path file = ROOT_LOCATION.resolve(filename);
+      Path file = rootLocation.resolve(filename);
       Files.deleteIfExists(file);
     } catch (Exception e) {
       throw new RuntimeException("Could not delete file: " + filename, e);
@@ -70,9 +80,9 @@ public class FileSystemStorageService implements FilesStorageService {
   @Override
   public Stream<Path> loadAll() {
     try {
-      return Files.walk(this.ROOT_LOCATION, 1)
-          .filter(path -> !path.equals(this.ROOT_LOCATION))
-          .map(this.ROOT_LOCATION::relativize);
+      return Files.walk(this.rootLocation, 1)
+          .filter(path -> !path.equals(this.rootLocation))
+          .map(this.rootLocation::relativize);
     } catch (Exception e) {
       throw new RuntimeException("Could not load files", e);
     }

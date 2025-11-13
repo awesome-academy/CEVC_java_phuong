@@ -37,3 +37,8 @@ logging:
       max-history: 7
       total-size-cap: 1GB
       clean-history-on-start: false
+
+app:
+  upload:
+    folder: /${UPLOAD_FOLDER}/
+    location: ${APP_UPLOAD_LOCATION}/${UPLOAD_FOLDER}
