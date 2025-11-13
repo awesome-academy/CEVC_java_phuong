@@ -138,7 +138,7 @@ public class ProductService {
       }
 
       exitProduct = productRepository.save(exitProduct);
-      imageUploadService.deleteImage(oldImagePath);
+      imageUploadService.deleteImage(oldImagePath, newImagePath != null);
 
       return modelMapper.map(exitProduct, DetailProductDTO.class);
     } catch (Exception e) {
