@@ -21,4 +21,15 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             AND o.orderStatus.id IN (1, 2, 3)
       """)
   boolean existsActiveOrderForProduct(@Param("productId") Long productId);
+
+  @Query("""
+        SELECT
+            CASE WHEN count(o) > 0 THEN TRUE ELSE FALSE END
+        FROM
+            Order o
+        WHERE
+            o.user.id = :userId
+            AND o.orderStatus.id IN (1, 2, 3)
+      """)
+  boolean existsActiveOrderForUser(@Param("userId") Long userId);
 }
