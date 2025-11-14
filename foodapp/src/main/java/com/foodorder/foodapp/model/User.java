@@ -1,5 +1,7 @@
 package com.foodorder.foodapp.model;
 
+import java.time.LocalDateTime;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.Column;
@@ -13,7 +15,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
-@EqualsAndHashCode(callSuper=false)
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -44,4 +46,7 @@ public class User extends BaseModel {
 
   @Column(length = 255)
   private String avatar;
+
+  @Column(name = "deleted_at")
+  private LocalDateTime deletedAt;
 }
