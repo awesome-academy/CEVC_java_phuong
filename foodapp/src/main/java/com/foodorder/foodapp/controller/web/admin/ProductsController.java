@@ -15,134 +15,149 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.foodorder.foodapp.dto.category.CreateCategoryDTO;
-import com.foodorder.foodapp.dto.category.DetailCategoryDTO;
 import com.foodorder.foodapp.dto.category.ListCategoryDTO;
-import com.foodorder.foodapp.dto.category.SearchCategoryDTO;
-import com.foodorder.foodapp.dto.category.UpdateCategoryDTO;
+import com.foodorder.foodapp.dto.product.CreateProductDTO;
+import com.foodorder.foodapp.dto.product.DetailProductDTO;
+import com.foodorder.foodapp.dto.product.ListProductDTO;
+import com.foodorder.foodapp.dto.product.SearchProductDTO;
+import com.foodorder.foodapp.dto.product.UpdateProductDTO;
+import com.foodorder.foodapp.dto.product_type.ProductTypeDTO;
 import com.foodorder.foodapp.enums.MessageCode;
 import com.foodorder.foodapp.exception.BadRequestException;
 import com.foodorder.foodapp.exception.ResourceNotFoundException;
 import com.foodorder.foodapp.service.CategoryService;
+import com.foodorder.foodapp.service.ProductService;
+
 import org.springframework.data.domain.Page;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 @Controller
-@RequestMapping("/admin/categories")
+@RequestMapping("/admin/products")
 @AllArgsConstructor
-public class CategoriesController {
+public class ProductsController {
+  private final ProductService productService;
   private final CategoryService categoryService;
   private final ModelMapper modelMapper;
 
   private void addSelectOptionsToModel(Model model) {
     List<ListCategoryDTO> categories = categoryService.getCategorySelectOptions();
+    List<ProductTypeDTO> productTypes = productService.getAllProductTypes();
     model.addAttribute("categories", categories);
+    model.addAttribute("productTypes", productTypes);
   }
 
   @GetMapping
-  public String indexCategory(
+  public String indexProduct(
       @RequestParam(required = false) String name,
+      @RequestParam(required = false) Long categoryId,
+      @RequestParam(required = false) Long productTypeId,
       @RequestParam(defaultValue = "1") int page,
       @RequestParam(defaultValue = "5") int perPage,
       Model model) {
-    SearchCategoryDTO params = new SearchCategoryDTO(name, page, perPage);
-    Page<ListCategoryDTO> categories = categoryService.getAllCategories(params);
+    SearchProductDTO params = new SearchProductDTO(name, categoryId, productTypeId, page, perPage);
+    Page<ListProductDTO> products = productService.getAllProducts(params);
+    addSelectOptionsToModel(model);
     model.addAttribute("search", params);
-    model.addAttribute("categories", categories);
-    model.addAttribute("totalPages", categories.getTotalPages());
+    model.addAttribute("products", products);
+    model.addAttribute("totalPages", products.getTotalPages());
 
-    return "admin/categories/index";
+    return "admin/products/index";
   }
 
   @GetMapping("/{id}")
-  public String detailCategory(@NonNull @PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
+  public String detailProduct(@NonNull @PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
     try {
-      DetailCategoryDTO category = categoryService.getCategoryById(id);
-      model.addAttribute("category", category);
+      DetailProductDTO product = productService.getProductById(id);
+      model.addAttribute("product", product);
 
-      return "admin/categories/detail";
+      return "admin/products/detail";
     } catch (ResourceNotFoundException e) {
       redirectAttributes.addFlashAttribute("failedMessage", e.getMessage());
 
-      return "redirect:/admin/categories";
+      return "redirect:/admin/products";
     }
   }
 
   @GetMapping("/new")
-  public String newCategory(Model model) {
+  public String newProduct(
+      Model model) {
     addSelectOptionsToModel(model);
-    model.addAttribute("category", new CreateCategoryDTO());
+    model.addAttribute("product", new CreateProductDTO());
 
-    return "admin/categories/new";
+    return "admin/products/new";
   }
 
   @PostMapping("/new")
-  public String createCategory(
-      @Valid @ModelAttribute("category") CreateCategoryDTO createCategoryDTO,
+  public String createProduct(
+      @Valid @ModelAttribute("product") CreateProductDTO createProductDTO,
       BindingResult bindingResult,
       RedirectAttributes redirectAttributes,
       Model model) {
     if (bindingResult.hasErrors()) {
       addSelectOptionsToModel(model);
       model.addAttribute("failedMessage", MessageCode.CREATE_FAILED.getCode());
-      return "admin/categories/new";
+      return "admin/products/new";
     }
-    categoryService.createCategory(createCategoryDTO);
+    productService.createProduct(createProductDTO);
     redirectAttributes.addFlashAttribute("successMessage", MessageCode.CREATE_SUCCESS.getCode());
 
-    return "redirect:/admin/categories";
+    return "redirect:/admin/products";
   }
 
   @GetMapping("/{id}/edit")
-  public String editCategory(@NonNull @PathVariable Long id, Model model) {
-    DetailCategoryDTO category = categoryService.getCategoryById(id);
+  public String editProduct(@NonNull @PathVariable Long id, Model model) {
+    addSelectOptionsToModel(model);
+    DetailProductDTO product = productService.getProductById(id);
+    UpdateProductDTO updateProductDTO = modelMapper.map(product, UpdateProductDTO.class);
 
-    UpdateCategoryDTO updateCategoryDTO = modelMapper.map(category, UpdateCategoryDTO.class);
-    if (category.getParent() != null) {
-      updateCategoryDTO.setParentId(category.getParent().getId());
+    if (product.getCategory() != null) {
+      updateProductDTO.setCategoryId(product.getCategory().getId());
+    }
+    if (product.getProductType() != null) {
+      updateProductDTO.setProductTypeId(product.getProductType().getId());
     }
 
-    addSelectOptionsToModel(model);
-    model.addAttribute("category", updateCategoryDTO);
+    model.addAttribute("product", updateProductDTO);
 
-    return "admin/categories/edit";
+    return "admin/products/edit";
   }
 
   @PostMapping("/{id}/edit")
-  public String updateCategory(
+  public String updateProduct(
       @PathVariable Long id,
-      @Valid @ModelAttribute("category") UpdateCategoryDTO updateCategoryDTO,
+      @Valid @ModelAttribute("product") UpdateProductDTO updateProductDTO,
       BindingResult bindingResult,
       RedirectAttributes redirectAttributes,
       Model model) {
     if (bindingResult.hasErrors()) {
       addSelectOptionsToModel(model);
       model.addAttribute("failedMessage", MessageCode.UPDATE_FAILED.getCode());
-      return "admin/categories/edit";
+
+      return "admin/products/edit";
     }
 
-    categoryService.updateCategory(updateCategoryDTO);
+    productService.updateProduct(updateProductDTO);
     redirectAttributes.addFlashAttribute("successMessage", MessageCode.UPDATE_SUCCESS.getCode());
 
-    return "redirect:/admin/categories";
+    return "redirect:/admin/products";
   }
 
   @GetMapping("/{id}/delete")
-  public String deleteCategory(
+  public String deleteProduct(
       @PathVariable Long id,
       RedirectAttributes redirectAttributes,
       Model model) {
     try {
-      categoryService.deleteCategory(id);
+      productService.deleteProduct(id);
       redirectAttributes.addFlashAttribute("successMessage", MessageCode.DELETE_SUCCESS.getCode());
 
-      return "redirect:/admin/categories";
+      return "redirect:/admin/products";
     } catch (BadRequestException e) {
       redirectAttributes.addFlashAttribute("failedMessage", e.getMessage());
 
-      return "redirect:/admin/categories";
+      return "redirect:/admin/products";
     }
   }
 }

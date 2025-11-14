@@ -8,6 +8,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -48,11 +49,18 @@ public class Product extends BaseModel {
   private String image;
 
   @Column(nullable = false)
-  private Float average_rating;
+  private Float averageRating;
 
   @Column(name = "is_active", nullable = false)
   private Boolean isActive;
 
   @Column(name = "deleted_at")
   private LocalDateTime deletedAt;
+
+  @PrePersist
+  @Override
+  protected void onCreate() {
+    super.onCreate();
+    this.averageRating = 0.0f;
+  }
 }
