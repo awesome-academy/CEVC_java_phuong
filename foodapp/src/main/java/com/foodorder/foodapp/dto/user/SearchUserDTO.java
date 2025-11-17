@@ -1,18 +1,25 @@
 package com.foodorder.foodapp.dto.user;
 
-import lombok.AllArgsConstructor;
+import com.foodorder.foodapp.config.PaginationConfig;
+import com.foodorder.foodapp.dto.pagination.PaginationDTO;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
+@ToString
 public class SearchUserDTO {
   private String name;
 
   private Long roleId;
 
-  private int page;
+  private PaginationDTO pagination;
 
-  private int perPage;
+  public SearchUserDTO(String name, Long roleId, int page, int perPage, PaginationConfig paginationConfig) {
+    this.name = name;
+    this.roleId = roleId;
+    this.pagination = new PaginationDTO(page, perPage, paginationConfig);
+  }
 }

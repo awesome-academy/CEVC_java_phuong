@@ -3,6 +3,8 @@ package com.foodorder.foodapp.controller.web.admin;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.foodorder.foodapp.config.PaginationConfig;
 import com.foodorder.foodapp.dto.auth_provider.AuthProviderDTO;
 import com.foodorder.foodapp.dto.role.RoleDTO;
 import com.foodorder.foodapp.dto.user.CreateUserDTO;
@@ -38,7 +41,9 @@ import lombok.AllArgsConstructor;
 public class UsersController {
   private final UserService userService;
   private final ModelMapper modelMapper;
+  private final PaginationConfig paginationConfig;
 
+  @ModelAttribute
   private void addSelectOptionsToModel(Model model) {
     List<AuthProviderDTO> authProviders = userService.getAllAuthProviders();
     List<RoleDTO> roles = userService.getAllRoles();
@@ -50,12 +55,12 @@ public class UsersController {
   public String indexUser(
       @RequestParam(required = false) String name,
       @RequestParam(required = false) Long roleId,
-      @RequestParam(defaultValue = "1") int page,
-      @RequestParam(defaultValue = "5") int perPage,
+      @RequestParam(defaultValue = "${app.pagination.default-page}") int page,
+      @RequestParam(defaultValue = "${app.pagination.default-per-page}") int perPage,
       Model model) {
-    SearchUserDTO params = new SearchUserDTO(name, roleId, page, perPage);
+    SearchUserDTO params = new SearchUserDTO(name, roleId, page, perPage, paginationConfig);
     Page<ListUserDTO> users = userService.getAllUsers(params);
-    addSelectOptionsToModel(model);
+
     model.addAttribute("search", params);
     model.addAttribute("users", users);
     model.addAttribute("totalPages", users.getTotalPages());
@@ -80,7 +85,6 @@ public class UsersController {
 
   @GetMapping("/new")
   public String newUser(Model model) {
-    addSelectOptionsToModel(model);
     model.addAttribute("user", new CreateUserDTO());
 
     return "admin/users/new";
@@ -93,7 +97,6 @@ public class UsersController {
       RedirectAttributes redirectAttributes,
       Model model) {
     if (bindingResult.hasErrors()) {
-      addSelectOptionsToModel(model);
       model.addAttribute("failedMessage", MessageCode.CREATE_FAILED.getCode());
       return "admin/users/new";
     }
@@ -106,7 +109,6 @@ public class UsersController {
 
   @GetMapping("/{id}/edit")
   public String editUser(@NonNull @PathVariable Long id, Model model) {
-    addSelectOptionsToModel(model);
     DetailUserDTO user = userService.getUserById(id);
     UpdateUserDTO updateUserDTO = modelMapper.map(user,
         UpdateUserDTO.class);
@@ -131,7 +133,6 @@ public class UsersController {
       RedirectAttributes redirectAttributes,
       Model model) {
     if (bindingResult.hasErrors()) {
-      addSelectOptionsToModel(model);
       model.addAttribute("failedMessage", MessageCode.UPDATE_FAILED.getCode());
 
       return "admin/users/edit";

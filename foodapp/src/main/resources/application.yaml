@@ -42,3 +42,6 @@ app:
   upload:
     folder: /${UPLOAD_FOLDER}/
     location: ${APP_UPLOAD_LOCATION}/${UPLOAD_FOLDER}
+  pagination:
+    default-page: 1
+    default-per-page: 5

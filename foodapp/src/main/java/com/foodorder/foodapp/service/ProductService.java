@@ -23,6 +23,7 @@ import com.foodorder.foodapp.dto.product.ListProductDTO;
 import com.foodorder.foodapp.dto.product.SearchProductDTO;
 import com.foodorder.foodapp.dto.product.UpdateProductDTO;
 import com.foodorder.foodapp.dto.product_type.ProductTypeDTO;
+import com.foodorder.foodapp.exception.BadRequestException;
 import com.foodorder.foodapp.exception.ResourceNotFoundException;
 import com.foodorder.foodapp.model.Category;
 import com.foodorder.foodapp.model.Product;
@@ -153,7 +154,7 @@ public class ProductService {
 
     boolean existsActiveOrderForProduct = orderRepository.existsActiveOrderForProduct(id);
     if (existsActiveOrderForProduct) {
-      throw new ResourceNotFoundException("product.in.active.orders");
+      throw new BadRequestException("product.in.active.orders");
     }
 
     product.setDeletedAt(LocalDateTime.now());

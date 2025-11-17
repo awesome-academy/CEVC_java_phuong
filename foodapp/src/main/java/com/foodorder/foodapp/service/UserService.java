@@ -21,6 +21,7 @@ import com.foodorder.foodapp.dto.user.DetailUserDTO;
 import com.foodorder.foodapp.dto.user.ListUserDTO;
 import com.foodorder.foodapp.dto.user.SearchUserDTO;
 import com.foodorder.foodapp.dto.user.UpdateUserDTO;
+import com.foodorder.foodapp.exception.BadRequestException;
 import com.foodorder.foodapp.exception.ResourceNotFoundException;
 import com.foodorder.foodapp.model.Role;
 import com.foodorder.foodapp.model.User;
@@ -46,8 +47,8 @@ public class UserService {
   private final OrderRepository orderRepository;
 
   public Page<ListUserDTO> getAllUsers(SearchUserDTO params) {
-    int pageIndex = Math.max(0, params.getPage() - 1);
-    Pageable pageable = PageRequest.of(pageIndex, params.getPerPage(), Sort.by("id").descending());
+    int pageIndex = Math.max(0, params.getPagination().getPage() - 1);
+    Pageable pageable = PageRequest.of(pageIndex, params.getPagination().getPerPage(), Sort.by("id").descending());
 
     Specification<User> spec = Stream.of(
         UserSpecification.withFetch(),
@@ -115,39 +116,39 @@ public class UserService {
   }
 
   public DetailUserDTO updateUser(UpdateUserDTO updateUserDTO) {
-    User exitUser = userRepository.findById(updateUserDTO.getId())
+    User existingUser = userRepository.findById(updateUserDTO.getId())
         .orElseThrow(() -> new ResourceNotFoundException("user.not.found"));
 
-    String oldImagePath = exitUser.getAvatar();
+    String oldImagePath = existingUser.getAvatar();
     String newAvatarPath = null;
     try {
       newAvatarPath = imageUploadService.uploadImage(updateUserDTO.getAvatarFile());
 
-      exitUser.setFullName(updateUserDTO.getFullName());
-      exitUser.setEmail(updateUserDTO.getEmail());
-      exitUser.setAge(updateUserDTO.getAge());
-      Optional.ofNullable(newAvatarPath).ifPresent(exitUser::setAvatar);
+      existingUser.setFullName(updateUserDTO.getFullName());
+      existingUser.setEmail(updateUserDTO.getEmail());
+      existingUser.setAge(updateUserDTO.getAge());
+      Optional.ofNullable(newAvatarPath).ifPresent(existingUser::setAvatar);
       // TODO: Implement password hashing later.
-      Optional.ofNullable(updateUserDTO.getPassword()).ifPresent(exitUser::setPassword);
+      Optional.ofNullable(updateUserDTO.getPassword()).ifPresent(existingUser::setPassword);
 
       Long roleId = updateUserDTO.getRoleId();
       if (roleId != null) {
         Role role = roleRepository.findById(roleId)
             .orElseThrow(() -> new ResourceNotFoundException("role.not.found"));
-        exitUser.setRole(role);
+        existingUser.setRole(role);
       }
 
       Long authProviderId = updateUserDTO.getAuthProviderId();
       if (authProviderId != null) {
         AuthProvider authProvider = authProviderRepository.findById(authProviderId)
             .orElseThrow(() -> new ResourceNotFoundException("auth_provider.not.found"));
-        exitUser.setAuthProvider(authProvider);
+        existingUser.setAuthProvider(authProvider);
       }
 
-      exitUser = userRepository.save(exitUser);
+      existingUser = userRepository.save(existingUser);
       imageUploadService.deleteImage(oldImagePath, newAvatarPath != null);
 
-      return modelMapper.map(exitUser, DetailUserDTO.class);
+      return modelMapper.map(existingUser, DetailUserDTO.class);
     } catch (Exception e) {
       imageUploadService.deleteImage(newAvatarPath);
       throw e;
@@ -161,7 +162,7 @@ public class UserService {
 
     boolean existsActiveOrderForUser = orderRepository.existsActiveOrderForUser(id);
     if (existsActiveOrderForUser) {
-      throw new ResourceNotFoundException("user.in.active.orders");
+      throw new BadRequestException("user.in.active.orders");
     }
 
     user.setDeletedAt(LocalDateTime.now());

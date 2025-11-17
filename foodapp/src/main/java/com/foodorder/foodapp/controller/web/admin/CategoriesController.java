@@ -36,6 +36,7 @@ public class CategoriesController {
   private final CategoryService categoryService;
   private final ModelMapper modelMapper;
 
+  @ModelAttribute
   private void addSelectOptionsToModel(Model model) {
     List<ListCategoryDTO> categories = categoryService.getCategorySelectOptions();
     model.addAttribute("categories", categories);
@@ -44,8 +45,8 @@ public class CategoriesController {
   @GetMapping
   public String indexCategory(
       @RequestParam(required = false) String name,
-      @RequestParam(defaultValue = "1") int page,
-      @RequestParam(defaultValue = "5") int perPage,
+      @RequestParam(defaultValue = "${app.pagination.default-page}") int page,
+      @RequestParam(defaultValue = "${app.pagination.default-per-page}") int perPage,
       Model model) {
     SearchCategoryDTO params = new SearchCategoryDTO(name, page, perPage);
     Page<ListCategoryDTO> categories = categoryService.getAllCategories(params);
@@ -72,7 +73,6 @@ public class CategoriesController {
 
   @GetMapping("/new")
   public String newCategory(Model model) {
-    addSelectOptionsToModel(model);
     model.addAttribute("category", new CreateCategoryDTO());
 
     return "admin/categories/new";
@@ -85,7 +85,6 @@ public class CategoriesController {
       RedirectAttributes redirectAttributes,
       Model model) {
     if (bindingResult.hasErrors()) {
-      addSelectOptionsToModel(model);
       model.addAttribute("failedMessage", MessageCode.CREATE_FAILED.getCode());
       return "admin/categories/new";
     }
@@ -104,7 +103,6 @@ public class CategoriesController {
       updateCategoryDTO.setParentId(category.getParent().getId());
     }
 
-    addSelectOptionsToModel(model);
     model.addAttribute("category", updateCategoryDTO);
 
     return "admin/categories/edit";
@@ -118,7 +116,6 @@ public class CategoriesController {
       RedirectAttributes redirectAttributes,
       Model model) {
     if (bindingResult.hasErrors()) {
-      addSelectOptionsToModel(model);
       model.addAttribute("failedMessage", MessageCode.UPDATE_FAILED.getCode());
       return "admin/categories/edit";
     }

@@ -115,15 +115,16 @@
                   <div class="row">
                     <div class="col-sm-6">
                       <form th:action="@{/admin/users}" th:object="${search}" method="get" id="perPageForm">
-                        <input type="hidden" name="name" th:value="${search.name}" />
+                        <input type="hidden" name="name" th:value="*{name}" />
+                        <input type="hidden" name="roleId" th:value="*{roleId}" />
                         <div class="per-page-box d-flex gap-2 align-items-center">
                           <div>Per page:</div>
                           <div>
                             <select class="form-select form-select-sm" name="perPage"
                               onchange="document.getElementById('perPageForm').submit()">
-                              <option value="5" th:selected="*{perPage} == 5">5</option>
-                              <option value="10" th:selected="*{perPage} == 10">10</option>
-                              <option value="15" th:selected="*{perPage} == 15">15</option>
+                              <option value="5" th:selected="*{pagination.perPage} == 5">5</option>
+                              <option value="10" th:selected="*{pagination.perPage} == 10">10</option>
+                              <option value="15" th:selected="*{pagination.perPage} == 15">15</option>
                             </select>
                           </div>
                         </div>
@@ -131,20 +132,20 @@
                     </div>
                     <div class="col-sm-6">
                       <ul class="pagination pagination-sm float-end" th:if="${totalPages > 1}">
-                        <li class="page-item" th:classappend="${search.page} == ${1} ? 'disabled'">
+                        <li class="page-item" th:classappend="${search.pagination.page} == ${1} ? 'disabled'">
                           <a class="page-link"
-                            th:href="@{/admin/users(page=${search.page - 1}, perPage=${search.perPage}, name=${search.name})}">&laquo;</a>
+                            th:href="@{/admin/users(page=${search.pagination.page - 1}, perPage=${search.pagination.perPage}, name=${search.name}, roleId=${search.roleId})}">&laquo;</a>
                         </li>
                         <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages-1)}"
-                          th:classappend="${i + 1} == ${search.page} ? 'active'">
+                          th:classappend="${i + 1} == ${search.pagination.page} ? 'active'">
                           <a class="page-link"
-                            th:href="@{/admin/users(page=${i + 1}, perPage=${search.perPage}, name=${search.name})}"
+                            th:href="@{/admin/users(page=${i + 1}, perPage=${search.pagination.perPage}, name=${search.name}, roleId=${search.roleId})}"
                             th:text="${i + 1}">
                           </a>
                         </li>
-                        <li class="page-item" th:classappend="${search.page} == ${totalPages} ? 'disabled'">
+                        <li class="page-item" th:classappend="${search.pagination.page} == ${totalPages} ? 'disabled'">
                           <a class="page-link"
-                            th:href="@{/admin/users(page=${search.page + 1}, perPage=${search.perPage}, name=${search.name})}">
+                            th:href="@{/admin/users(page=${search.pagination.page + 1}, perPage=${search.pagination.perPage}, name=${search.name}, roleId=${search.roleId})}">
                             &raquo;
                           </a>
                         </li>
