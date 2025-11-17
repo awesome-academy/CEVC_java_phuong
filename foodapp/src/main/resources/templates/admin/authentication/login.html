@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Login page</title>
+  <th:block th:replace="~{admin/layouts/static :: css_links}"></th:block>
+</head>
+
+<body class="login-page bg-body-secondary">
+  <div class="login-box">
+    <div class="login-logo">
+      <a href="#"><b>Admin</b>LTE</a>
+    </div>
+    <!-- /.login-logo -->
+    <div class="card">
+      <div class="card-body login-card-body">
+        <p class="login-box-msg">Sign in</p>
+        <!-- Show error login -->
+        <div th:if="${param.error}" class="alert alert-danger" role="alert" th:text="#{login.invalid}">
+        </div>
+
+        <!-- Show info logout success -->
+        <div th:if="${param.logout}" class="alert alert-success" role="alert" th:text="#{logout.success}">
+        </div>
+        <form th:action="@{/admin/login}" method="post">
+          <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="Email" name="email" />
+            <div class="input-group-text"><span class="bi bi-envelope"></span></div>
+          </div>
+          <div class="input-group mb-3">
+            <input type="password" class="form-control" placeholder="Password" name="password" />
+            <div class="input-group-text"><span class="bi bi-lock-fill"></span></div>
+          </div>
+          <!--begin::Row-->
+          <div class="row">
+            <div class="col-8">
+            </div>
+            <!-- /.col -->
+            <div class="col-4">
+              <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Sign In</button>
+              </div>
+            </div>
+            <!-- /.col -->
+          </div>
+          <!--end::Row-->
+        </form>
+      </div>
+      <!-- /.login-card-body -->
+    </div>
+  </div>
+  <!-- /.login-box -->
+  <!--begin::Third Party Plugin(OverlayScrollbars)-->
+  <th:block th:replace="~{admin/layouts/static :: js_scripts}"></th:block>
+  <!--end::Script-->
+</body>
+
+</html>

@@ -22,5 +22,11 @@ public class UpdateUserDTO extends UserOperationDTO {
   @Pattern(regexp = RegexConstants.PW_OPTIONAL_REGEX, message = "{validation.user.password.invalid}")
   private String password;
 
+  @NotNull(message = "{validation.user.role.required}")
+  private Long roleId;
+
+  @NotNull(message = "{validation.user.auth_provider.required}")
+  private Long authProviderId;
+
   private String avatar;
 }
