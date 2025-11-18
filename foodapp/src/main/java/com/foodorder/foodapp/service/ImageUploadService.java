@@ -18,13 +18,17 @@ public class ImageUploadService {
     return filesStorageService.save(file);
   }
 
-  public void deleteImage(String imagePath) {
-    if (imagePath == null || imagePath.isEmpty()) {
+  public void deleteImage(String imagePath, boolean allowDelete) {
+    if (imagePath == null || imagePath.isEmpty() || !allowDelete) {
       return;
     }
 
     String filename = extractFilenameFromPath(imagePath);
     filesStorageService.delete(filename);
+  }
+
+  public void deleteImage(String imagePath) {
+    deleteImage(imagePath, true);
   }
 
   private String extractFilenameFromPath(String imagePath) {

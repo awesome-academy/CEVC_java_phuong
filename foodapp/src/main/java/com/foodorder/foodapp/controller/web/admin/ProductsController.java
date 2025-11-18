@@ -41,6 +41,7 @@ public class ProductsController {
   private final CategoryService categoryService;
   private final ModelMapper modelMapper;
 
+  @ModelAttribute
   private void addSelectOptionsToModel(Model model) {
     List<ListCategoryDTO> categories = categoryService.getCategorySelectOptions();
     List<ProductTypeDTO> productTypes = productService.getAllProductTypes();
@@ -53,12 +54,11 @@ public class ProductsController {
       @RequestParam(required = false) String name,
       @RequestParam(required = false) Long categoryId,
       @RequestParam(required = false) Long productTypeId,
-      @RequestParam(defaultValue = "1") int page,
-      @RequestParam(defaultValue = "5") int perPage,
+      @RequestParam(defaultValue = "${app.pagination.default-page}") int page,
+      @RequestParam(defaultValue = "${app.pagination.default-per-page}") int perPage,
       Model model) {
     SearchProductDTO params = new SearchProductDTO(name, categoryId, productTypeId, page, perPage);
     Page<ListProductDTO> products = productService.getAllProducts(params);
-    addSelectOptionsToModel(model);
     model.addAttribute("search", params);
     model.addAttribute("products", products);
     model.addAttribute("totalPages", products.getTotalPages());
@@ -83,7 +83,6 @@ public class ProductsController {
   @GetMapping("/new")
   public String newProduct(
       Model model) {
-    addSelectOptionsToModel(model);
     model.addAttribute("product", new CreateProductDTO());
 
     return "admin/products/new";
@@ -96,7 +95,6 @@ public class ProductsController {
       RedirectAttributes redirectAttributes,
       Model model) {
     if (bindingResult.hasErrors()) {
-      addSelectOptionsToModel(model);
       model.addAttribute("failedMessage", MessageCode.CREATE_FAILED.getCode());
       return "admin/products/new";
     }
@@ -108,7 +106,6 @@ public class ProductsController {
 
   @GetMapping("/{id}/edit")
   public String editProduct(@NonNull @PathVariable Long id, Model model) {
-    addSelectOptionsToModel(model);
     DetailProductDTO product = productService.getProductById(id);
     UpdateProductDTO updateProductDTO = modelMapper.map(product, UpdateProductDTO.class);
 
@@ -132,7 +129,6 @@ public class ProductsController {
       RedirectAttributes redirectAttributes,
       Model model) {
     if (bindingResult.hasErrors()) {
-      addSelectOptionsToModel(model);
       model.addAttribute("failedMessage", MessageCode.UPDATE_FAILED.getCode());
 
       return "admin/products/edit";
