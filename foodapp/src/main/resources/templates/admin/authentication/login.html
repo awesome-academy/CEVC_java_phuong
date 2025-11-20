@@ -15,7 +15,7 @@
     <!-- /.login-logo -->
     <div class="card">
       <div class="card-body login-card-body">
-        <p class="login-box-msg">Sign in</p>
+        <p class="login-box-msg" th:text="#{views.admin.login.title}"></p>
         <!-- Show error login -->
         <div th:if="${param.error}" class="alert alert-danger" role="alert" th:text="#{login.invalid}">
         </div>
@@ -39,7 +39,7 @@
             <!-- /.col -->
             <div class="col-4">
               <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary">Sign In</button>
+                <button type="submit" class="btn btn-primary" th:text="#{views.admin.login.title}"></button>
               </div>
             </div>
             <!-- /.col -->

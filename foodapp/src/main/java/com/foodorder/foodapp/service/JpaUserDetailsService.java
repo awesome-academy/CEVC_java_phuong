@@ -23,7 +23,7 @@ public class JpaUserDetailsService implements UserDetailsService {
   @Override
   public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
     User user = userRepository.findByEmailIgnoreCase(email)
-        .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        .orElseThrow(() -> new UsernameNotFoundException("user.not.found"));
 
     Role role = user.getRole();
     Collection<GrantedAuthority> authorities = List.of(
