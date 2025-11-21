@@ -8,6 +8,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.lang.NonNull;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import com.foodorder.foodapp.repository.*;
 import com.foodorder.foodapp.specification.UserSpecification;
 
@@ -19,6 +21,7 @@ import com.foodorder.foodapp.dto.role.RoleDTO;
 import com.foodorder.foodapp.dto.user.CreateUserDTO;
 import com.foodorder.foodapp.dto.user.DetailUserDTO;
 import com.foodorder.foodapp.dto.user.ListUserDTO;
+import com.foodorder.foodapp.dto.user.RegisterUserDTO;
 import com.foodorder.foodapp.dto.user.SearchUserDTO;
 import com.foodorder.foodapp.dto.user.UpdateUserDTO;
 import com.foodorder.foodapp.exception.BadRequestException;
@@ -45,6 +48,7 @@ public class UserService {
   private final ModelMapper modelMapper;
   private final ImageUploadService imageUploadService;
   private final OrderRepository orderRepository;
+  private final PasswordEncoder passwordEncoder;
 
   public Page<ListUserDTO> getAllUsers(SearchUserDTO params) {
     int pageIndex = Math.max(0, params.getPagination().getPage() - 1);
@@ -91,8 +95,7 @@ public class UserService {
       User user = new User();
       user.setFullName(createUserDTO.getFullName());
       user.setEmail(createUserDTO.getEmail());
-      // TODO: Implement password hashing later.
-      user.setPassword(createUserDTO.getPassword());
+      user.setPassword(passwordEncoder.encode(createUserDTO.getPassword()));
       user.setAvatar(avatarPath);
       user.setAge(createUserDTO.getAge());
 
@@ -128,8 +131,8 @@ public class UserService {
       existingUser.setEmail(updateUserDTO.getEmail());
       existingUser.setAge(updateUserDTO.getAge());
       Optional.ofNullable(newAvatarPath).ifPresent(existingUser::setAvatar);
-      // TODO: Implement password hashing later.
-      Optional.ofNullable(updateUserDTO.getPassword()).ifPresent(existingUser::setPassword);
+      Optional.ofNullable(updateUserDTO.getPassword())
+          .ifPresent(password -> existingUser.setPassword(passwordEncoder.encode(password)));
 
       Long roleId = updateUserDTO.getRoleId();
       if (roleId != null) {
@@ -145,7 +148,7 @@ public class UserService {
         existingUser.setAuthProvider(authProvider);
       }
 
-      existingUser = userRepository.save(existingUser);
+      userRepository.save(existingUser);
       imageUploadService.deleteImage(oldImagePath, newAvatarPath != null);
 
       return modelMapper.map(existingUser, DetailUserDTO.class);
@@ -167,5 +170,32 @@ public class UserService {
 
     user.setDeletedAt(LocalDateTime.now());
     userRepository.save(user);
+  }
+
+  public DetailUserDTO registerUser(RegisterUserDTO registerUserDTO) {
+    String avatarPath = null;
+    try {
+      avatarPath = imageUploadService.uploadImage(registerUserDTO.getAvatarFile());
+
+      User newUser = new User();
+      newUser.setFullName(registerUserDTO.getFullName());
+      newUser.setEmail(registerUserDTO.getEmail());
+      newUser.setPassword(passwordEncoder.encode(registerUserDTO.getPassword()));
+      newUser.setAvatar(avatarPath);
+      newUser.setAge(registerUserDTO.getAge());
+
+      Role role = roleRepository.findByName("USER")
+          .orElseThrow(() -> new ResourceNotFoundException("role.not.found"));
+      newUser.setRole(role);
+      AuthProvider authProvider = authProviderRepository.findByName("LOCAL")
+          .orElseThrow(() -> new ResourceNotFoundException("auth_provider.not.found"));
+      newUser.setAuthProvider(authProvider);
+
+      newUser = userRepository.save(newUser);
+      return modelMapper.map(newUser, DetailUserDTO.class);
+    } catch (Exception e) {
+      imageUploadService.deleteImage(avatarPath);
+      throw e;
+    }
   }
 }
