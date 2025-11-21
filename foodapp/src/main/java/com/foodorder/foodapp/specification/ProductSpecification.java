@@ -37,6 +37,12 @@ public class ProductSpecification {
     };
   }
 
+  public static Specification<Product> isActive() {
+    return (root, query, cb) -> {
+      return cb.isTrue(root.get("isActive"));
+    };
+  }
+
   public static Specification<Product> withFetch() {
     return (root, query, cb) -> {
       if (Long.class != query.getResultType()) {

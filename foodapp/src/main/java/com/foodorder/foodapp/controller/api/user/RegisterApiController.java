@@ -7,6 +7,8 @@ import com.foodorder.foodapp.dto.user.DetailUserDTO;
 import com.foodorder.foodapp.dto.user.RegisterUserDTO;
 import com.foodorder.foodapp.service.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
@@ -19,10 +21,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 @RequestMapping("/api/register")
 @Validated
 @AllArgsConstructor
+@Tag(name = "users", description = "Api Client for sers")
 public class RegisterApiController {
   private final UserService userService;
 
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @Operation(summary = "Register user", description = "Register a new user")
   public DetailUserDTO register(
       @Valid RegisterUserDTO registerUserDTO,
       BindingResult bindingResult) {
