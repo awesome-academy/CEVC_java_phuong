@@ -45,11 +45,7 @@ public class ProductsApiController {
   @GetMapping("/{id}")
   @Operation(summary = "Get product details", description = "Get details of a product by ID")
   public ResponseEntity<?> detailProduct(@PathVariable Long id) {
-    try {
-      ClientDetailProductDTO product = clientProductService.getProductById(id);
-      return ApiResponseDTO.ok(product);
-    } catch (Exception e) {
-      return ApiResponseDTO.notFound("Product not found");
-    }
+    ClientDetailProductDTO product = clientProductService.getProductById(id);
+    return ApiResponseDTO.ok(product);
   }
 }
