@@ -16,11 +16,14 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
   @Autowired
   private MessageSource messageSource;
+  private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
   @ExceptionHandler(ResourceNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
@@ -132,8 +135,24 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
   }
 
+  @ExceptionHandler(UnauthorizedException.class)
+  public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException ex) {
+    String localizedMessage = messageSource.getMessage(
+        ex.getMessage(),
+        null,
+        LocaleContextHolder.getLocale());
+
+    ErrorResponse errorResponse = new ErrorResponse(
+        localizedMessage,
+        401,
+        "UNAUTHORIZED");
+
+    return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
+    logger.error("Unhandled exception occurred: ", ex);
     ErrorResponse errorResponse = new ErrorResponse(
         "An unexpected error occurred. Please try again later.",
         500,

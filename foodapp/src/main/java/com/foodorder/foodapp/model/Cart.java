@@ -1,5 +1,6 @@
 package com.foodorder.foodapp.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -31,5 +32,5 @@ public class Cart extends BaseModel {
 
   @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
   @JsonManagedReference
-  private List<CartItem> cartItems;
+  private List<CartItem> cartItems = new ArrayList<>();
 }
