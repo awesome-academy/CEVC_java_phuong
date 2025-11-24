@@ -7,5 +7,6 @@ import lombok.ToString;
 @ToString
 public class ProductTypeDTO {
   private Long id;
+
   private String name;
 }

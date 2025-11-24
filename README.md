@@ -19,3 +19,9 @@ cp .env.example .env
 psql -U postgres -h localhost
 CREATE DATABASE foodapp_dev_db;
 ```
+
+2. Api document
+
+- OpenAPI JSON: http://localhost:8080/v3/api-docs
+
+- Swagger: http://localhost:8080/swagger-ui/index.html
