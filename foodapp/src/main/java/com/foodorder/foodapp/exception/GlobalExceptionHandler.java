@@ -117,6 +117,21 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
   }
 
+  @ExceptionHandler(BadRequestException.class)
+  public ResponseEntity<ErrorResponse> handleBadRequestException(BadRequestException ex) {
+    String localizedMessage = messageSource.getMessage(
+        ex.getMessage(),
+        null,
+        LocaleContextHolder.getLocale());
+
+    ErrorResponse errorResponse = new ErrorResponse(
+        localizedMessage,
+        400,
+        "BAD_REQUEST");
+
+    return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
     ErrorResponse errorResponse = new ErrorResponse(
