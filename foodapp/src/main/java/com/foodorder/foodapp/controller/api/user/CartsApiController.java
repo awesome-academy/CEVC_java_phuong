@@ -40,19 +40,17 @@ public class CartsApiController {
   @Operation(summary = "Add item to cart", description = "Add an item to the cart for client")
   public ResponseEntity<?> addToCart(
       @PathVariable Long userId,
-      @Valid @RequestBody AddToCartDTO addToCartDTO,
-      BindingResult bindingResult) {
+      @Valid @RequestBody AddToCartDTO addToCartDTO) {
     DetailCartDTO response = clientCartService.addItemToCart(userId,
         addToCartDTO);
-    return ApiResponseDTO.created(response, "/cart/" + response.getId());
+    return ApiResponseDTO.created(response, "/api/carts/" + response.getId());
   }
 
   @PostMapping("/{userId}/update")
   @Operation(summary = "Update/remove item to cart", description = "Update or remove an item from the cart for client")
   public ResponseEntity<?> updateCart(@PathVariable Long userId,
-      @Valid @RequestBody UpdateToCartDTO updateToCartDTO,
-      BindingResult bindingResult) {
+      @Valid @RequestBody UpdateToCartDTO updateToCartDTO) {
     DetailCartDTO response = clientCartService.updateCart(userId, updateToCartDTO);
-    return ApiResponseDTO.created(response, "/cart/" + response.getId());
+    return ApiResponseDTO.created(response, "/api/carts/" + response.getId());
   }
 }

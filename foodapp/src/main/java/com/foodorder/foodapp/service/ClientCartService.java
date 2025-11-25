@@ -121,7 +121,7 @@ public class ClientCartService {
   }
 
   private void validateQuantity(Integer quantity, Integer cartQuantity) {
-    if (quantity < cartQuantity) {
+    if (quantity == null || quantity < cartQuantity) {
       throw new BadRequestException("validation.cart.quantity.max");
     }
   }

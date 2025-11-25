@@ -12,24 +12,13 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-class UserDTO {
-  private Long id;
-
-  private String fullName;
-}
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @ToString
 public class DetailCartDTO {
   private Long id;
 
-  private UserDTO user;
+  private CartUserDTO user;
 
   private List<ListCartItemDTO> cartItems;
-
-  private Integer totalPrice;
 
   public Integer getTotalPrice() {
     if (cartItems == null)
