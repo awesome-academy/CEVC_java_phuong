@@ -17,7 +17,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
-@EqualsAndHashCode(callSuper=false)
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -29,7 +29,7 @@ public class Cart extends BaseModel {
   @JsonBackReference
   private User user;
 
-  @OneToMany(mappedBy = "cart", cascade = CascadeType.REMOVE)
+  @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
   @JsonManagedReference
   private List<CartItem> cartItems;
 }
