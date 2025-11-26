@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 
 public class RefreshTokenJwtDTO {
   @NotBlank(message = "{validation.user.refresh_token.required}")
-  @Size(max = 255, message = "{validation.user.refresh_token.max}")
+  @Size(max = 1000, message = "{validation.user.refresh_token.max}")
   private String refreshToken;
 }

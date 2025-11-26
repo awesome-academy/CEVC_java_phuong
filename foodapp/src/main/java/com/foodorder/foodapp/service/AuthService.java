@@ -9,16 +9,14 @@ import com.foodorder.foodapp.exception.UnauthorizedException;
 import com.foodorder.foodapp.model.User;
 import com.foodorder.foodapp.repository.UserRepository;
 
+import lombok.AllArgsConstructor;
+
 @Service
+@AllArgsConstructor
 public class AuthService {
-  @Autowired
-  private UserRepository userRepository;
-
-  @Autowired
-  private JwtService jwtService;
-
-  @Autowired
-  private PasswordEncoder passwordEncoder;
+  private final UserRepository userRepository;
+  private final JwtService jwtService;
+  private final PasswordEncoder passwordEncoder;
 
   public JwtResponseDTO login(String email, String password) {
     User user = userRepository.findByEmailIgnoreCase(email)

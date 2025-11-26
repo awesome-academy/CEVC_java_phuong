@@ -34,7 +34,7 @@ public class AuthApiController {
       @Valid @RequestBody LoginJwtDTO loginUserDTO) {
 
     JwtResponseDTO response = authService.login(loginUserDTO.getEmail(), loginUserDTO.getPassword());
-    return ApiResponseDTO.created(response, "/api/auth/login" + loginUserDTO.getEmail());
+    return ApiResponseDTO.ok(response);
   }
 
   @PostMapping("/refresh")
@@ -42,6 +42,6 @@ public class AuthApiController {
   public ResponseEntity<?> refresh(@Valid @RequestBody RefreshTokenJwtDTO refreshTokenJwtDTO) {
 
     JwtResponseDTO response = jwtService.refreshToken(refreshTokenJwtDTO);
-    return ApiResponseDTO.created(response, "/api/auth/refresh" + response.getEmail());
+    return ApiResponseDTO.ok(response);
   }
 }

@@ -17,8 +17,12 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class JwtService {
+  private static final Logger logger = LoggerFactory.getLogger(JwtService.class);
 
   @Value("${app.jwt.secret}")
   private String secret;
@@ -82,17 +86,27 @@ public class JwtService {
           .build()
           .parseClaimsJws(token);
       return true;
+    } catch (ExpiredJwtException e) {
+      logger.debug("JWT token expired: {}", e.getMessage());
+    } catch (MalformedJwtException e) {
+      logger.debug("JWT token malformed: {}", e.getMessage());
     } catch (JwtException e) {
-      return false;
+      logger.debug("JWT invalid: {}", e.getMessage());
     }
+    return false;
   }
 
   public String getEmailFromToken(String token) {
-    Claims claims = Jwts.parserBuilder()
-        .setSigningKey(key)
-        .build()
-        .parseClaimsJws(token)
-        .getBody();
-    return claims.getSubject();
+    try {
+      Claims claims = Jwts.parserBuilder()
+          .setSigningKey(key)
+          .build()
+          .parseClaimsJws(token)
+          .getBody();
+      return claims.getSubject();
+    } catch (JwtException e) {
+      throw new UnauthorizedException("validation.user.refresh_token.invalid");
+    }
   }
+
 }
