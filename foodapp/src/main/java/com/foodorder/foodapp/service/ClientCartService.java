@@ -9,6 +9,7 @@ import com.foodorder.foodapp.exception.ResourceNotFoundException;
 import com.foodorder.foodapp.model.Cart;
 import com.foodorder.foodapp.model.CartItem;
 import com.foodorder.foodapp.model.Product;
+import com.foodorder.foodapp.model.User;
 import com.foodorder.foodapp.repository.CartRepository;
 import com.foodorder.foodapp.repository.ProductRepository;
 
@@ -28,26 +29,27 @@ public class ClientCartService {
   private final ModelMapper modelMapper;
   private final ProductRepository productRepository;
 
-  public DetailCartDTO getCartByUserId(Long userId) {
-    Cart cart = cartRepository.findByUserId(userId).orElse(new Cart());
+  public DetailCartDTO getCartByUserId(User user) {
+    Cart cart = cartRepository.findByUserId(user.getId()).orElse(new Cart());
     return modelMapper.map(cart, DetailCartDTO.class);
   }
 
   @Transactional
-  public DetailCartDTO addItemToCart(Long userId, AddToCartDTO addToCartDTO) {
+  public DetailCartDTO addItemToCart(User user, AddToCartDTO addToCartDTO) {
     {
-      Cart cart = cartRepository.findByUserId(userId).orElse(new Cart());
+      Cart cart = cartRepository.findByUserId(user.getId()).orElse(new Cart());
 
       addOrUpdateCartItem(cart, addToCartDTO, false);
 
+      cart.setUser(user);
       cart = cartRepository.save(cart);
       return modelMapper.map(cart, DetailCartDTO.class);
     }
   }
 
   @Transactional
-  public DetailCartDTO updateCart(Long userId, UpdateToCartDTO updateToCartDTO) {
-    Cart cart = cartRepository.findByUserId(userId)
+  public DetailCartDTO updateCart(User user, UpdateToCartDTO updateToCartDTO) {
+    Cart cart = cartRepository.findByUserId(user.getId())
         .orElseThrow(() -> new ResourceNotFoundException("cart.not.found"));
 
     switch (updateToCartDTO.getActionType()) {

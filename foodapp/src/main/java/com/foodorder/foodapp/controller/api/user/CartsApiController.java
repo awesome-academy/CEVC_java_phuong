@@ -1,10 +1,9 @@
 package com.foodorder.foodapp.controller.api.user;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +13,7 @@ import com.foodorder.foodapp.dto.cart.AddToCartDTO;
 import com.foodorder.foodapp.dto.cart.DetailCartDTO;
 import com.foodorder.foodapp.dto.cart.UpdateToCartDTO;
 import com.foodorder.foodapp.dto.response.ApiResponseDTO;
+import com.foodorder.foodapp.model.User;
 import com.foodorder.foodapp.service.ClientCartService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,28 +29,35 @@ import lombok.AllArgsConstructor;
 public class CartsApiController {
   private final ClientCartService clientCartService;
 
-  @GetMapping("/{userId}")
+  @GetMapping("/me")
   @Operation(summary = "Cart info", description = "Get cart information for client")
-  public ResponseEntity<?> getCart(@PathVariable Long userId) {
-    DetailCartDTO response = clientCartService.getCartByUserId(userId);
+  public ResponseEntity<?> getCart(@AuthenticationPrincipal User currentUser) {
+
+    DetailCartDTO response = clientCartService.getCartByUserId(currentUser);
+
     return ApiResponseDTO.ok(response);
   }
 
-  @PostMapping("/{userId}/add")
+  @PostMapping("/me/add")
   @Operation(summary = "Add item to cart", description = "Add an item to the cart for client")
   public ResponseEntity<?> addToCart(
-      @PathVariable Long userId,
-      @Valid @RequestBody AddToCartDTO addToCartDTO) {
-    DetailCartDTO response = clientCartService.addItemToCart(userId,
-        addToCartDTO);
+      @Valid @RequestBody AddToCartDTO addToCartDTO,
+      @AuthenticationPrincipal User currentUser) {
+
+    DetailCartDTO response = clientCartService.addItemToCart(currentUser, addToCartDTO);
+
     return ApiResponseDTO.created(response, "/api/carts/" + response.getId());
   }
 
-  @PostMapping("/{userId}/update")
+  @PostMapping("/me/update")
   @Operation(summary = "Update/remove item to cart", description = "Update or remove an item from the cart for client")
-  public ResponseEntity<?> updateCart(@PathVariable Long userId,
-      @Valid @RequestBody UpdateToCartDTO updateToCartDTO) {
-    DetailCartDTO response = clientCartService.updateCart(userId, updateToCartDTO);
+
+  public ResponseEntity<?> updateCart(
+      @Valid @RequestBody UpdateToCartDTO updateToCartDTO,
+      @AuthenticationPrincipal User currentUser) {
+
+    DetailCartDTO response = clientCartService.updateCart(currentUser, updateToCartDTO);
+
     return ApiResponseDTO.created(response, "/api/carts/" + response.getId());
   }
 }
