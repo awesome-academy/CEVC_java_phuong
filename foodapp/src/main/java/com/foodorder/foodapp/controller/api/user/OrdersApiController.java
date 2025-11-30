@@ -22,6 +22,7 @@ import com.foodorder.foodapp.model.User;
 import com.foodorder.foodapp.service.ClientOrderService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -31,6 +32,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 @Validated
 @Tag(name = "orders", description = "Api Client for Orders")
+@SecurityRequirement(name = "bearerAuth")
 public class OrdersApiController {
   private final ClientOrderService clientOrderService;
 
@@ -57,7 +59,7 @@ public class OrdersApiController {
   }
 
   @PostMapping("/complete")
-  @Operation(summary = "Complete order", description = "Add an item to the order for client")
+  @Operation(summary = "Complete order", description = "Complete and submit an order from the user's cart")
   public ResponseEntity<?> createOrder(@AuthenticationPrincipal User currentUser) {
 
     DetailOrderDTO response = clientOrderService.createOrder(currentUser);
@@ -67,12 +69,12 @@ public class OrdersApiController {
 
   @PostMapping("/{id}/cancel")
   @Operation(summary = "Cancel order", description = "Cancel an order for client")
-  public ResponseEntity<DetailOrderDTO> cancelOrder(
+  public ResponseEntity<?> cancelOrder(
       @PathVariable Long id,
       @Valid @RequestBody ReasonCancelDTO reasonCancelDTO,
       @AuthenticationPrincipal User currentUser) {
     DetailOrderDTO response = clientOrderService.cancelOrder(id, currentUser, reasonCancelDTO);
 
-    return ResponseEntity.ok(response);
+    return ApiResponseDTO.ok(response);
   }
 }

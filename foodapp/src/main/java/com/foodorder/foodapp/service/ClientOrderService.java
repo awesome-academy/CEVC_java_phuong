@@ -43,7 +43,7 @@ public class ClientOrderService {
   private final ProductRepository productRepository;
 
   public List<DetailOrderDTO> getAllOrders(User user, SearchOrderDTO params) {
-    Specification<Order> spec = buildSpecification(params);
+    Specification<Order> spec = buildSpecification(user, params);
     List<Order> orders = orderRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "id"));
 
     return orders.stream()
@@ -52,9 +52,11 @@ public class ClientOrderService {
         .collect(Collectors.toList());
   }
 
-  private Specification<Order> buildSpecification(SearchOrderDTO params) {
+  private Specification<Order> buildSpecification(User user, SearchOrderDTO params) {
     return Stream.of(
-        OrderSpecification.hasProductName(params.getProductName()))
+        OrderSpecification.hasProductName(params.getProductName()),
+        OrderSpecification.withUserId(user.getId()),
+        OrderSpecification.withFetch())
         .filter(Objects::nonNull)
         .reduce((s1, s2) -> s1.and(s2))
         .orElse(null);
@@ -85,6 +87,8 @@ public class ClientOrderService {
 
       validateQuantity(product.getQuantity(), cartItem.getQuantity());
 
+      product.setQuantity(product.getQuantity() - cartItem.getQuantity());
+
       OrderItem orderItem = new OrderItem();
       orderItem.setProduct(product);
       orderItem.setQuantity(cartItem.getQuantity());
@@ -104,13 +108,6 @@ public class ClientOrderService {
         .sum());
     order = orderRepository.save(order);
 
-    // Update product quantity
-    for (OrderItem orderItem : order.getOrderItems()) {
-      Product product = orderItem.getProduct();
-      product.setQuantity(product.getQuantity() - orderItem.getQuantity());
-      productRepository.save(product);
-    }
-
     // Clear cart
     cart.getCartItems().clear();
     cartRepository.save(cart);
@@ -120,7 +117,7 @@ public class ClientOrderService {
 
   private void validateQuantity(Integer quantity, Integer cartQuantity) {
     if (quantity == null || quantity < cartQuantity) {
-      throw new BadRequestException("validation.cart.quantity.max");
+      throw new BadRequestException("validation.product.quantity.insufficient");
     }
   }
 
@@ -148,7 +145,6 @@ public class ClientOrderService {
           .orElseThrow(() -> new ResourceNotFoundException("product.not.found"));
 
       product.setQuantity(product.getQuantity() + item.getQuantity());
-      productRepository.save(product);
     }
 
     return modelMapper.map(order, DetailOrderDTO.class);
