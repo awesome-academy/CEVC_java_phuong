@@ -10,7 +10,8 @@ public class IgnoreSecurityCheckUrl {
       "/api/categories",
       "/api/products/**",
       "/api/product-types",
-      "/api/auth/**");
+      "/api/auth/**",
+      "/api/users/register");
 
   public static final List<String> PUBLIC_STATIC_URLS = Arrays.asList(
       "/css/**",
