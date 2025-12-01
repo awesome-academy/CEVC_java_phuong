@@ -3,9 +3,7 @@ package com.foodorder.foodapp.controller.api.user;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,7 +25,7 @@ import org.springframework.http.MediaType;
 @RequestMapping("/api/users")
 @AllArgsConstructor
 @Validated
-@Tag(name = "users", description = "Api Client for sers")
+@Tag(name = "users", description = "Api Client for Users")
 @SecurityRequirement(name = "bearerAuth")
 public class UserApiController {
   private final ClientUserService clientUserService;
@@ -46,9 +44,7 @@ public class UserApiController {
       @Valid ClientUpdateUserDTO updateUserDTO,
       @AuthenticationPrincipal User currentUser) {
 
-    ClientDetailUserDTO response = clientUserService.updateUser(currentUser,
-        updateUserDTO);
-
-    return ApiResponseDTO.created(response, "/api/users/" + response.getId());
+    ClientDetailUserDTO response = clientUserService.updateUser(currentUser, updateUserDTO);
+    return ApiResponseDTO.ok(response);
   }
 }

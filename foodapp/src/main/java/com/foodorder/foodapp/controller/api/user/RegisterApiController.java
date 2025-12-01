@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 @RequestMapping("/api/users")
 @Validated
 @AllArgsConstructor
-@Tag(name = "users", description = "Api Client for sers")
+@Tag(name = "users", description = "Api Client for Users")
 public class RegisterApiController {
   private final UserService userService;
 
