@@ -1,5 +1,6 @@
 package com.foodorder.foodapp.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -18,7 +19,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
-@EqualsAndHashCode(callSuper=false)
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -35,9 +36,9 @@ public class Order extends BaseModel {
   @JsonBackReference
   private OrderStatus orderStatus;
 
-  @OneToMany(mappedBy = "order", cascade = CascadeType.REMOVE)
+  @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
   @JsonManagedReference
-  private List<OrderItem> orderItems;
+  private List<OrderItem> orderItems = new ArrayList<>();
 
   @Column(name = "reason_cancel", length = 1000)
   private String reasonCancel;

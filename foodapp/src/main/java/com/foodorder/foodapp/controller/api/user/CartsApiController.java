@@ -17,6 +17,7 @@ import com.foodorder.foodapp.model.User;
 import com.foodorder.foodapp.service.ClientCartService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -26,6 +27,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 @Validated
 @Tag(name = "carts", description = "Api Client for Carts")
+@SecurityRequirement(name = "bearerAuth")
 public class CartsApiController {
   private final ClientCartService clientCartService;
 
