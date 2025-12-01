@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Detail order</title>
+  <th:block th:replace="~{admin/layouts/static :: css_links}"></th:block>
+</head>
+
+<body class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">
+  <!--begin::App Wrapper-->
+  <div class="app-wrapper">
+    <!--begin::Header-->
+    <th:block th:replace="~{admin/layouts/header :: header}"></th:block>
+    <!--end::Header-->
+    <!--begin::Sidebar-->
+    <th:block th:replace="~{admin/layouts/sidebar :: sidebar}"></th:block>
+    <!--end::Sidebar-->
+    <!--begin::App Main-->
+    <main class="app-main">
+      <!--begin::App Content Header-->
+      <div class="app-content-header">
+        <!--begin::Container-->
+        <div class="container-fluid">
+          <!--begin::Row-->
+          <div class="row">
+            <div class="col-sm-6">
+              <h3 class="mb-0">Detail order</h3>
+            </div>
+          </div>
+          <!--end::Row-->
+        </div>
+        <!--end::Container-->
+      </div>
+      <!--end::App Content Header-->
+      <div class="app-content">
+        <!--begin::Container-->
+        <div class="container-fluid">
+          <!--begin::Row-->
+          <div class="row g-4">
+            <!--begin::Col-->
+            <div class="col-md-9">
+              <!--begin::Quick Example-->
+              <div class="card card-primary card-outline mb-4">
+                <!--begin::Header-->
+                <!--end::Header-->
+                <!--begin::Form-->
+                <form>
+                  <!--begin::Body-->
+                  <div class="card-body">
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">ID: </label>
+                      <p th:text="${order.id}"></p>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">User Order Info: </label>
+                      <p th:text="${order.user?.fullName}"></p>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">User Receiver Info: </label>
+                      <p th:if="${order.orderAddress != null}">
+                        <span th:text="${order.orderAddress?.receiverName + ' - '}"></span>
+                        <span th:text="${order.orderAddress?.phoneNumber + ' - '}"></span>
+                        <span
+                          th:text="${order.orderAddress?.streetAddress} + ', ' + ${order.orderAddress?.district} + ', ' + ${order.orderAddress?.city}">
+                        </span>
+                      </p>
+                      <p th:if="${order.orderAddress == null}">N/A</p>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">Order Status: </label>
+                      <p th:text="${order.orderStatus?.name ?: 'N/A'}"></p>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">Reason Cancel: </label>
+                      <p th:text="${order.reasonCancel ?: 'N/A'}"></p>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">Order Items: </label>
+                      <table class="table table-striped">
+                        <thead>
+                          <tr>
+                            <th style="width: 100px">Product ID</th>
+                            <th>Product name</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr class="align-middle" th:each="orderItem, iterStat : ${order.orderItems}">
+                            <td th:text="${orderItem.product?.id}"></td>
+                            <td th:text="${orderItem.product?.name}"></td>
+                            <td th:text="${orderItem.quantity}"></td>
+                            <td th:text="${orderItem.price}"></td>
+                          </tr>
+                          <tr class="align-middle">
+                            <td colspan="3" class="text-end fw-bold">Total:</td>
+                            <td th:text="${order.totalPrice}"></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">Note: </label>
+                      <p th:text="${order.note}"></p>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">Created At: </label>
+                      <p th:text="${order.createdAt}"></p>
+                    </div>
+                  </div>
+                  <!--end::Body-->
+                  <!--begin::Footer-->
+                  <div class=" card-footer">
+                    <a th:href="@{/admin/orders}">Back to index</a>
+                  </div>
+                  <!--end::Footer-->
+                </form>
+                <!--end::Form-->
+              </div>
+              <!--end::Quick Example-->
+            </div>
+            <!--end::Col-->
+          </div>
+          <!--end::Row-->
+        </div>
+        <!--end::Container-->
+      </div>
+      <!--end::App Content-->
+    </main>
+    <!--end::App Main-->
+    <!--begin::Footer-->
+    <th:block th:replace="~{admin/layouts/footer :: footer}"></th:block>
+    <!--end::Footer-->
+  </div>
+  <!--end::App Wrapper-->
+  <!--begin::Script-->
+  <!--begin::Third Party Plugin(OverlayScrollbars)-->
+  <th:block th:replace="~{admin/layouts/static :: js_scripts}"></th:block>
+  <!--end::OverlayScrollbars Configure-->
+  <!-- OPTIONAL SCRIPTS -->
+  <!-- sortablejs -->
+  <!--end::Script-->
+</body>
+
+</html>

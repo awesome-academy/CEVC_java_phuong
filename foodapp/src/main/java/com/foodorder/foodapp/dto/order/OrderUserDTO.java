@@ -1,0 +1,14 @@
+package com.foodorder.foodapp.dto.order;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+class OrderUserDTO {
+  private Long id;
+
+  private String fullName;
+}

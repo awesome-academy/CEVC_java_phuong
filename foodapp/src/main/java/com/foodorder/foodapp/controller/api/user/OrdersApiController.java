@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.foodorder.foodapp.dto.order.CreateOrderDTO;
 import com.foodorder.foodapp.dto.order.DetailOrderDTO;
 import com.foodorder.foodapp.dto.order.ReasonCancelDTO;
 import com.foodorder.foodapp.dto.order.SearchOrderDTO;
@@ -60,9 +61,11 @@ public class OrdersApiController {
 
   @PostMapping("/complete")
   @Operation(summary = "Complete order", description = "Complete and submit an order from the user's cart")
-  public ResponseEntity<?> createOrder(@AuthenticationPrincipal User currentUser) {
+  public ResponseEntity<?> createOrder(
+      @Valid @RequestBody CreateOrderDTO createOrderDTO,
+      @AuthenticationPrincipal User currentUser) {
 
-    DetailOrderDTO response = clientOrderService.createOrder(currentUser);
+    DetailOrderDTO response = clientOrderService.createOrder(currentUser, createOrderDTO);
 
     return ApiResponseDTO.created(response, "/api/orders/" + response.getId());
   }

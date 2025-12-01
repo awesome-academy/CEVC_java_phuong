@@ -1,5 +1,6 @@
 package com.foodorder.foodapp.service;
 
+import com.foodorder.foodapp.dto.order.CreateOrderDTO;
 import com.foodorder.foodapp.dto.order.DetailOrderDTO;
 import com.foodorder.foodapp.dto.order.ReasonCancelDTO;
 import com.foodorder.foodapp.dto.order.SearchOrderDTO;
@@ -8,14 +9,17 @@ import com.foodorder.foodapp.exception.ResourceNotFoundException;
 import com.foodorder.foodapp.model.Cart;
 import com.foodorder.foodapp.model.CartItem;
 import com.foodorder.foodapp.model.Order;
+import com.foodorder.foodapp.model.OrderAddress;
 import com.foodorder.foodapp.model.OrderItem;
 import com.foodorder.foodapp.model.OrderStatus;
 import com.foodorder.foodapp.model.Product;
 import com.foodorder.foodapp.model.User;
+import com.foodorder.foodapp.model.UserAddress;
 import com.foodorder.foodapp.repository.CartRepository;
 import com.foodorder.foodapp.repository.OrderRepository;
 import com.foodorder.foodapp.repository.OrderStatusRepository;
 import com.foodorder.foodapp.repository.ProductRepository;
+import com.foodorder.foodapp.repository.UserAddressRepository;
 import com.foodorder.foodapp.specification.OrderSpecification;
 
 import jakarta.transaction.Transactional;
@@ -41,6 +45,7 @@ public class ClientOrderService {
   private final OrderRepository orderRepository;
   private final OrderStatusRepository orderStatusRepository;
   private final ProductRepository productRepository;
+  private final UserAddressRepository userAddressRepository;
 
   public List<DetailOrderDTO> getAllOrders(User user, SearchOrderDTO params) {
     Specification<Order> spec = buildSpecification(user, params);
@@ -69,7 +74,7 @@ public class ClientOrderService {
   }
 
   @Transactional
-  public DetailOrderDTO createOrder(User user) {
+  public DetailOrderDTO createOrder(User user, CreateOrderDTO createOrderDTO) {
     Cart cart = cartRepository.findByUserId(user.getId())
         .orElseThrow(() -> new ResourceNotFoundException("cart.not.found"));
 
@@ -98,6 +103,19 @@ public class ClientOrderService {
       order.getOrderItems().add(orderItem);
     }
 
+    // Build order address
+    UserAddress address = userAddressRepository.findByUserIdAndId(user.getId(), createOrderDTO.getReceiverAddressId())
+        .orElseThrow(() -> new ResourceNotFoundException("user_address.not.found"));
+
+    OrderAddress orderAddress = new OrderAddress();
+    orderAddress.setReceiverName(address.getReceiverName());
+    orderAddress.setPhoneNumber(address.getPhoneNumber());
+    orderAddress.setCity(address.getCity());
+    orderAddress.setDistrict(address.getDistrict());
+    orderAddress.setStreetAddress(address.getStreetAddress());
+    orderAddress.setOrder(order);
+    order.setOrderAddress(orderAddress);
+
     // Build order
     OrderStatus orderStatus = orderStatusRepository.findByName("PENDING").orElseThrow(
         () -> new ResourceNotFoundException("order_status.not.found"));
@@ -106,6 +124,7 @@ public class ClientOrderService {
     order.setTotalPrice(order.getOrderItems().stream()
         .mapToInt(item -> item.getPrice() * item.getQuantity())
         .sum());
+    order.setNote(createOrderDTO.getNote());
     order = orderRepository.save(order);
 
     // Clear cart

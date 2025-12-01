@@ -37,17 +37,49 @@ public class OrderSpecification {
     };
   }
 
+  public static Specification<Order> hasOrderStatus(Long orderStatusId) {
+    return (root, query, cb) -> {
+      if (orderStatusId == null) {
+        return null;
+      }
+      return cb.equal(root.get("orderStatus").get("id"), orderStatusId);
+    };
+  }
+
+  public static Specification<Order> hasPriceLevel(Long priceLevel) {
+    return (root, query, cb) -> {
+      if (priceLevel == null) {
+        return null;
+      }
+
+      switch (priceLevel.intValue()) {
+        case 1:
+          return cb.lessThan(root.get("totalPrice"), 100_000);
+        case 2:
+          return cb.between(root.get("totalPrice"), 100_000, 1_000_000);
+        case 3:
+          return cb.greaterThan(root.get("totalPrice"), 1_000_000);
+        default:
+          return null;
+      }
+    };
+  }
+
   public static Specification<Order> withFetch() {
     return (root, query, cb) -> {
-      // Avoid duplicate results with fetch joins
-      root.fetch("orderItems", JoinType.LEFT)
-          .fetch("product", JoinType.LEFT);
-      root.fetch("orderStatus", JoinType.LEFT);
-
-      // To avoid duplicate results
-      query.distinct(true);
-
-      return null; // Only fetch, no filtering
+      if (Order.class.equals(query.getResultType())) {
+        root.fetch("orderItems", JoinType.LEFT)
+            .fetch("product", JoinType.LEFT);
+        root.fetch("orderStatus", JoinType.LEFT);
+        root.fetch("user", JoinType.LEFT);
+        root.fetch("orderAddress", JoinType.LEFT);
+        query.distinct(true);
+      } else {
+        root.join("orderItems", JoinType.LEFT)
+            .join("product", JoinType.LEFT);
+        query.distinct(true);
+      }
+      return null;
     };
   }
 }
