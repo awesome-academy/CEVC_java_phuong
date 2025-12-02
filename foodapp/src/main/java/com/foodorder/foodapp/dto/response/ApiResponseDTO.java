@@ -60,4 +60,8 @@ public class ApiResponseDTO<T> {
         error(errorMessage),
         HttpStatus.INTERNAL_SERVER_ERROR);
   }
+
+  public static <T> ResponseEntity<Void> noContent() {
+    return ResponseEntity.noContent().build();
+  }
 }

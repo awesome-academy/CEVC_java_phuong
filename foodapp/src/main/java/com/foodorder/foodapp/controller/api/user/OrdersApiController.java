@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.foodorder.foodapp.dto.order.CreateOrderDTO;
 import com.foodorder.foodapp.dto.order.DetailOrderDTO;
 import com.foodorder.foodapp.dto.order.ReasonCancelDTO;
 import com.foodorder.foodapp.dto.order.SearchOrderDTO;
@@ -60,21 +62,23 @@ public class OrdersApiController {
 
   @PostMapping("/complete")
   @Operation(summary = "Complete order", description = "Complete and submit an order from the user's cart")
-  public ResponseEntity<?> createOrder(@AuthenticationPrincipal User currentUser) {
+  public ResponseEntity<?> createOrder(
+      @Valid @RequestBody CreateOrderDTO createOrderDTO,
+      @AuthenticationPrincipal User currentUser) {
 
-    DetailOrderDTO response = clientOrderService.createOrder(currentUser);
+    DetailOrderDTO response = clientOrderService.createOrder(currentUser, createOrderDTO);
 
     return ApiResponseDTO.created(response, "/api/orders/" + response.getId());
   }
 
-  @PostMapping("/{id}/cancel")
+  @DeleteMapping("/{id}/cancel")
   @Operation(summary = "Cancel order", description = "Cancel an order for client")
   public ResponseEntity<?> cancelOrder(
       @PathVariable Long id,
       @Valid @RequestBody ReasonCancelDTO reasonCancelDTO,
       @AuthenticationPrincipal User currentUser) {
-    DetailOrderDTO response = clientOrderService.cancelOrder(id, currentUser, reasonCancelDTO);
+    clientOrderService.cancelOrder(id, currentUser, reasonCancelDTO);
 
-    return ApiResponseDTO.ok(response);
+    return ApiResponseDTO.noContent();
   }
 }

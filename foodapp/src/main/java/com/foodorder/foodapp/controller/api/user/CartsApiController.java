@@ -21,6 +21,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
 @RequestMapping("/api/carts")
@@ -51,7 +53,7 @@ public class CartsApiController {
     return ApiResponseDTO.created(response, "/api/carts/" + response.getId());
   }
 
-  @PostMapping("/me/update")
+  @PutMapping("/me/update")
   @Operation(summary = "Update/remove item to cart", description = "Update or remove an item from the cart for client")
 
   public ResponseEntity<?> updateCart(
