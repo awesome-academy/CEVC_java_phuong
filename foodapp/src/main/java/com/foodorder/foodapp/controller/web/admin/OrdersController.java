@@ -58,7 +58,7 @@ public class OrdersController {
   }
 
   @GetMapping("/{id}")
-  public String detailProduct(@NonNull @PathVariable Long id, Model model) {
+  public String detailOrder(@NonNull @PathVariable Long id, Model model) {
     AdminDetailOrderDTO order = orderService.getOrderById(id);
     model.addAttribute("order", order);
 

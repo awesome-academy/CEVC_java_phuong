@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -70,14 +71,14 @@ public class OrdersApiController {
     return ApiResponseDTO.created(response, "/api/orders/" + response.getId());
   }
 
-  @PostMapping("/{id}/cancel")
+  @DeleteMapping("/{id}/cancel")
   @Operation(summary = "Cancel order", description = "Cancel an order for client")
   public ResponseEntity<?> cancelOrder(
       @PathVariable Long id,
       @Valid @RequestBody ReasonCancelDTO reasonCancelDTO,
       @AuthenticationPrincipal User currentUser) {
-    DetailOrderDTO response = clientOrderService.cancelOrder(id, currentUser, reasonCancelDTO);
+    clientOrderService.cancelOrder(id, currentUser, reasonCancelDTO);
 
-    return ApiResponseDTO.ok(response);
+    return ApiResponseDTO.noContent();
   }
 }

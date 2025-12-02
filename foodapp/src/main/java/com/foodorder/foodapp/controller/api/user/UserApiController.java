@@ -4,7 +4,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
 @RequestMapping("/api/users")
@@ -38,7 +39,7 @@ public class UserApiController {
     return ApiResponseDTO.ok(response);
   }
 
-  @PostMapping(path = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @PutMapping(path = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @Operation(summary = "Update info", description = "Update user information")
   public ResponseEntity<?> updateUserInfo(
       @Valid ClientUpdateUserDTO updateUserDTO,
