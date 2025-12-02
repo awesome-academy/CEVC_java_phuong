@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Index page</title>
+  <title>Index Evaluate Page</title>
   <th:block th:replace="~{admin/layouts/static :: css_links}"></th:block>
 </head>
 
@@ -46,35 +46,28 @@
                 <div class="card-header">
                   <div class="row">
                     <div class="col-sm-6">
-                      <form th:action="@{/admin/products}" th:object="${search}" method="get">
+                      <form th:action="@{/admin/evaluates}" th:object="${search}" method="get">
                         <div class="d-flex gap-4 align-items-center">
                           <div class="filter-box d-flex gap-2 align-items-center">
                             <div>Filter by:</div>
                             <div>
-                              <input type="text" class="form-control" placeholder="Input name..." name="name"
-                                th:value="*{name}" />
+                              <input type="text" class="form-control" placeholder="Input product name..."
+                                name="productName" th:value="*{productName}" />
                             </div>
                             <div>
-                              <select class="form-select" th:field="*{categoryId}">
-                                <option value="">--Category--</option>
-                                <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}">
-                                </option>
-                              </select>
-                            </div>
-                            <div>
-                              <select class="form-select" th:field="*{productTypeId}">
-                                <option value="">--Product Type--</option>
-                                <option th:each="type : ${productTypes}" th:value="${type.id}" th:text="${type.name}">
-                                </option>
+                              <select class="form-select" th:field="*{ratingLevel}">
+                                <option value="">--Rating Level--</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
                               </select>
                             </div>
                           </div>
                           <button class="btn btn-secondary" type="submit">Search</button>
                         </div>
                       </form>
-                    </div>
-                    <div class="col-sm-6 text-end">
-                      <a th:href="@{/admin/products/new}" class="btn btn-primary">Add New</a>
                     </div>
                   </div>
                 </div>
@@ -83,42 +76,32 @@
                   <table class="table table-striped">
                     <thead>
                       <tr>
-                        <th style="width: 10px">ID</th>
+                        <th style="width: 100px">Id</th>
                         <th>Image</th>
-                        <th>Name</th>
-                        <th>Category Name</th>
-                        <th>Product Type</th>
-                        <th>Price</th>
-                        <th>Quantity</th>
-                        <th>Average rating</th>
-                        <th>Is Active</th>
-                        <th>Created At</th>
-                        <th style="width: 150px">Actions</th>
+                        <th>Product name</th>
+                        <th>Full name</th>
+                        <th>Content</th>
+                        <th style="width: 150px">Rating</th>
+                        <th style="width: 250px">Created At</th>
+                        <th style="width: 100px" class="text-center">Action</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr class="align-middle" th:each="product, iterStat : ${products}">
-                        <td th:text="${product.id}"></td>
+                      <tr class="align-middle" th:each="evaluate, iterStat : ${evaluates}">
+                        <td th:text="${evaluate.id}"></td>
                         <td>
-                          <img th:if="${product.image}" th:src="@{${product.image}}" class="img-thumbnail">
+                          <img th:if="${evaluate.image}" th:src="@{${evaluate.image}}" class="img-thumbnail">
                         </td>
+                        <td th:text="${evaluate.product?.name}"></td>
+                        <td th:text="${evaluate.user?.fullName}"></td>
+                        <td th:text="${evaluate.content}"></td>
                         <td>
-                          <a th:href="@{/admin/products/{id}(id=${product.id})}" th:text="${product.name}"></a>
+                          <th:block th:replace="~{admin/layouts/rating :: stars(${evaluate.rating})}"></th:block>
                         </td>
-                        <td th:text="${product.category?.name}"></td>
-                        <td th:text="${product.productType?.name}"></td>
-                        <td th:text="${product.price}"></td>
-                        <td th:text="${product.quantity}"></td>
-                        <td>
-                          <th:block th:replace="~{admin/layouts/rating :: stars(${product.averageRating})}"></th:block>
-                        </td>
-                        <td th:text="${product.isActive == true ? 'Published' : 'Unpublished'}"></td>
-                        <td th:text="${product.createdAt}"></td>
-                        <td>
-                          <a th:href="@{/admin/products/{id}/edit(id=${product.id})}"
-                            class="btn btn-sm btn-primary">Edit</a>
-                          <a th:href="@{/admin/products/{id}/delete(id=${product.id})}"
-                            class="btn btn-sm btn-danger">Delete</a>
+                        <td th:text="${evaluate.createdAt}"></td>
+                        <td class="text-center">
+                          <a th:href="@{/admin/evaluates/{id}/hide-evaluate(id=${evaluate.id})}"
+                            class="btn btn-sm btn-danger">Hide</a>
                         </td>
                       </tr>
                     </tbody>
@@ -128,8 +111,9 @@
                 <div class="card-footer">
                   <div class="row">
                     <div class="col-sm-6">
-                      <form th:action="@{/admin/products}" th:object="${search}" method="get" id="perPageForm">
-                        <input type="hidden" name="name" th:value="${search.name}" />
+                      <form th:action="@{/admin/evaluates}" th:object="${search}" method="get" id="perPageForm">
+                        <input type="hidden" name="productName" th:value="${search.productName}" />
+                        <input type="hidden" name="ratingLevel" th:value="${search.ratingLevel}" />
                         <div class="per-page-box d-flex gap-2 align-items-center">
                           <div>Per page:</div>
                           <div>
@@ -147,18 +131,18 @@
                       <ul class="pagination pagination-sm float-end" th:if="${totalPages > 1}">
                         <li class="page-item" th:classappend="${search.page} == ${1} ? 'disabled'">
                           <a class="page-link"
-                            th:href="@{/admin/products(page=${search.page - 1}, perPage=${search.perPage}, name=${search.name})}">&laquo;</a>
+                            th:href="@{/admin/evaluates(page=${search.page - 1}, perPage=${search.perPage}, productName=${search.productName}, ratingLevel=${search.ratingLevel})}">&laquo;</a>
                         </li>
                         <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages-1)}"
                           th:classappend="${i + 1} == ${search.page} ? 'active'">
                           <a class="page-link"
-                            th:href="@{/admin/products(page=${i + 1}, perPage=${search.perPage}, name=${search.name})}"
+                            th:href="@{/admin/evaluates(page=${i + 1}, perPage=${search.perPage}, productName=${search.productName}, ratingLevel=${search.ratingLevel})}"
                             th:text="${i + 1}">
                           </a>
                         </li>
                         <li class="page-item" th:classappend="${search.page} == ${totalPages} ? 'disabled'">
                           <a class="page-link"
-                            th:href="@{/admin/products(page=${search.page + 1}, perPage=${search.perPage}, name=${search.name})}">
+                            th:href="@{/admin/evaluates(page=${search.page + 1}, perPage=${search.perPage}, productName=${search.productName}, ratingLevel=${search.ratingLevel})}">
                             &raquo;
                           </a>
                         </li>
