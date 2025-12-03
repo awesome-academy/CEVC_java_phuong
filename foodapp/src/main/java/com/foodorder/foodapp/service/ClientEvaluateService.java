@@ -31,10 +31,10 @@ public class ClientEvaluateService {
   private final ImageUploadService imageUploadService;
 
   public ClientDetailEvaluateDTO getEvaluate(User currentUser, Long productId) {
-    Evaluate evaluates = evaluateRepository.findByProductIdAndUserIdAndIsShowTrue(productId, currentUser.getId())
+    Evaluate evaluate = evaluateRepository.findByProductIdAndUserIdAndIsShowTrue(productId, currentUser.getId())
         .orElseThrow(() -> new ResourceNotFoundException("evaluate.not.found"));
 
-    return modelMapper.map(evaluates, ClientDetailEvaluateDTO.class);
+    return modelMapper.map(evaluate, ClientDetailEvaluateDTO.class);
   }
 
   @Transactional
@@ -43,7 +43,7 @@ public class ClientEvaluateService {
     Product product = productRepository.findByIdForUpdate(productId)
         .orElseThrow(() -> new ResourceNotFoundException("product.not.found"));
 
-    Boolean existsOrderCompleted = orderRepository
+    boolean existsOrderCompleted = orderRepository
         .existsOrderCompletedByUserIdAndProductId(currentUser.getId(), productId);
 
     if (!existsOrderCompleted) {
@@ -68,19 +68,11 @@ public class ClientEvaluateService {
       evaluate = evaluateRepository.save(evaluate);
       imageUploadService.deleteImage(oldImagePath, newImagePath != null);
 
-      Double avgRating = evaluateRepository
-          .findByProductIdAndIsShowTrue(productId)
-          .stream()
-          .mapToInt(Evaluate::getRating)
-          .average()
-          .orElse(0.0);
-
-      product.setAverageRating(avgRating.floatValue());
-      productRepository.save(product);
+      caculateAvgRating(product);
 
       return modelMapper.map(evaluate, ClientDetailEvaluateDTO.class);
     } catch (Exception e) {
-      imageUploadService.deleteImage(oldImagePath);
+      imageUploadService.deleteImage(newImagePath);
       throw e;
     }
   }
@@ -95,14 +87,19 @@ public class ClientEvaluateService {
 
     evaluateRepository.delete(evaluate);
 
-    Double avgRating = evaluateRepository
-        .findByProductIdAndIsShowTrue(productId)
+    caculateAvgRating(product);
+  }
+
+  private void caculateAvgRating(Product product) {
+    double avgRating = evaluateRepository
+        .findByProductIdAndIsShowTrue(
+            product.getId())
         .stream()
         .mapToInt(Evaluate::getRating)
         .average()
         .orElse(0.0);
 
-    product.setAverageRating(avgRating.floatValue());
+    product.setAverageRating((float) avgRating);
     productRepository.save(product);
   }
 }

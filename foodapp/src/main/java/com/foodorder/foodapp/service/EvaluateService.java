@@ -68,14 +68,14 @@ public class EvaluateService {
     evaluate.setIsShow(false);
     evaluateRepository.save(evaluate);
 
-    Double avgRating = evaluateRepository
+    double avgRating = evaluateRepository
         .findByProductIdAndIsShowTrue(productId)
         .stream()
         .mapToInt(Evaluate::getRating)
         .average()
         .orElse(0.0);
 
-    product.setAverageRating(avgRating.floatValue());
+    product.setAverageRating((float) avgRating);
     productRepository.save(product);
   }
 }

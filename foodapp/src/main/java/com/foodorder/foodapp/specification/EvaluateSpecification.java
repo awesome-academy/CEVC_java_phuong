@@ -29,26 +29,18 @@ public class EvaluateSpecification {
         return null;
       }
 
-      switch (ratingLevel.intValue()) {
-        case 1:
-          return cb.equal(root.get("rating"), 1);
-        case 2:
-          return cb.equal(root.get("rating"), 2);
-        case 3:
-          return cb.equal(root.get("rating"), 3);
-        case 4:
-          return cb.equal(root.get("rating"), 4);
-        case 5:
-          return cb.equal(root.get("rating"), 5);
-        default:
-          return null;
+      int rating = ratingLevel.intValue();
+      if (rating >= 1 && rating <= 5) {
+        return cb.equal(root.get("rating"), rating);
+      } else {
+        return null;
       }
     };
   }
 
   public static Specification<Evaluate> withFetch() {
     return (root, query, cb) -> {
-      if (Order.class.equals(query.getResultType())) {
+      if (Evaluate.class.equals(query.getResultType())) {
         root.fetch("product", JoinType.LEFT);
         root.fetch("user", JoinType.LEFT);
         query.distinct(true);

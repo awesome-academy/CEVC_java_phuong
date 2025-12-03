@@ -51,7 +51,7 @@ public class EvaluationsApiController {
     ClientDetailEvaluateDTO response = clientEvaluateService.createEvaluate(currentUser, productId,
         createEvaluateDTO);
 
-    return ApiResponseDTO.created(response, "/api/product-evaluates/" + response.getId() + "/create");
+    return ApiResponseDTO.created(response, "/api/product-evaluates/" + productId);
   }
 
   @DeleteMapping("/{productId}/delete")
