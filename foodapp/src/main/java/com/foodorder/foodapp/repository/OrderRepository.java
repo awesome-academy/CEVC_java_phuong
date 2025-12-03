@@ -37,4 +37,18 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
   boolean existsActiveOrderForUser(@Param("userId") Long userId);
 
   Optional<Order> findByUserIdAndId(Long userId, Long id);
+
+  @Query("""
+        SELECT
+            CASE WHEN count(o) > 0 THEN TRUE ELSE FALSE END
+        FROM
+            Order o
+        JOIN
+            o.orderItems oi
+        WHERE
+            oi.product.id = :productId
+            AND o.orderStatus.id = 4
+            AND o.user.id = :userId
+      """)
+  boolean existsOrderCompletedByUserIdAndProductId(@Param("userId") Long userId, @Param("productId") Long productId);
 }

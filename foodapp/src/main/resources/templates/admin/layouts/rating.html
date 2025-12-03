@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <title>Rating</title>
+</head>
+
+<body>
+  <div th:fragment="stars(rating)">
+    <span th:text="${rating}"></span>
+
+    <span th:with="
+      r=${rating.floatValue()},
+      full=${T(java.lang.Math).floor(r)},
+      half=${(r - full) > 0 ? 1 : 0},
+      empty=${5 - full - half}
+    ">
+      <span th:if="${full > 0}" th:each="i : ${#numbers.sequence(1, full)}">
+        <i class="bi bi-star-fill"></i>
+      </span>
+
+      <span th:if="${half == 1}">
+        <i class="bi bi-star-half"></i>
+      </span>
+
+      <span th:if="${empty > 0}" th:each="i : ${#numbers.sequence(1, empty)}">
+        <i class="bi bi-star"></i>
+      </span>
+    </span>
+  </div>
+</body>
