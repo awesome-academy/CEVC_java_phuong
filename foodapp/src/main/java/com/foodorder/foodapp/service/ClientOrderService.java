@@ -25,6 +25,7 @@ import com.foodorder.foodapp.specification.OrderSpecification;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -87,7 +88,13 @@ public class ClientOrderService {
     order.setUser(user);
 
     // Build order items
-    for (CartItem cartItem : cart.getCartItems()) {
+    // Lock products in productId order (same as OrderStockService.restoreStock) so concurrent
+    // orders with the same products wait for each other instead of deadlocking
+    List<CartItem> sortedItems = cart.getCartItems().stream()
+        .sorted(Comparator.comparing(cartItem -> cartItem.getProduct().getId()))
+        .toList();
+
+    for (CartItem cartItem : sortedItems) {
       Product product = productRepository.findByIdForUpdate(cartItem.getProduct().getId())
           .orElseThrow(() -> new ResourceNotFoundException("product.not.found"));
 
