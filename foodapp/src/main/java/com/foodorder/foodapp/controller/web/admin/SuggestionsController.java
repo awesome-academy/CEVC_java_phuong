@@ -2,6 +2,7 @@ package com.foodorder.foodapp.controller.web.admin;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,12 +51,25 @@ public class SuggestionsController {
     return "admin/suggestions/index";
   }
 
+  @GetMapping("/{id}")
+  public String detailSuggestion(@NonNull @PathVariable Long id, Model model) {
+    model.addAttribute("suggestion", suggestionService.getSuggestionById(id));
+
+    return "admin/suggestions/detail";
+  }
+
   @PostMapping("/{id}/update-status")
   public String updateSuggestionStatus(
       @NonNull @PathVariable Long id,
       @Valid AdminUpdateSuggestionStatusDTO updateSuggestionStatusDTO,
-      RedirectAttributes redirectAttributes,
-      Model model) {
+      BindingResult bindingResult,
+      RedirectAttributes redirectAttributes) {
+    if (bindingResult.hasErrors()) {
+      redirectAttributes.addFlashAttribute("failedMessage",
+          MessageCode.UPDATE_FAILED.getCode());
+      return "redirect:/admin/suggestions";
+    }
+
     suggestionService.updateSuggestionStatus(id, updateSuggestionStatusDTO);
     redirectAttributes.addFlashAttribute("successMessage",
         MessageCode.UPDATE_SUCCESS.getCode());

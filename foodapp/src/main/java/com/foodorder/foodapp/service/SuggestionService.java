@@ -42,6 +42,13 @@ public class SuggestionService {
         DetailSuggestionDTO.class));
   }
 
+  public DetailSuggestionDTO getSuggestionById(Long id) {
+    Suggestion suggestion = suggestionRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("suggestion.not.found"));
+
+    return modelMapper.map(suggestion, DetailSuggestionDTO.class);
+  }
+
   private Specification<Suggestion> buildSpecification(AdminSearchSuggestionDTO params) {
     return Stream.of(
         SuggestionSpecification.hasStatus(params.getStatus()),

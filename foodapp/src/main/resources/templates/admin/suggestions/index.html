@@ -76,24 +76,32 @@
                         <th>Description</th>
                         <th>Status</th>
                         <th style="width: 250px">Created At</th>
-                        <th style="width: 100px" class="text-center">Action</th>
+                        <th style="width: 160px" class="text-center">Action</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr class="align-middle" th:each="suggestion, iterStat : ${suggestions}">
-                        <td th:text="${suggestion.id}"></td>
+                        <td>
+                          <a th:href="@{/admin/suggestions/{id}(id=${suggestion.id})}" th:text="${suggestion.id}"></a>
+                        </td>
                         <td>
                           <img th:if="${suggestion.image}" th:src="@{${suggestion.image}}" class="img-thumbnail">
                         </td>
                         <td th:text="${suggestion.user?.fullName}"></td>
                         <td th:text="${suggestion.title}"></td>
                         <td th:text="${suggestion.description}"></td>
-                        <td th:text="${suggestion.status}">
+                        <td>
+                          <span th:replace="~{admin/suggestions/status_badge :: badge(${suggestion.status})}"></span>
                         </td>
-                        <td th:text="${evaluate.createdAt}"></td>
-                        <td class="text-center">
-                          <!-- <a th:href="@{/admin/evaluates/{id}/hide-evaluate(id=${evaluate.id})}"
-                            class="btn btn-sm btn-danger">Hide</a> -->
+                        <td th:text="${#temporals.format(suggestion.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td class="text-center"
+                          th:with="finalStatus=${suggestion.status.name() == 'APPROVED' || suggestion.status.name() == 'REJECTED'}">
+                          <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#updateStatusModal" th:unless="${finalStatus}"
+                            th:data-suggestion-id="${suggestion.id}" th:data-current-status="${suggestion.status}">
+                            Update status
+                          </button>
+                          <span th:if="${finalStatus}">---</span>
                         </td>
                       </tr>
                     </tbody>
@@ -157,10 +165,37 @@
     <th:block th:replace="~{admin/layouts/footer :: footer}"></th:block>
     <!--end::Footer-->
   </div>
+  <div class="modal fade" id="updateStatusModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="updateStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="updateStatusModalLabel">Update Status</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form action="#" method="post" id="updateStatusForm">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <div class="mb-3">
+              <label for="statusSelect" class="form-label">Suggestion Status</label>
+              <select class="form-select" name="status" id="statusSelect">
+                <option th:each="status : ${statuses}" th:value="${status}" th:text="${status}"></option>
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary" form="updateStatusForm">Update</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <!--end::App Wrapper-->
   <!--begin::Script-->
   <!--begin::Third Party Plugin(OverlayScrollbars)-->
   <th:block th:replace="~{admin/layouts/static :: js_scripts}"></th:block>
+  <script th:src="@{/js/update-suggestion-status.js}"></script>
   <!--end::OverlayScrollbars Configure-->
   <!-- OPTIONAL SCRIPTS -->
   <!-- sortablejs -->

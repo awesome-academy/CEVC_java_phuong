@@ -1,0 +1,4 @@
+<!-- Colored badge for suggestion status. Usage: th:replace="~{admin/suggestions/status_badge :: badge(${suggestion.status})}" -->
+<span th:fragment="badge(status)" class="badge" th:classappend="${status.name() == 'APPROVED' ? 'text-bg-success'
+    : (status.name() == 'REJECTED' ? 'text-bg-danger'
+    : (status.name() == 'REVIEWED' ? 'text-bg-warning' : 'text-bg-secondary'))}" th:text="${status}"></span>
