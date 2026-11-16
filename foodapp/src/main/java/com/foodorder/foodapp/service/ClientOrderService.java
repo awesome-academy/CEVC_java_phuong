@@ -90,6 +90,11 @@ public class ClientOrderService {
       Product product = productRepository.findByIdForUpdate(cartItem.getProduct().getId())
           .orElseThrow(() -> new ResourceNotFoundException("product.not.found"));
 
+      // Product may be hidden/deleted after it was added to the cart
+      if (!Boolean.TRUE.equals(product.getIsActive()) || product.getDeletedAt() != null) {
+        throw new BadRequestException("product.not.available");
+      }
+
       validateQuantity(product.getQuantity(), cartItem.getQuantity());
 
       product.setQuantity(product.getQuantity() - cartItem.getQuantity());
