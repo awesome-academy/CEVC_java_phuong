@@ -11,7 +11,6 @@ import org.springframework.data.domain.PageRequest;
 
 import com.foodorder.foodapp.repository.OrderRepository;
 import com.foodorder.foodapp.repository.OrderStatusRepository;
-import com.foodorder.foodapp.repository.ProductRepository;
 import com.foodorder.foodapp.specification.OrderSpecification;
 
 import jakarta.transaction.Transactional;
@@ -25,9 +24,7 @@ import com.foodorder.foodapp.dto.order_status.OrderStatusDTO;
 import com.foodorder.foodapp.exception.BadRequestException;
 import com.foodorder.foodapp.exception.ResourceNotFoundException;
 import com.foodorder.foodapp.model.Order;
-import com.foodorder.foodapp.model.OrderItem;
 import com.foodorder.foodapp.model.OrderStatus;
-import com.foodorder.foodapp.model.Product;
 
 import java.util.List;
 import java.util.Objects;
@@ -41,7 +38,7 @@ public class OrderService {
   private final ModelMapper modelMapper;
   private final OrderRepository orderRepository;
   private final OrderStatusRepository orderStatusRepository;
-  private final ProductRepository productRepository;
+  private final OrderStockService orderStockService;
 
   public Page<ListOrderDTO> getAllOrders(AdminSearchOrderDTO params) {
     int pageIndex = Math.max(0, params.getPage() - 1);
@@ -95,16 +92,14 @@ public class OrderService {
         .orElseThrow(() -> new ResourceNotFoundException("order.status.not.found"));
 
     order.setOrderStatus(orderStatus);
-    order.setReasonCancel(updateOrderStatusDTO.getReasonCancel());
-    order = orderRepository.save(order);
 
-    // Optionally: restore product quantity
-    for (OrderItem item : order.getOrderItems()) {
-      Product product = productRepository.findByIdForUpdate(item.getProduct().getId())
-          .orElseThrow(() -> new ResourceNotFoundException("product.not.found"));
-
-      product.setQuantity(product.getQuantity() + item.getQuantity());
+    // Stock is given back only when the order is cancelled (once: CANCELLED orders are blocked above)
+    if ("CANCELLED".equals(orderStatus.getName())) {
+      order.setReasonCancel(updateOrderStatusDTO.getReasonCancel());
+      orderStockService.restoreStock(order);
     }
+
+    order = orderRepository.save(order);
 
     return modelMapper.map(order, AdminDetailOrderDTO.class);
   }

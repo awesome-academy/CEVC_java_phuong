@@ -45,6 +45,7 @@ public class ClientOrderService {
   private final OrderRepository orderRepository;
   private final OrderStatusRepository orderStatusRepository;
   private final ProductRepository productRepository;
+  private final OrderStockService orderStockService;
   private final UserAddressRepository userAddressRepository;
 
   public List<DetailOrderDTO> getAllOrders(User user, SearchOrderDTO params) {
@@ -163,13 +164,7 @@ public class ClientOrderService {
     order.setReasonCancel(reasonCancelDTO.getReason());
     orderRepository.save(order);
 
-    // Optionally: restore product quantity
-    for (OrderItem item : order.getOrderItems()) {
-      Product product = productRepository.findByIdForUpdate(item.getProduct().getId())
-          .orElseThrow(() -> new ResourceNotFoundException("product.not.found"));
-
-      product.setQuantity(product.getQuantity() + item.getQuantity());
-    }
+    orderStockService.restoreStock(order);
 
     return modelMapper.map(order, DetailOrderDTO.class);
   }
