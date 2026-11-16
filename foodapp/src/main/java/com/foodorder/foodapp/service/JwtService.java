@@ -94,7 +94,6 @@ public class JwtService {
           .parseClaimsJws(token)
           .getBody();
       return expectedType.equals(claims.get(JwtConstants.TOKEN_TYPE_CLAIM, String.class));
-
     } catch (ExpiredJwtException e) {
       logger.debug("JWT token expired: {}", e.getMessage());
     } catch (MalformedJwtException e) {
