@@ -13,9 +13,8 @@ public class OrderSpecification {
         return null;
       }
 
-      if (query.getResultType() != Long.class) {
-        query.distinct(true);
-      }
+      query.distinct(true);
+
       // Join Order -> OrderItem
       var orderItemsJoin = root.join("orderItems", JoinType.LEFT);
 
@@ -68,17 +67,11 @@ public class OrderSpecification {
   public static Specification<Order> withFetch() {
     return (root, query, cb) -> {
       if (Order.class.equals(query.getResultType())) {
-        root.fetch("orderItems", JoinType.LEFT)
-            .fetch("product", JoinType.LEFT);
         root.fetch("orderStatus", JoinType.LEFT);
         root.fetch("user", JoinType.LEFT);
         root.fetch("orderAddress", JoinType.LEFT);
-        query.distinct(true);
-      } else {
-        root.join("orderItems", JoinType.LEFT)
-            .join("product", JoinType.LEFT);
-        query.distinct(true);
       }
+
       return null;
     };
   }
