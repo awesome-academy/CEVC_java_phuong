@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Index Suggestion Page</title>
+  <th:block th:replace="~{admin/layouts/static :: css_links}"></th:block>
+</head>
+
+<body class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">
+  <!--begin::App Wrapper-->
+  <div class="app-wrapper">
+    <!--begin::Header-->
+    <th:block th:replace="~{admin/layouts/header :: header}"></th:block>
+    <!--end::Header-->
+    <!--begin::Sidebar-->
+    <th:block th:replace="~{admin/layouts/sidebar :: sidebar}"></th:block>
+    <!--end::Sidebar-->
+    <!--begin::App Main-->
+    <main class="app-main">
+      <!--begin::App Content Header-->
+      <div class="app-content-header">
+        <!--begin::Container-->
+        <div class="container-fluid">
+          <!--begin::Row-->
+          <div class="row">
+            <div class="col-sm-6">
+              <h3 class="mb-0">Index</h3>
+            </div>
+          </div>
+          <!--end::Row-->
+        </div>
+        <!--end::Container-->
+      </div>
+      <!--end::App Content Header-->
+      <!--begin::App Content-->
+      <div class="app-content">
+        <!--begin::Container-->
+        <div class="container-fluid">
+          <!--begin::Row-->
+          <div class="row">
+            <!-- /.col -->
+            <div class="col-md-12">
+              <!-- /.card -->
+              <div class="card">
+                <div class="card-header">
+                  <div class="row">
+                    <div class="col-sm-6">
+                      <form th:action="@{/admin/suggestions}" th:object="${search}" method="get">
+                        <div class="d-flex gap-4 align-items-center">
+                          <div class="filter-box d-flex gap-2 align-items-center">
+                            <div>Filter by:</div>
+                            <div>
+                              <select class="form-select" th:field="*{status}">
+                                <option value="">--Status--</option>
+                                <option th:each="status : ${statuses}" th:value="${status}" th:text="${status}">
+                                </option>
+                              </select>
+                            </div>
+                          </div>
+                          <button class="btn btn-secondary" type="submit">Search</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body p-0">
+                  <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th style="width: 100px">Id</th>
+                        <th>Image</th>
+                        <th>User full name</th>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th style="width: 250px">Created At</th>
+                        <th style="width: 160px" class="text-center">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr class="align-middle" th:each="suggestion, iterStat : ${suggestions}">
+                        <td>
+                          <a th:href="@{/admin/suggestions/{id}(id=${suggestion.id})}" th:text="${suggestion.id}"></a>
+                        </td>
+                        <td>
+                          <img th:if="${suggestion.image}" th:src="@{${suggestion.image}}" class="img-thumbnail">
+                        </td>
+                        <td th:text="${suggestion.user?.fullName}"></td>
+                        <td th:text="${suggestion.title}"></td>
+                        <td th:text="${suggestion.description}"></td>
+                        <td>
+                          <span th:replace="~{admin/suggestions/status_badge :: badge(${suggestion.status})}"></span>
+                        </td>
+                        <td th:text="${#temporals.format(suggestion.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td class="text-center"
+                          th:with="finalStatus=${suggestion.status.name() == 'APPROVED' || suggestion.status.name() == 'REJECTED'}">
+                          <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#updateStatusModal" th:unless="${finalStatus}"
+                            th:data-suggestion-id="${suggestion.id}" th:data-current-status="${suggestion.status}">
+                            Update status
+                          </button>
+                          <span th:if="${finalStatus}">---</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer">
+                  <div class="row">
+                    <div class="col-sm-6">
+                      <form th:action="@{/admin/suggestions}" th:object="${search}" method="get" id="perPageForm">
+                        <input type="hidden" name="status" th:value="${search.status}" />
+                        <div class="per-page-box d-flex gap-2 align-items-center">
+                          <div>Per page:</div>
+                          <div>
+                            <select class="form-select form-select-sm" name="perPage"
+                              onchange="document.getElementById('perPageForm').submit()">
+                              <option value="5" th:selected="*{perPage} == 5">5</option>
+                              <option value="10" th:selected="*{perPage} == 10">10</option>
+                              <option value="15" th:selected="*{perPage} == 15">15</option>
+                            </select>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                    <div class="col-sm-6">
+                      <ul class="pagination pagination-sm float-end" th:if="${totalPages > 1}">
+                        <li class="page-item" th:classappend="${search.page} == ${1} ? 'disabled'">
+                          <a class="page-link"
+                            th:href="@{/admin/suggestions(page=${search.page - 1}, perPage=${search.perPage}, status=${search.status})}">&laquo;</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages-1)}"
+                          th:classappend="${i + 1} == ${search.page} ? 'active'">
+                          <a class="page-link"
+                            th:href="@{/admin/suggestions(page=${i + 1}, perPage=${search.perPage}, status=${search.status})}"
+                            th:text="${i + 1}">
+                          </a>
+                        </li>
+                        <li class="page-item" th:classappend="${search.page} == ${totalPages} ? 'disabled'">
+                          <a class="page-link"
+                            th:href="@{/admin/suggestions(page=${search.page + 1}, perPage=${search.perPage}, status=${search.status})}">
+                            &raquo;
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- /.card -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!--end::Row-->
+        </div>
+        <!--end::Container-->
+      </div>
+      <!--end::App Content-->
+    </main>
+    <!--end::App Main-->
+    <!--begin::Footer-->
+    <th:block th:replace="~{admin/layouts/footer :: footer}"></th:block>
+    <!--end::Footer-->
+  </div>
+  <div class="modal fade" id="updateStatusModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="updateStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="updateStatusModalLabel">Update Status</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form action="#" method="post" id="updateStatusForm">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <div class="mb-3">
+              <label for="statusSelect" class="form-label">Suggestion Status</label>
+              <select class="form-select" name="status" id="statusSelect">
+                <option th:each="status : ${statuses}" th:unless="${status.name() == 'PENDING'}" th:value="${status}"
+                  th:text="${status}"></option>
+              </select>
+            </div>
+            <div class="mb-3 d-none" id="reasonRejectDiv">
+              <label for="reasonRejectTextarea" class="form-label">Reason Reject</label>
+              <textarea class="form-control" rows="5" maxlength="1000" name="reasonReject" id="reasonRejectTextarea"
+                placeholder="Input reason reject"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary" form="updateStatusForm">Update</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--end::App Wrapper-->
+  <!--begin::Script-->
+  <!--begin::Third Party Plugin(OverlayScrollbars)-->
+  <th:block th:replace="~{admin/layouts/static :: js_scripts}"></th:block>
+  <script th:src="@{/js/update-suggestion-status.js}"></script>
+  <!--end::OverlayScrollbars Configure-->
+  <!-- OPTIONAL SCRIPTS -->
+  <!-- sortablejs -->
+  <!--end::Script-->
+</body>
+
+</html>

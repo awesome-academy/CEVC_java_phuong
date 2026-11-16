@@ -1,0 +1,25 @@
+# Local PostgreSQL for development only.
+# Start:  docker compose up -d
+# Stop:   docker compose down        (data kept in volume)
+# Reset:  docker compose down -v     (wipes all data)
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: foodapp-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-foodapp_dev_db}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - foodapp-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  foodapp-pgdata:

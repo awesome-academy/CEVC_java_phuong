@@ -1,6 +1,7 @@
 package com.foodorder.foodapp.exception;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -19,7 +20,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@RestControllerAdvice
+// JSON error responses for API controllers only (admin pages: AdminExceptionHandler)
+@RestControllerAdvice(basePackages = "com.foodorder.foodapp.controller.api")
 public class GlobalExceptionHandler {
   @Autowired
   private MessageSource messageSource;
@@ -148,6 +150,22 @@ public class GlobalExceptionHandler {
         "UNAUTHORIZED");
 
     return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+  }
+
+  // Concurrent update on a @Version entity: the later save is rejected instead of overwriting
+  @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+  public ResponseEntity<ErrorResponse> handleOptimisticLockingFailure(ObjectOptimisticLockingFailureException ex) {
+    String localizedMessage = messageSource.getMessage(
+        "suggestion.update.conflict",
+        null,
+        LocaleContextHolder.getLocale());
+
+    ErrorResponse errorResponse = new ErrorResponse(
+        localizedMessage,
+        409,
+        "CONFLICT");
+
+    return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
   }
 
   @ExceptionHandler(Exception.class)

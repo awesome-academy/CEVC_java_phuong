@@ -3,7 +3,6 @@ package com.foodorder.foodapp.specification;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.foodorder.foodapp.model.Evaluate;
-import com.foodorder.foodapp.model.Order;
 
 import jakarta.persistence.criteria.JoinType;
 
