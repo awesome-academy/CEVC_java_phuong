@@ -148,7 +148,7 @@ public class ClientOrderService {
 
   @Transactional
   public DetailOrderDTO cancelOrder(Long orderId, User user, ReasonCancelDTO reasonCancelDTO) {
-    Order order = orderRepository.findByUserIdAndId(user.getId(), orderId)
+    Order order = orderRepository.findByUserIdAndIdForUpdate(user.getId(), orderId)
         .orElseThrow(() -> new ResourceNotFoundException("order.not.found"));
 
     Set<String> nonCancellableStatuses = Set.of("SHIPPED", "COMPLETED", "CANCELLED");

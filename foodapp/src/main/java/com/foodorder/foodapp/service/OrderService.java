@@ -80,7 +80,7 @@ public class OrderService {
 
   @Transactional
   public AdminDetailOrderDTO updateOrderStatus(Long id, AdminUpdateOrderStatusDTO updateOrderStatusDTO) {
-    Order order = orderRepository.findById(id)
+    Order order = orderRepository.findByIdForUpdate(id)
         .orElseThrow(() -> new ResourceNotFoundException("order.not.found"));
     Set<String> nonUpdateStatuses = Set.of("COMPLETED", "CANCELLED");
 
