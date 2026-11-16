@@ -11,4 +11,6 @@ public class EvaluateUserDTO {
   private Long id;
 
   private String fullName;
+
+  private String avatar;
 }

@@ -2,6 +2,7 @@ package com.foodorder.foodapp.specification;
 
 import org.springframework.data.jpa.domain.Specification;
 
+import com.foodorder.foodapp.model.BaseModel_;
 import com.foodorder.foodapp.model.Evaluate;
 import com.foodorder.foodapp.model.Evaluate_;
 import com.foodorder.foodapp.model.Product_;
@@ -15,6 +16,15 @@ public class EvaluateSpecification {
         return null;
       }
       return cb.like(cb.lower(root.get(Evaluate_.product).get(Product_.name)), "%" + productName.toLowerCase() + "%");
+    };
+  }
+
+  public static Specification<Evaluate> hasProduct(Long productId) {
+    return (root, query, cb) -> {
+      if (productId == null) {
+        return null;
+      }
+      return cb.equal(root.get(Evaluate_.product).get(BaseModel_.id), productId);
     };
   }
 

@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.lang.NonNull;
 
+import com.foodorder.foodapp.repository.EvaluateRepository;
 import com.foodorder.foodapp.repository.ProductRepository;
 import com.foodorder.foodapp.specification.ProductSpecification;
 
@@ -27,6 +28,7 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 public class ClientProductService {
   private final ProductRepository productRepository;
+  private final EvaluateRepository evaluateRepository;
   private final ModelMapper modelMapper;
 
   public Page<ClientProductDTO> getPublicProducts(SearchProductDTO params, Pageable pageable) {
@@ -55,6 +57,10 @@ public class ClientProductService {
     Product product = productRepository.findByIdAndIsActiveTrueAndDeletedAtIsNull(id)
         .orElseThrow(() -> new ResourceNotFoundException("product.not.found"));
 
-    return modelMapper.map(product, ClientDetailProductDTO.class);
+    long evaluateCount = evaluateRepository.countByProductIdAndIsShowTrue(id);
+    ClientDetailProductDTO productDTO =  modelMapper.map(product, ClientDetailProductDTO.class);
+    productDTO.setEvaluateCount(evaluateCount);
+
+    return productDTO;
   }
 }

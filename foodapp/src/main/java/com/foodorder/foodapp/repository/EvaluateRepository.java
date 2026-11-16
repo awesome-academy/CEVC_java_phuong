@@ -14,4 +14,6 @@ public interface EvaluateRepository extends JpaRepository<Evaluate, Long>, JpaSp
   Optional<Evaluate> findByProductIdAndUserIdAndIsShowTrue(Long productId, Long userId);
 
   List<Evaluate> findByProductIdAndIsShowTrue(Long productId);
+
+  long countByProductIdAndIsShowTrue(Long productId);
 }
