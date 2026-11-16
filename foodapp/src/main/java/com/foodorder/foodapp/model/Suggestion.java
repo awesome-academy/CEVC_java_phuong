@@ -10,6 +10,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -42,4 +43,8 @@ public class Suggestion extends BaseModel {
 
   @Column(name = "reason_reject", length = 1000)
   private String reasonReject;
+
+  // Optimistic locking: a stale save throws ObjectOptimisticLockingFailureException instead of overwriting
+  @Version
+  private Long version;
 }

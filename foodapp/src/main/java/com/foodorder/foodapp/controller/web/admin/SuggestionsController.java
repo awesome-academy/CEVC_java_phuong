@@ -1,5 +1,6 @@
 package com.foodorder.foodapp.controller.web.admin;
 
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -78,6 +79,9 @@ public class SuggestionsController {
     } catch (BadRequestException e) {
       // Show business rule errors as toast instead of the JSON error response
       redirectAttributes.addFlashAttribute("failedMessage", e.getMessage());
+    } catch (ObjectOptimisticLockingFailureException e) {
+      // Suggestion was changed (by the owner or another admin) after it was loaded
+      redirectAttributes.addFlashAttribute("failedMessage", "suggestion.update.conflict");
     }
 
     return "redirect:/admin/suggestions";
