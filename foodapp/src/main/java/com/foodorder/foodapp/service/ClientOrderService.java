@@ -29,11 +29,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Sort;
 
@@ -49,14 +51,16 @@ public class ClientOrderService {
   private final OrderStockService orderStockService;
   private final UserAddressRepository userAddressRepository;
 
-  public List<DetailOrderDTO> getAllOrders(User user, SearchOrderDTO params) {
-    Specification<Order> spec = buildSpecification(user, params);
-    List<Order> orders = orderRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "id"));
+  public Page<DetailOrderDTO> getAllOrders(User user, SearchOrderDTO params) {
+    int pageIndex = Math.max(0, params.getPage() - 1);
+    Pageable pageable = PageRequest.of(pageIndex, params.getPerPage(), Sort.by("id").descending());
 
-    return orders.stream()
+    Specification<Order> spec = buildSpecification(user, params);
+    Page<Order> pageResult = orderRepository.findAll(spec, pageable);
+
+    return pageResult
         .map(order -> modelMapper.map(order,
-            DetailOrderDTO.class))
-        .collect(Collectors.toList());
+            DetailOrderDTO.class));
   }
 
   private Specification<Order> buildSpecification(User user, SearchOrderDTO params) {

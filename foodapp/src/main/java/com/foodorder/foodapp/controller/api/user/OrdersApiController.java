@@ -2,8 +2,6 @@ package com.foodorder.foodapp.controller.api.user;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,6 +18,7 @@ import com.foodorder.foodapp.dto.order.DetailOrderDTO;
 import com.foodorder.foodapp.dto.order.ReasonCancelDTO;
 import com.foodorder.foodapp.dto.order.SearchOrderDTO;
 import com.foodorder.foodapp.dto.response.ApiResponseDTO;
+import com.foodorder.foodapp.dto.response.PageResponseDTO;
 import com.foodorder.foodapp.model.User;
 import com.foodorder.foodapp.service.ClientOrderService;
 
@@ -41,10 +40,13 @@ public class OrdersApiController {
   @GetMapping
   @Operation(summary = "Order list", description = "Get order list for client")
   public ResponseEntity<?> getOrders(@RequestParam(required = false) String productName,
+      @RequestParam(defaultValue = "${app.pagination.default-page}") int page,
+      @RequestParam(defaultValue = "${app.pagination.default-per-page}") int perPage,
       @AuthenticationPrincipal User currentUser) {
-    SearchOrderDTO params = new SearchOrderDTO(productName);
+    SearchOrderDTO params = new SearchOrderDTO(productName, page, perPage);
 
-    List<DetailOrderDTO> response = clientOrderService.getAllOrders(currentUser, params);
+    PageResponseDTO<DetailOrderDTO> response = new PageResponseDTO<>(
+        clientOrderService.getAllOrders(currentUser, params));
 
     return ApiResponseDTO.ok(response);
   }

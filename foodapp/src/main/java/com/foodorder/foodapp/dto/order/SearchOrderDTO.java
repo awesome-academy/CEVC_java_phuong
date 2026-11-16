@@ -9,4 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SearchOrderDTO {
   private String productName;
+
+  private int page;
+
+  private int perPage;
 }
