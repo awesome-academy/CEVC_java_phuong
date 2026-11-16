@@ -15,6 +15,7 @@ public class AdminUpdateSuggestionStatusDTO {
   @NotNull(message = "{validation.suggestion.status.required}")
   private ESuggestion status;
 
+  // Required only when status is REJECTED (checked in SuggestionService)
   @Size(max = 1000, message = "{validation.suggestion.reason_reject.max}")
   private String reasonReject;
 }

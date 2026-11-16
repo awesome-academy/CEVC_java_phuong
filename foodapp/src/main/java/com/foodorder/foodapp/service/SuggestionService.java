@@ -62,12 +62,28 @@ public class SuggestionService {
     Suggestion suggestion = suggestionRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("suggestion.not.found"));
 
-    ESuggestion status = suggestion.getStatus();
-    if (status == ESuggestion.APPROVED || status == ESuggestion.REJECTED) {
+    ESuggestion currentStatus = suggestion.getStatus();
+    if (currentStatus == ESuggestion.APPROVED || currentStatus == ESuggestion.REJECTED) {
       throw new BadRequestException("suggestion.update.not.allowed");
     }
 
-    suggestion.setStatus(updateSuggestionStatusDTO.getStatus());
+    // Status only moves forward: PENDING -> REVIEWED -> APPROVED / REJECTED
+    ESuggestion newStatus = updateSuggestionStatusDTO.getStatus();
+    if (newStatus == ESuggestion.PENDING || newStatus == currentStatus) {
+      throw new BadRequestException("suggestion.status.invalid");
+    }
+
+    String reasonReject = null;
+    if (newStatus == ESuggestion.REJECTED) {
+      reasonReject = updateSuggestionStatusDTO.getReasonReject();
+      if (reasonReject == null || reasonReject.isBlank()) {
+        throw new BadRequestException("validation.suggestion.reason_reject.required");
+      }
+      reasonReject = reasonReject.trim();
+    }
+
+    suggestion.setStatus(newStatus);
+    suggestion.setReasonReject(reasonReject);
     suggestionRepository.save(suggestion);
   }
 }

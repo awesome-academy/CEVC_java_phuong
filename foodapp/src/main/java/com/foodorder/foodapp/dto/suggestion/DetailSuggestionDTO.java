@@ -23,6 +23,8 @@ public class DetailSuggestionDTO {
 
   private ESuggestion status;
 
+  private String reasonReject;
+
   private UserOptionDTO user;
 
   private LocalDateTime createdAt;

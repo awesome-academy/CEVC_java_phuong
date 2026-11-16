@@ -39,4 +39,7 @@ public class Suggestion extends BaseModel {
 
   @Enumerated(EnumType.STRING)
   private ESuggestion status;
+
+  @Column(name = "reason_reject", length = 1000)
+  private String reasonReject;
 }

@@ -82,7 +82,9 @@ public class ClientSuggestionService {
       suggestion.setTitle(createSuggestionDTO.getTitle());
       suggestion.setDescription(createSuggestionDTO.getDescription());
       Optional.ofNullable(newImagePath).ifPresent(suggestion::setImage);
+      // Edited suggestion is re-submitted for review, old reject reason no longer applies
       suggestion.setStatus(ESuggestion.PENDING);
+      suggestion.setReasonReject(null);
 
       suggestion = suggestionRepository.save(suggestion);
       imageUploadService.deleteImage(oldImagePath, newImagePath != null);
@@ -104,5 +106,6 @@ public class ClientSuggestionService {
     }
 
     suggestionRepository.delete(suggestion);
+    imageUploadService.deleteImage(suggestion.getImage());
   }
 }

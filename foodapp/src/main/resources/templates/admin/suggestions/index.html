@@ -179,8 +179,14 @@
             <div class="mb-3">
               <label for="statusSelect" class="form-label">Suggestion Status</label>
               <select class="form-select" name="status" id="statusSelect">
-                <option th:each="status : ${statuses}" th:value="${status}" th:text="${status}"></option>
+                <option th:each="status : ${statuses}" th:unless="${status.name() == 'PENDING'}" th:value="${status}"
+                  th:text="${status}"></option>
               </select>
+            </div>
+            <div class="mb-3 d-none" id="reasonRejectDiv">
+              <label for="reasonRejectTextarea" class="form-label">Reason Reject</label>
+              <textarea class="form-control" rows="5" maxlength="1000" name="reasonReject" id="reasonRejectTextarea"
+                placeholder="Input reason reject"></textarea>
             </div>
           </form>
         </div>

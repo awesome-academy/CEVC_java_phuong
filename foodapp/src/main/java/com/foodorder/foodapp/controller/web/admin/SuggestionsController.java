@@ -16,6 +16,7 @@ import com.foodorder.foodapp.dto.suggestion.AdminUpdateSuggestionStatusDTO;
 import com.foodorder.foodapp.dto.suggestion.DetailSuggestionDTO;
 import com.foodorder.foodapp.enums.ESuggestion;
 import com.foodorder.foodapp.enums.MessageCode;
+import com.foodorder.foodapp.exception.BadRequestException;
 import com.foodorder.foodapp.service.SuggestionService;
 
 import io.micrometer.common.lang.NonNull;
@@ -70,9 +71,14 @@ public class SuggestionsController {
       return "redirect:/admin/suggestions";
     }
 
-    suggestionService.updateSuggestionStatus(id, updateSuggestionStatusDTO);
-    redirectAttributes.addFlashAttribute("successMessage",
-        MessageCode.UPDATE_SUCCESS.getCode());
+    try {
+      suggestionService.updateSuggestionStatus(id, updateSuggestionStatusDTO);
+      redirectAttributes.addFlashAttribute("successMessage",
+          MessageCode.UPDATE_SUCCESS.getCode());
+    } catch (BadRequestException e) {
+      // Show business rule errors as toast instead of the JSON error response
+      redirectAttributes.addFlashAttribute("failedMessage", e.getMessage());
+    }
 
     return "redirect:/admin/suggestions";
   }

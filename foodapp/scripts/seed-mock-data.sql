@@ -403,6 +403,17 @@ FROM (
 ) AS v (email, title, description, status, days_ago)
 JOIN users u ON u.email = v.email;
 
+-- Lý do từ chối cho các suggestion REJECTED (cột thêm ở V6)
+UPDATE suggestions s
+SET reason_reject = v.reason
+FROM (
+  VALUES
+    ('Bán rượu bia',     'Quán chưa có giấy phép kinh doanh đồ uống có cồn.'),
+    ('Lẩu mini 1 người', 'Lẩu cần bếp riêng, khó giao hàng đảm bảo chất lượng.'),
+    ('Bán kem que',      'Kem dễ tan khi giao hàng xa, chưa có thùng giữ lạnh chuyên dụng.')
+) AS v (title, reason)
+WHERE s.title = v.title AND s.status = 'REJECTED';
+
 COMMIT;
 
 -- Tổng kết
