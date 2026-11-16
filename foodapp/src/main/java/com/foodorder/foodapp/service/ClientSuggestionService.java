@@ -70,8 +70,7 @@ public class ClientSuggestionService {
 
     String newImagePath = null;
     String oldImagePath = suggestion.getImage();
-    ESuggestion status = suggestion.getStatus();
-    if (status == ESuggestion.APPROVED) {
+    if (suggestion.getStatus().isLockedForOwner()) {
       throw new BadRequestException("suggestion.update.not.allowed");
     }
 
@@ -100,8 +99,7 @@ public class ClientSuggestionService {
     Suggestion suggestion = suggestionRepository.findByIdAndUserId(suggestionId, currentUser.getId())
         .orElseThrow(() -> new ResourceNotFoundException("suggestion.not.found"));
 
-    ESuggestion status = suggestion.getStatus();
-    if (status == ESuggestion.APPROVED) {
+    if (suggestion.getStatus().isLockedForOwner()) {
       throw new BadRequestException("suggestion.update.not.allowed");
     }
 

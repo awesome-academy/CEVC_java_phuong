@@ -63,13 +63,12 @@ public class SuggestionService {
         .orElseThrow(() -> new ResourceNotFoundException("suggestion.not.found"));
 
     ESuggestion currentStatus = suggestion.getStatus();
-    if (currentStatus == ESuggestion.APPROVED || currentStatus == ESuggestion.REJECTED) {
+    if (currentStatus.isFinal()) {
       throw new BadRequestException("suggestion.update.not.allowed");
     }
 
-    // Status only moves forward: PENDING -> REVIEWED -> APPROVED / REJECTED
     ESuggestion newStatus = updateSuggestionStatusDTO.getStatus();
-    if (newStatus == ESuggestion.PENDING || newStatus == currentStatus) {
+    if (!currentStatus.canMoveTo(newStatus)) {
       throw new BadRequestException("suggestion.status.invalid");
     }
 
