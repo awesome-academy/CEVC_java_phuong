@@ -1,12 +1,8 @@
 package com.foodorder.foodapp.config;
 
-import com.foodorder.foodapp.repository.AuthProviderRepository;
-import com.foodorder.foodapp.security.JwtFilter;
-
-import lombok.AllArgsConstructor;
-
 import java.util.List;
 
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -18,13 +14,20 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.foodorder.foodapp.repository.UserRepository;
+import com.foodorder.foodapp.security.JwtFilter;
+import com.foodorder.foodapp.service.JwtService;
+
+import lombok.AllArgsConstructor;
+
 @Configuration
 @EnableWebSecurity
 @AllArgsConstructor
 public class WebSecurityConfig {
 
-  private final AuthProviderRepository authProviderRepository;
-  private final JwtFilter jwtFilter;
+  private final UserRepository userRepository;
+  private final JwtService jwtService;
+  private final MessageSource messageSource;
 
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -41,7 +44,8 @@ public class WebSecurityConfig {
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(publicApiUrls.toArray(new String[0])).permitAll()
             .anyRequest().authenticated())
-        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        .addFilterBefore(new JwtFilter(userRepository, jwtService, messageSource, publicApiUrls),
+            UsernamePasswordAuthenticationFilter.class);
     return http.build();
   }
 

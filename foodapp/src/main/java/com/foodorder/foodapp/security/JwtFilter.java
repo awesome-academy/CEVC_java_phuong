@@ -5,18 +5,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.foodorder.foodapp.constants.JwtConstants;
 import com.foodorder.foodapp.model.User;
 import com.foodorder.foodapp.repository.UserRepository;
 import com.foodorder.foodapp.service.JwtService;
@@ -26,7 +23,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@Component
 public class JwtFilter extends OncePerRequestFilter {
 
   private final JwtService jwtService;
@@ -37,14 +33,11 @@ public class JwtFilter extends OncePerRequestFilter {
   private final List<String> excludeUrls;
 
   public JwtFilter(UserRepository userRepository, JwtService jwtService, MessageSource messageSource,
-      List<String> publicStaticUrls, List<String> publicApiUrls) {
+      List<String> publicApiUrls) {
     this.userRepository = userRepository;
     this.jwtService = jwtService;
     this.messageSource = messageSource;
-    this.excludeUrls = Stream.concat(
-        publicApiUrls.stream(),
-        publicStaticUrls.stream())
-        .collect(Collectors.toList());
+    this.excludeUrls = publicApiUrls;
   }
 
   @Override
@@ -58,13 +51,13 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     String token = authHeader.substring(7);
-    if (!jwtService.validateToken(token)) {
+    if (!jwtService.validateToken(token, JwtConstants.ACCESS)) {
       sendUnauthorized(response, "validation.user.token.invalid");
       return;
     }
 
     String email = jwtService.getEmailFromToken(token);
-    User user = userRepository.findByEmailIgnoreCase(email).orElse(null);
+    User user = userRepository.findByEmailIgnoreCaseAndDeletedAtIsNull(email).orElse(null);
     if (user == null) {
       sendUnauthorized(response, "validation.user.token.invalid");
       return;

@@ -1,24 +1,29 @@
 package com.foodorder.foodapp.service;
 
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
-import jakarta.annotation.PostConstruct;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import com.foodorder.foodapp.dto.auth.RefreshTokenJwtDTO;
-import com.foodorder.foodapp.dto.response.JwtResponseDTO;
-import com.foodorder.foodapp.exception.UnauthorizedException;
-import com.foodorder.foodapp.model.User;
-import com.foodorder.foodapp.repository.UserRepository;
-
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import com.foodorder.foodapp.constants.JwtConstants;
+import com.foodorder.foodapp.dto.auth.RefreshTokenJwtDTO;
+import com.foodorder.foodapp.dto.response.JwtResponseDTO;
+import com.foodorder.foodapp.exception.UnauthorizedException;
+import com.foodorder.foodapp.model.User;
+import com.foodorder.foodapp.repository.UserRepository;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 
 @Service
 public class JwtService {
@@ -48,12 +53,12 @@ public class JwtService {
   public JwtResponseDTO refreshToken(RefreshTokenJwtDTO refreshTokenJwtDTO) {
     String refreshToken = refreshTokenJwtDTO.getRefreshToken();
 
-    if (!validateToken(refreshToken)) {
+    if (!validateToken(refreshToken, JwtConstants.REFRESH)) {
       throw new UnauthorizedException("validation.user.refresh_token.invalid");
     }
 
     String email = getEmailFromToken(refreshToken);
-    User user = userRepository.findByEmailIgnoreCase(email)
+    User user = userRepository.findByEmailIgnoreCaseAndDeletedAtIsNull(email)
         .orElseThrow(() -> new UnauthorizedException("validation.user.refresh_token.invalid"));
     String newAccessToken = generateAccessToken(email);
     String newRefreshToken = generateRefreshToken(email);
@@ -64,6 +69,7 @@ public class JwtService {
   public String generateAccessToken(String email) {
     return Jwts.builder()
         .setSubject(email)
+        .claim(JwtConstants.TOKEN_TYPE_CLAIM, JwtConstants.ACCESS)
         .setIssuedAt(new Date())
         .setExpiration(new Date(System.currentTimeMillis() + accessTokenValidity))
         .signWith(key, SignatureAlgorithm.HS256)
@@ -73,19 +79,22 @@ public class JwtService {
   public String generateRefreshToken(String email) {
     return Jwts.builder()
         .setSubject(email)
+        .claim(JwtConstants.TOKEN_TYPE_CLAIM, JwtConstants.REFRESH)
         .setIssuedAt(new Date())
         .setExpiration(new Date(System.currentTimeMillis() + refreshTokenValidity))
         .signWith(key, SignatureAlgorithm.HS256)
         .compact();
   }
 
-  public boolean validateToken(String token) {
+  public boolean validateToken(String token, String expectedType) {
     try {
-      Jwts.parserBuilder()
+      Claims claims = Jwts.parserBuilder()
           .setSigningKey(key)
           .build()
-          .parseClaimsJws(token);
-      return true;
+          .parseClaimsJws(token)
+          .getBody();
+      return expectedType.equals(claims.get(JwtConstants.TOKEN_TYPE_CLAIM, String.class));
+
     } catch (ExpiredJwtException e) {
       logger.debug("JWT token expired: {}", e.getMessage());
     } catch (MalformedJwtException e) {

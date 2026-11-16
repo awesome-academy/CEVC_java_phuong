@@ -19,7 +19,7 @@ public class AuthService {
   private final PasswordEncoder passwordEncoder;
 
   public JwtResponseDTO login(String email, String password) {
-    User user = userRepository.findByEmailIgnoreCase(email)
+    User user = userRepository.findByEmailIgnoreCaseAndDeletedAtIsNull(email)
         .orElseThrow(() -> new UnauthorizedException("validation.user.email_or_password.invalid"));
 
     if (!passwordEncoder.matches(password, user.getPassword())) {
