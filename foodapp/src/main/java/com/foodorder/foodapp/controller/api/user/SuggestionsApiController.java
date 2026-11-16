@@ -58,7 +58,6 @@ public class SuggestionsApiController {
   @PostMapping(path = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @Operation(summary = "Create product suggestion", description = "Create a new product suggestion")
   public ResponseEntity<?> createSuggestion(
-      @PathVariable Long productId,
       @Valid CreateSuggestionDTO createSuggestionDTO,
       @AuthenticationPrincipal User currentUser) {
     DetailSuggestionDTO response = clientSuggestionService.createSuggestion(currentUser,

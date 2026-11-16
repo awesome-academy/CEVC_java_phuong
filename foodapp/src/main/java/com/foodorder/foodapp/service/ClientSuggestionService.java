@@ -52,6 +52,7 @@ public class ClientSuggestionService {
       suggestion.setTitle(createSuggestionDTO.getTitle());
       suggestion.setDescription(createSuggestionDTO.getDescription());
       Optional.ofNullable(newImagePath).ifPresent(suggestion::setImage);
+      suggestion.setStatus(ESuggestion.PENDING);
 
       suggestion = suggestionRepository.save(suggestion);
 
