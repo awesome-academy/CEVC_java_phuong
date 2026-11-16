@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${status} + ' - ' + ${title}">Error</title>
+  <th:block th:replace="~{admin/layouts/static :: css_links}"></th:block>
+</head>
+
+<body class="bg-body-tertiary">
+  <!-- Standalone error page (no header/sidebar) so it also renders for anonymous users -->
+  <main class="d-flex align-items-center justify-content-center min-vh-100 p-3">
+    <div class="text-center">
+      <h1 class="display-1 fw-bold text-secondary" th:text="${status}">404</h1>
+      <h3 class="mb-3" th:text="${title}">Page not found</h3>
+      <p class="text-muted mb-4" th:text="${message}">The page you are looking for does not exist.</p>
+      <a th:href="@{/admin/users}" class="btn btn-primary">Back to admin</a>
+    </div>
+  </main>
+</body>
+
+</html>

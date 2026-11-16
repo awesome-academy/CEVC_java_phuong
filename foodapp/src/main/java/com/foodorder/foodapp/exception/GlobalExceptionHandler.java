@@ -19,7 +19,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@RestControllerAdvice
+// JSON error responses for API controllers only (admin pages: AdminExceptionHandler)
+@RestControllerAdvice(basePackages = "com.foodorder.foodapp.controller.api")
 public class GlobalExceptionHandler {
   @Autowired
   private MessageSource messageSource;
