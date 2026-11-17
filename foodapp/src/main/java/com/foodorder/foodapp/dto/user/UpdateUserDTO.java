@@ -29,4 +29,9 @@ public class UpdateUserDTO extends UserOperationDTO {
   private Long authProviderId;
 
   private String avatar;
+
+  @Override
+  public Long getEditingUserId() {
+    return id;
+  }
 }
