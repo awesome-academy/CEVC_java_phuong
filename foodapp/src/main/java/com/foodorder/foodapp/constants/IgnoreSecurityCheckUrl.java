@@ -20,6 +20,4 @@ public class IgnoreSecurityCheckUrl {
       "/images/**",
       "/swagger-ui/**",
       "/v3/api-docs/**");
-  public static final List<String> PUBLIC_JWT_URLS = Arrays.asList(
-      "/admin/**");
 }

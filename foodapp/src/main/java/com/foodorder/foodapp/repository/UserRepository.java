@@ -11,4 +11,6 @@ import com.foodorder.foodapp.model.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
   Optional<User> findByEmailIgnoreCase(String email);
+
+  Optional<User> findByEmailIgnoreCaseAndDeletedAtIsNull(String email);
 }

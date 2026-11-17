@@ -27,7 +27,6 @@ public class IgnoreSecurityConfig {
   @Bean
   public List<String> publicApiUrls() {
     List<String> urls = new ArrayList<>(IgnoreSecurityCheckUrl.PUBLIC_API_URLS);
-    urls.addAll(IgnoreSecurityCheckUrl.PUBLIC_JWT_URLS);
     return urls;
   }
 }
