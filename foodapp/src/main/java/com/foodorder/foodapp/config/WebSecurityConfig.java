@@ -55,6 +55,7 @@ public class WebSecurityConfig {
     http
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(publicStaticUrls.toArray(new String[0])).permitAll()
+            .requestMatchers("/admin/login").permitAll()
             .requestMatchers("/admin/**").hasRole("ADMIN")
             .anyRequest().authenticated())
         .formLogin(form -> form
@@ -63,12 +64,15 @@ public class WebSecurityConfig {
             .usernameParameter("email")
             .passwordParameter("password")
             .defaultSuccessUrl("/admin/users")
-            .failureUrl("/admin/login?error")
+            // Redirect only: failureUrl() would store the exception in the (JDBC) session,
+            // and since Spring Security 6.5 it carries the typed password
+            .failureHandler((request, response, exception) -> response
+                .sendRedirect(request.getContextPath() + "/admin/login?error"))
             .permitAll())
         .logout(logout -> logout
             .logoutUrl("/admin/logout")
             .logoutSuccessUrl("/admin/login?logout=true")
-            .deleteCookies("JSESSIONID")
+            .deleteCookies("SESSION")
             .permitAll());
     return http.build();
   }
