@@ -57,6 +57,14 @@
 	    <version>3.5.3</version>
 	  </dependency>
 
+	  <!-- JPA static metamodel (Order_, Product_...) for type-safe Specifications; same version as Hibernate core -->
+	  <dependency>
+	    <groupId>org.hibernate.orm</groupId>
+	    <artifactId>hibernate-jpamodelgen</artifactId>
+	    <version>${hibernate.version}</version>
+	    <scope>provided</scope>
+	  </dependency>
+
 	  <dependency>
 	    <groupId>org.springframework.session</groupId>
 	    <artifactId>spring-session-jdbc</artifactId>
