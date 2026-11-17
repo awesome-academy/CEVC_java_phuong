@@ -1,17 +1,17 @@
 package com.foodorder.foodapp.service;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 
 import lombok.AllArgsConstructor;
 
-import com.foodorder.foodapp.dto.pagination.PaginationDTO;
 import com.foodorder.foodapp.dto.user_address.CreateUserAddressDTO;
 import com.foodorder.foodapp.dto.user_address.DetailUserAddressDTO;
+import com.foodorder.foodapp.exception.BadRequestException;
 import com.foodorder.foodapp.model.User;
 import com.foodorder.foodapp.model.UserAddress;
 import com.foodorder.foodapp.repository.UserAddressRepository;
@@ -19,15 +19,25 @@ import com.foodorder.foodapp.repository.UserAddressRepository;
 @Service
 @AllArgsConstructor
 public class ClientUserAddressService {
+  // The address list is returned in full (order form needs all of them), so the number per user is capped
+  public static final int MAX_ADDRESSES_PER_USER = 10;
+
   private final ModelMapper modelMapper;
   private final UserAddressRepository userAddressRepository;
 
-  public Page<DetailUserAddressDTO> getAllUserAddress(User currentUser, PaginationDTO pagination) {
-    return userAddressRepository.findByUserId(currentUser.getId(), pagination.toPageable(Sort.by("id").descending()))
-        .map(userAddress -> modelMapper.map(userAddress, DetailUserAddressDTO.class));
+  public List<DetailUserAddressDTO> getAllUserAddress(User currentUser) {
+    List<UserAddress> userAddresses = userAddressRepository.findByUserId(currentUser.getId());
+
+    return userAddresses.stream()
+        .map(userAddress -> modelMapper.map(userAddress, DetailUserAddressDTO.class))
+        .collect(Collectors.toList());
   }
 
   public DetailUserAddressDTO createUserAddress(User currentUser, CreateUserAddressDTO createUserAddressDTO) {
+    if (userAddressRepository.countByUserId(currentUser.getId()) >= MAX_ADDRESSES_PER_USER) {
+      throw new BadRequestException("user_address.limit.exceeded", MAX_ADDRESSES_PER_USER);
+    }
+
     UserAddress userAddress = modelMapper.map(createUserAddressDTO, UserAddress.class);
     userAddress.setUser(currentUser);
 
