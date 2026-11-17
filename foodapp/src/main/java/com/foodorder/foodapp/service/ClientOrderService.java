@@ -18,14 +18,12 @@ import com.foodorder.foodapp.model.UserAddress;
 import com.foodorder.foodapp.repository.CartRepository;
 import com.foodorder.foodapp.repository.OrderRepository;
 import com.foodorder.foodapp.repository.OrderStatusRepository;
-import com.foodorder.foodapp.repository.ProductRepository;
 import com.foodorder.foodapp.repository.UserAddressRepository;
 import com.foodorder.foodapp.specification.OrderSpecification;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -47,7 +45,6 @@ public class ClientOrderService {
   private final ModelMapper modelMapper;
   private final OrderRepository orderRepository;
   private final OrderStatusRepository orderStatusRepository;
-  private final ProductRepository productRepository;
   private final OrderStockService orderStockService;
   private final UserAddressRepository userAddressRepository;
 
@@ -91,25 +88,12 @@ public class ClientOrderService {
     Order order = new Order();
     order.setUser(user);
 
+    // Lock, re-check and take stock for all cart products (shared with restoreStock)
+    orderStockService.deductStock(cart.getCartItems());
+
     // Build order items
-    // Lock products in productId order (same as OrderStockService.restoreStock) so concurrent
-    // orders with the same products wait for each other instead of deadlocking
-    List<CartItem> sortedItems = cart.getCartItems().stream()
-        .sorted(Comparator.comparing(cartItem -> cartItem.getProduct().getId()))
-        .toList();
-
-    for (CartItem cartItem : sortedItems) {
-      Product product = productRepository.findByIdForUpdate(cartItem.getProduct().getId())
-          .orElseThrow(() -> new ResourceNotFoundException("product.not.found"));
-
-      // Product may be hidden/deleted after it was added to the cart
-      if (!Boolean.TRUE.equals(product.getIsActive()) || product.getDeletedAt() != null) {
-        throw new BadRequestException("product.not.available");
-      }
-
-      validateQuantity(product.getQuantity(), cartItem.getQuantity());
-
-      product.setQuantity(product.getQuantity() - cartItem.getQuantity());
+    for (CartItem cartItem : cart.getCartItems()) {
+      Product product = cartItem.getProduct();
 
       OrderItem orderItem = new OrderItem();
       orderItem.setProduct(product);
@@ -149,12 +133,6 @@ public class ClientOrderService {
     cartRepository.save(cart);
 
     return modelMapper.map(order, DetailOrderDTO.class);
-  }
-
-  private void validateQuantity(Integer quantity, Integer cartQuantity) {
-    if (quantity == null || quantity < cartQuantity) {
-      throw new BadRequestException("validation.product.quantity.insufficient");
-    }
   }
 
   @Transactional
