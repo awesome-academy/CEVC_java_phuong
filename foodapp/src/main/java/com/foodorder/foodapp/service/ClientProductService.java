@@ -53,7 +53,7 @@ public class ClientProductService {
   }
 
   public ClientDetailProductDTO getProductById(@NonNull Long id) {
-    Product product = productRepository.findById(id)
+    Product product = productRepository.findByIdAndIsActiveTrueAndDeletedAtIsNull(id)
         .orElseThrow(() -> new ResourceNotFoundException("product.not.found"));
 
     return modelMapper.map(product, ClientDetailProductDTO.class);
