@@ -18,6 +18,7 @@ import com.foodorder.foodapp.dto.order.AdminUpdateOrderStatusDTO;
 import com.foodorder.foodapp.dto.order.ListOrderDTO;
 import com.foodorder.foodapp.dto.order_status.OrderStatusDTO;
 import com.foodorder.foodapp.enums.MessageCode;
+import com.foodorder.foodapp.exception.BadRequestException;
 import com.foodorder.foodapp.service.OrderService;
 
 import io.micrometer.common.lang.NonNull;
@@ -84,9 +85,14 @@ public class OrdersController {
       return "admin/orders/index";
     }
 
-    orderService.updateOrderStatus(id, updateOrderStatusDTO);
-    redirectAttributes.addFlashAttribute("successMessage",
-        MessageCode.UPDATE_SUCCESS.getCode());
+    try {
+      orderService.updateOrderStatus(id, updateOrderStatusDTO);
+      redirectAttributes.addFlashAttribute("successMessage",
+          MessageCode.UPDATE_SUCCESS.getCode());
+    } catch (BadRequestException e) {
+      // Business rule errors (missing cancel reason, order already completed/cancelled) as toast
+      redirectAttributes.addFlashAttribute("failedMessage", e.getMessage());
+    }
 
     return "redirect:/admin/orders";
   }

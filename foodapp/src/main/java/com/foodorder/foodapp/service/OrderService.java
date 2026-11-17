@@ -93,9 +93,15 @@ public class OrderService {
 
     order.setOrderStatus(orderStatus);
 
-    // Stock is given back only when the order is cancelled (once: CANCELLED orders are blocked above)
+    // Stock is given back only when the order is cancelled (once: CANCELLED orders are blocked above).
+    // Admin may cancel a SHIPPED order (e.g. failed delivery), unlike the customer, but must give a reason
+    // so the customer knows why
     if ("CANCELLED".equals(orderStatus.getName())) {
-      order.setReasonCancel(updateOrderStatusDTO.getReasonCancel());
+      String reasonCancel = updateOrderStatusDTO.getReasonCancel();
+      if (reasonCancel == null || reasonCancel.isBlank()) {
+        throw new BadRequestException("validation.order.reason.required");
+      }
+      order.setReasonCancel(reasonCancel.trim());
       orderStockService.restoreStock(order);
     }
 
