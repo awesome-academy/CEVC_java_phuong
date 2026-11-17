@@ -1,16 +1,17 @@
 package com.foodorder.foodapp.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.foodorder.foodapp.exception.BadRequestException;
 import org.modelmapper.ModelMapper;
 
 import lombok.AllArgsConstructor;
 
+import com.foodorder.foodapp.dto.pagination.PaginationDTO;
 import com.foodorder.foodapp.dto.suggestion.DetailSuggestionDTO;
 import com.foodorder.foodapp.dto.suggestion.CreateSuggestionDTO;
 import com.foodorder.foodapp.enums.ESuggestion;
@@ -26,12 +27,9 @@ public class ClientSuggestionService {
   private final ImageUploadService imageUploadService;
   private final SuggestionRepository suggestionRepository;
 
-  public List<DetailSuggestionDTO> getSuggestions(User currentUser) {
-    List<Suggestion> suggestions = suggestionRepository.findByUserId(currentUser.getId());
-
-    return suggestions.stream()
-        .map(suggestion -> modelMapper.map(suggestion, DetailSuggestionDTO.class))
-        .collect(Collectors.toList());
+  public Page<DetailSuggestionDTO> getSuggestions(User currentUser, PaginationDTO pagination) {
+    return suggestionRepository.findByUserId(currentUser.getId(), pagination.toPageable(Sort.by("id").descending()))
+        .map(suggestion -> modelMapper.map(suggestion, DetailSuggestionDTO.class));
   }
 
   public DetailSuggestionDTO getSuggestion(User currentUser, Long suggestionId) {

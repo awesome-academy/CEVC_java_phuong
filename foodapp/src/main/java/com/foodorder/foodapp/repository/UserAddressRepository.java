@@ -13,4 +13,6 @@ public interface UserAddressRepository extends JpaRepository<UserAddress, Long> 
   List<UserAddress> findByUserId(Long userId);
 
   Optional<UserAddress> findByUserIdAndId(Long userId, Long id);
+
+  long countByUserId(Long userId);
 }

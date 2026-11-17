@@ -18,7 +18,6 @@ import com.foodorder.foodapp.model.UserAddress;
 import com.foodorder.foodapp.repository.CartRepository;
 import com.foodorder.foodapp.repository.OrderRepository;
 import com.foodorder.foodapp.repository.OrderStatusRepository;
-import com.foodorder.foodapp.repository.ProductRepository;
 import com.foodorder.foodapp.repository.UserAddressRepository;
 import com.foodorder.foodapp.specification.OrderSpecification;
 
@@ -28,11 +27,12 @@ import lombok.AllArgsConstructor;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Sort;
 
@@ -44,17 +44,18 @@ public class ClientOrderService {
   private final ModelMapper modelMapper;
   private final OrderRepository orderRepository;
   private final OrderStatusRepository orderStatusRepository;
-  private final ProductRepository productRepository;
+  private final OrderStockService orderStockService;
   private final UserAddressRepository userAddressRepository;
 
-  public List<DetailOrderDTO> getAllOrders(User user, SearchOrderDTO params) {
-    Specification<Order> spec = buildSpecification(user, params);
-    List<Order> orders = orderRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "id"));
+  public Page<DetailOrderDTO> getAllOrders(User user, SearchOrderDTO params) {
+    Pageable pageable = params.getPagination().toPageable(Sort.by("id").descending());
 
-    return orders.stream()
+    Specification<Order> spec = buildSpecification(user, params);
+    Page<Order> pageResult = orderRepository.findAll(spec, pageable);
+
+    return pageResult
         .map(order -> modelMapper.map(order,
-            DetailOrderDTO.class))
-        .collect(Collectors.toList());
+            DetailOrderDTO.class));
   }
 
   private Specification<Order> buildSpecification(User user, SearchOrderDTO params) {
@@ -85,14 +86,12 @@ public class ClientOrderService {
     Order order = new Order();
     order.setUser(user);
 
+    // Lock, re-check and take stock for all cart products (shared with restoreStock)
+    orderStockService.deductStock(cart.getCartItems());
+
     // Build order items
     for (CartItem cartItem : cart.getCartItems()) {
-      Product product = productRepository.findByIdForUpdate(cartItem.getProduct().getId())
-          .orElseThrow(() -> new ResourceNotFoundException("product.not.found"));
-
-      validateQuantity(product.getQuantity(), cartItem.getQuantity());
-
-      product.setQuantity(product.getQuantity() - cartItem.getQuantity());
+      Product product = cartItem.getProduct();
 
       OrderItem orderItem = new OrderItem();
       orderItem.setProduct(product);
@@ -134,15 +133,9 @@ public class ClientOrderService {
     return modelMapper.map(order, DetailOrderDTO.class);
   }
 
-  private void validateQuantity(Integer quantity, Integer cartQuantity) {
-    if (quantity == null || quantity < cartQuantity) {
-      throw new BadRequestException("validation.product.quantity.insufficient");
-    }
-  }
-
   @Transactional
   public DetailOrderDTO cancelOrder(Long orderId, User user, ReasonCancelDTO reasonCancelDTO) {
-    Order order = orderRepository.findByUserIdAndId(user.getId(), orderId)
+    Order order = orderRepository.findByUserIdAndIdForUpdate(user.getId(), orderId)
         .orElseThrow(() -> new ResourceNotFoundException("order.not.found"));
 
     Set<String> nonCancellableStatuses = Set.of("SHIPPED", "COMPLETED", "CANCELLED");
@@ -158,13 +151,7 @@ public class ClientOrderService {
     order.setReasonCancel(reasonCancelDTO.getReason());
     orderRepository.save(order);
 
-    // Optionally: restore product quantity
-    for (OrderItem item : order.getOrderItems()) {
-      Product product = productRepository.findByIdForUpdate(item.getProduct().getId())
-          .orElseThrow(() -> new ResourceNotFoundException("product.not.found"));
-
-      product.setQuantity(product.getQuantity() + item.getQuantity());
-    }
+    orderStockService.restoreStock(order);
 
     return modelMapper.map(order, DetailOrderDTO.class);
   }

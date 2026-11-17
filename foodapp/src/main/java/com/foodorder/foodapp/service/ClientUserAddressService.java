@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 
 import com.foodorder.foodapp.dto.user_address.CreateUserAddressDTO;
 import com.foodorder.foodapp.dto.user_address.DetailUserAddressDTO;
+import com.foodorder.foodapp.exception.BadRequestException;
 import com.foodorder.foodapp.model.User;
 import com.foodorder.foodapp.model.UserAddress;
 import com.foodorder.foodapp.repository.UserAddressRepository;
@@ -18,6 +19,9 @@ import com.foodorder.foodapp.repository.UserAddressRepository;
 @Service
 @AllArgsConstructor
 public class ClientUserAddressService {
+  // The address list is returned in full (order form needs all of them), so the number per user is capped
+  public static final int MAX_ADDRESSES_PER_USER = 10;
+
   private final ModelMapper modelMapper;
   private final UserAddressRepository userAddressRepository;
 
@@ -30,6 +34,10 @@ public class ClientUserAddressService {
   }
 
   public DetailUserAddressDTO createUserAddress(User currentUser, CreateUserAddressDTO createUserAddressDTO) {
+    if (userAddressRepository.countByUserId(currentUser.getId()) >= MAX_ADDRESSES_PER_USER) {
+      throw new BadRequestException("user_address.limit.exceeded", MAX_ADDRESSES_PER_USER);
+    }
+
     UserAddress userAddress = modelMapper.map(createUserAddressDTO, UserAddress.class);
     userAddress.setUser(currentUser);
 
