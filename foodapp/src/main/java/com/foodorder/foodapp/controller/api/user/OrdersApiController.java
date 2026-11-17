@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.foodorder.foodapp.config.PaginationConfig;
 import com.foodorder.foodapp.dto.order.CreateOrderDTO;
 import com.foodorder.foodapp.dto.order.DetailOrderDTO;
 import com.foodorder.foodapp.dto.order.ReasonCancelDTO;
@@ -36,6 +37,7 @@ import lombok.AllArgsConstructor;
 @SecurityRequirement(name = "bearerAuth")
 public class OrdersApiController {
   private final ClientOrderService clientOrderService;
+  private final PaginationConfig paginationConfig;
 
   @GetMapping
   @Operation(summary = "Order list", description = "Get order list for client")
@@ -43,7 +45,7 @@ public class OrdersApiController {
       @RequestParam(defaultValue = "${app.pagination.default-page}") int page,
       @RequestParam(defaultValue = "${app.pagination.default-per-page}") int perPage,
       @AuthenticationPrincipal User currentUser) {
-    SearchOrderDTO params = new SearchOrderDTO(productName, page, perPage);
+    SearchOrderDTO params = new SearchOrderDTO(productName, page, perPage, paginationConfig);
 
     PageResponseDTO<DetailOrderDTO> response = new PageResponseDTO<>(
         clientOrderService.getAllOrders(currentUser, params));

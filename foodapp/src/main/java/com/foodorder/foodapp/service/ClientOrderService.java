@@ -32,7 +32,6 @@ import java.util.stream.Stream;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Sort;
@@ -49,8 +48,7 @@ public class ClientOrderService {
   private final UserAddressRepository userAddressRepository;
 
   public Page<DetailOrderDTO> getAllOrders(User user, SearchOrderDTO params) {
-    int pageIndex = Math.max(0, params.getPage() - 1);
-    Pageable pageable = PageRequest.of(pageIndex, params.getPerPage(), Sort.by("id").descending());
+    Pageable pageable = params.getPagination().toPageable(Sort.by("id").descending());
 
     Specification<Order> spec = buildSpecification(user, params);
     Page<Order> pageResult = orderRepository.findAll(spec, pageable);
