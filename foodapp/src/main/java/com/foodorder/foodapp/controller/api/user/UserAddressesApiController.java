@@ -1,6 +1,5 @@
 package com.foodorder.foodapp.controller.api.user;
 
-import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -9,9 +8,13 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.foodorder.foodapp.config.PaginationConfig;
+import com.foodorder.foodapp.dto.pagination.PaginationDTO;
 import com.foodorder.foodapp.dto.response.ApiResponseDTO;
+import com.foodorder.foodapp.dto.response.PageResponseDTO;
 import com.foodorder.foodapp.dto.user_address.CreateUserAddressDTO;
 import com.foodorder.foodapp.dto.user_address.DetailUserAddressDTO;
 import com.foodorder.foodapp.model.User;
@@ -34,11 +37,16 @@ import org.springframework.web.bind.annotation.PutMapping;
 @SecurityRequirement(name = "bearerAuth")
 public class UserAddressesApiController {
   private final ClientUserAddressService clientUserAddressService;
+  private final PaginationConfig paginationConfig;
 
   @GetMapping
   @Operation(summary = "User list user address", description = "Get list user address information")
-  public ResponseEntity<?> getUserInfo(@AuthenticationPrincipal User currentUser) {
-    List<DetailUserAddressDTO> response = clientUserAddressService.getAllUserAddress(currentUser);
+  public ResponseEntity<?> getUserInfo(
+      @RequestParam(defaultValue = "${app.pagination.default-page}") int page,
+      @RequestParam(defaultValue = "${app.pagination.default-per-page}") int perPage,
+      @AuthenticationPrincipal User currentUser) {
+    PageResponseDTO<DetailUserAddressDTO> response = new PageResponseDTO<>(clientUserAddressService
+        .getAllUserAddress(currentUser, new PaginationDTO(page, perPage, paginationConfig)));
 
     return ApiResponseDTO.ok(response);
   }

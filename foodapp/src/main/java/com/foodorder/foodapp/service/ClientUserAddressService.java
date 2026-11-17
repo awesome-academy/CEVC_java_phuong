@@ -1,14 +1,15 @@
 package com.foodorder.foodapp.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 
 import lombok.AllArgsConstructor;
 
+import com.foodorder.foodapp.dto.pagination.PaginationDTO;
 import com.foodorder.foodapp.dto.user_address.CreateUserAddressDTO;
 import com.foodorder.foodapp.dto.user_address.DetailUserAddressDTO;
 import com.foodorder.foodapp.model.User;
@@ -21,12 +22,9 @@ public class ClientUserAddressService {
   private final ModelMapper modelMapper;
   private final UserAddressRepository userAddressRepository;
 
-  public List<DetailUserAddressDTO> getAllUserAddress(User currentUser) {
-    List<UserAddress> userAddresses = userAddressRepository.findByUserId(currentUser.getId());
-
-    return userAddresses.stream()
-        .map(userAddress -> modelMapper.map(userAddress, DetailUserAddressDTO.class))
-        .collect(Collectors.toList());
+  public Page<DetailUserAddressDTO> getAllUserAddress(User currentUser, PaginationDTO pagination) {
+    return userAddressRepository.findByUserId(currentUser.getId(), pagination.toPageable(Sort.by("id").descending()))
+        .map(userAddress -> modelMapper.map(userAddress, DetailUserAddressDTO.class));
   }
 
   public DetailUserAddressDTO createUserAddress(User currentUser, CreateUserAddressDTO createUserAddressDTO) {
