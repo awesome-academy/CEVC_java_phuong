@@ -1,5 +1,6 @@
 package com.foodorder.foodapp.service;
 
+import com.foodorder.foodapp.dto.pagination.PaginationDTO;
 import org.springframework.stereotype.Service;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Pageable;
@@ -7,7 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.lang.NonNull;
-import org.springframework.data.domain.PageRequest;
 
 import com.foodorder.foodapp.repository.OrderRepository;
 import com.foodorder.foodapp.repository.OrderStatusRepository;
@@ -41,9 +41,7 @@ public class OrderService {
   private final OrderStockService orderStockService;
 
   public Page<ListOrderDTO> getAllOrders(AdminSearchOrderDTO params) {
-    int pageIndex = Math.max(0, params.getPage() - 1);
-    Pageable pageable = PageRequest.of(pageIndex, params.getPerPage(),
-        Sort.by("id").descending());
+    Pageable pageable = PaginationDTO.toPageable(params.getPage(), params.getPerPage(), Sort.by("id").descending());
 
     Specification<Order> spec = buildSpecification(params);
 

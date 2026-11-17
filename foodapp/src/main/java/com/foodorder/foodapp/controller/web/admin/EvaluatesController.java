@@ -1,5 +1,7 @@
 package com.foodorder.foodapp.controller.web.admin;
 
+import com.foodorder.foodapp.dto.pagination.PaginationDTO;
+import com.foodorder.foodapp.config.properties.PaginationProperties;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,15 +26,18 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class EvaluatesController {
   private final EvaluateService evaluateService;
+  private final PaginationProperties paginationProperties;
 
   @GetMapping
   public String indexEvaluate(
       @RequestParam(required = false) String productName,
       @RequestParam(required = false) Long ratingLevel,
-      @RequestParam(defaultValue = "${app.pagination.default-page}") int page,
-      @RequestParam(defaultValue = "${app.pagination.default-per-page}") int perPage,
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer perPage,
       Model model) {
-    AdminSearchEvaluateDTO params = new AdminSearchEvaluateDTO(productName, ratingLevel, page, perPage);
+    PaginationDTO pagination = paginationProperties.resolve(page, perPage);
+    AdminSearchEvaluateDTO params = new AdminSearchEvaluateDTO(productName, ratingLevel, pagination.getPage(),
+        pagination.getPerPage());
     Page<DetailEvaluateDTO> evaluates = evaluateService.getAllEvaluates(params);
     model.addAttribute("search", params);
     model.addAttribute("evaluates", evaluates);

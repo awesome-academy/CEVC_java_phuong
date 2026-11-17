@@ -1,6 +1,5 @@
 package com.foodorder.foodapp.dto.user;
 
-import com.foodorder.foodapp.config.PaginationConfig;
 import com.foodorder.foodapp.dto.pagination.PaginationDTO;
 
 import lombok.Data;
@@ -17,9 +16,9 @@ public class SearchUserDTO {
 
   private PaginationDTO pagination;
 
-  public SearchUserDTO(String name, Long roleId, int page, int perPage, PaginationConfig paginationConfig) {
+  public SearchUserDTO(String name, Long roleId, PaginationDTO pagination) {
     this.name = name;
     this.roleId = roleId;
-    this.pagination = new PaginationDTO(page, perPage, paginationConfig);
+    this.pagination = pagination;
   }
 }

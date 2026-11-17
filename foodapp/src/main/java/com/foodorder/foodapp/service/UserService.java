@@ -6,7 +6,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -51,8 +50,7 @@ public class UserService {
   private final PasswordEncoder passwordEncoder;
 
   public Page<ListUserDTO> getAllUsers(SearchUserDTO params) {
-    int pageIndex = Math.max(0, params.getPagination().getPage() - 1);
-    Pageable pageable = PageRequest.of(pageIndex, params.getPagination().getPerPage(), Sort.by("id").descending());
+    Pageable pageable = params.getPagination().toPageable(Sort.by("id").descending());
 
     Specification<User> spec = Stream.of(
         UserSpecification.withFetch(),

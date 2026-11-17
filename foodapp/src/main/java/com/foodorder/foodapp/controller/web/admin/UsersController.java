@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.foodorder.foodapp.config.PaginationConfig;
+import com.foodorder.foodapp.config.properties.PaginationProperties;
 import com.foodorder.foodapp.dto.auth_provider.AuthProviderDTO;
 import com.foodorder.foodapp.dto.role.RoleDTO;
 import com.foodorder.foodapp.dto.user.CreateUserDTO;
@@ -39,7 +39,7 @@ import lombok.AllArgsConstructor;
 public class UsersController {
   private final UserService userService;
   private final ModelMapper modelMapper;
-  private final PaginationConfig paginationConfig;
+  private final PaginationProperties paginationProperties;
 
   @ModelAttribute
   private void addSelectOptionsToModel(Model model) {
@@ -53,10 +53,10 @@ public class UsersController {
   public String indexUser(
       @RequestParam(required = false) String name,
       @RequestParam(required = false) Long roleId,
-      @RequestParam(defaultValue = "${app.pagination.default-page}") int page,
-      @RequestParam(defaultValue = "${app.pagination.default-per-page}") int perPage,
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer perPage,
       Model model) {
-    SearchUserDTO params = new SearchUserDTO(name, roleId, page, perPage, paginationConfig);
+    SearchUserDTO params = new SearchUserDTO(name, roleId, paginationProperties.resolve(page, perPage));
     Page<ListUserDTO> users = userService.getAllUsers(params);
 
     model.addAttribute("search", params);

@@ -1,12 +1,12 @@
 package com.foodorder.foodapp.service;
 
+import com.foodorder.foodapp.dto.pagination.PaginationDTO;
 import org.springframework.stereotype.Service;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.lang.NonNull;
 
 import com.foodorder.foodapp.repository.CategoryRepository;
@@ -46,8 +46,7 @@ public class ProductService {
   private final ImageUploadService imageUploadService;
 
   public Page<ListProductDTO> getAllProducts(SearchProductDTO params) {
-    int pageIndex = Math.max(0, params.getPage() - 1);
-    Pageable pageable = PageRequest.of(pageIndex, params.getPerPage(), Sort.by("id").descending());
+    Pageable pageable = PaginationDTO.toPageable(params.getPage(), params.getPerPage(), Sort.by("id").descending());
 
     Specification<Product> spec = Stream.of(
         ProductSpecification.withFetch(),

@@ -1,5 +1,7 @@
 package com.foodorder.foodapp.controller.web.admin;
 
+import com.foodorder.foodapp.dto.pagination.PaginationDTO;
+import com.foodorder.foodapp.config.properties.PaginationProperties;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
@@ -38,6 +40,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class ProductsController {
   private final ProductService productService;
+  private final PaginationProperties paginationProperties;
   private final CategoryService categoryService;
   private final ModelMapper modelMapper;
 
@@ -54,10 +57,12 @@ public class ProductsController {
       @RequestParam(required = false) String name,
       @RequestParam(required = false) Long categoryId,
       @RequestParam(required = false) Long productTypeId,
-      @RequestParam(defaultValue = "${app.pagination.default-page}") int page,
-      @RequestParam(defaultValue = "${app.pagination.default-per-page}") int perPage,
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer perPage,
       Model model) {
-    SearchProductDTO params = new SearchProductDTO(name, categoryId, productTypeId, page, perPage);
+    PaginationDTO pagination = paginationProperties.resolve(page, perPage);
+    SearchProductDTO params = new SearchProductDTO(name, categoryId, productTypeId, pagination.getPage(),
+        pagination.getPerPage());
     Page<ListProductDTO> products = productService.getAllProducts(params);
     model.addAttribute("search", params);
     model.addAttribute("products", products);

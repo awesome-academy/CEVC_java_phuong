@@ -1,5 +1,7 @@
 package com.foodorder.foodapp.controller.web.admin;
 
+import com.foodorder.foodapp.dto.pagination.PaginationDTO;
+import com.foodorder.foodapp.config.properties.PaginationProperties;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,6 +34,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class SuggestionsController {
   private final SuggestionService suggestionService;
+  private final PaginationProperties paginationProperties;
 
   @ModelAttribute
   private void addSelectOptionsToModel(Model model) {
@@ -41,10 +44,12 @@ public class SuggestionsController {
   @GetMapping
   public String indexSuggestion(
       @RequestParam(required = false) String status,
-      @RequestParam(defaultValue = "${app.pagination.default-page}") int page,
-      @RequestParam(defaultValue = "${app.pagination.default-per-page}") int perPage,
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer perPage,
       Model model) {
-    AdminSearchSuggestionDTO params = new AdminSearchSuggestionDTO(status, page, perPage);
+    PaginationDTO pagination = paginationProperties.resolve(page, perPage);
+    AdminSearchSuggestionDTO params = new AdminSearchSuggestionDTO(status, pagination.getPage(),
+        pagination.getPerPage());
     Page<DetailSuggestionDTO> suggestions = suggestionService.getAllSuggestions(params);
     model.addAttribute("search", params);
     model.addAttribute("suggestions", suggestions);

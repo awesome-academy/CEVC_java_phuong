@@ -1,11 +1,11 @@
 package com.foodorder.foodapp.service;
 
+import com.foodorder.foodapp.dto.pagination.PaginationDTO;
 import org.springframework.stereotype.Service;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.lang.NonNull;
 
 import com.foodorder.foodapp.repository.CategoryRepository;
@@ -31,8 +31,7 @@ public class CategoryService {
   private final ModelMapper modelMapper;
 
   public Page<ListCategoryDTO> getAllCategories(SearchCategoryDTO params) {
-    int pageIndex = Math.max(0, params.getPage() - 1);
-    Pageable pageable = PageRequest.of(pageIndex, params.getPerPage(), Sort.by("id").descending());
+    Pageable pageable = PaginationDTO.toPageable(params.getPage(), params.getPerPage(), Sort.by("id").descending());
 
     Page<Category> pageResult;
     if (params.getName() != null && !params.getName().isBlank()) {

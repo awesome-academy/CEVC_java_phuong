@@ -1,6 +1,7 @@
 package com.foodorder.foodapp.config;
 
-import org.springframework.beans.factory.annotation.Value;
+import com.foodorder.foodapp.config.properties.UploadProperties;
+
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -8,15 +9,15 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-  @Value("${app.upload.location}")
-  private String uploadLocation;
+  private final UploadProperties uploadProperties;
 
-  @Value("${app.upload.folder}")
-  private String folder;
+  public WebConfig(UploadProperties uploadProperties) {
+    this.uploadProperties = uploadProperties;
+  }
 
   @Override
   public void addResourceHandlers(ResourceHandlerRegistry registry) {
-    registry.addResourceHandler(folder + "**")
-        .addResourceLocations("file:" + uploadLocation + "/");
+    registry.addResourceHandler(uploadProperties.folder() + "**")
+        .addResourceLocations("file:" + uploadProperties.location() + "/");
   }
 }

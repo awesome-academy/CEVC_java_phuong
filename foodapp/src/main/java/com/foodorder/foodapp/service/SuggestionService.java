@@ -1,12 +1,12 @@
 package com.foodorder.foodapp.service;
 
+import com.foodorder.foodapp.dto.pagination.PaginationDTO;
 import org.springframework.stereotype.Service;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.domain.PageRequest;
 
 import com.foodorder.foodapp.repository.SuggestionRepository;
 
@@ -32,9 +32,7 @@ public class SuggestionService {
   private final SuggestionRepository suggestionRepository;
 
   public Page<DetailSuggestionDTO> getAllSuggestions(AdminSearchSuggestionDTO params) {
-    int pageIndex = Math.max(0, params.getPage() - 1);
-    Pageable pageable = PageRequest.of(pageIndex, params.getPerPage(),
-        Sort.by("id").descending());
+    Pageable pageable = PaginationDTO.toPageable(params.getPage(), params.getPerPage(), Sort.by("id").descending());
     Specification<Suggestion> spec = buildSpecification(params);
     Page<Suggestion> pageResult = suggestionRepository.findAll(spec, pageable);
 

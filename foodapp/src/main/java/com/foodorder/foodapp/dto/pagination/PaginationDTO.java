@@ -4,10 +4,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-import com.foodorder.foodapp.config.PaginationConfig;
-
 import lombok.Value;
 
+/**
+ * Normalized page/perPage of a list request. Built once in the controller (see PaginationProperties#resolve),
+ * so search DTOs, templates and services always get valid values.
+ */
 @Value
 public class PaginationDTO {
   // Upper bound for perPage sent by clients (e.g. perPage=100000 would load everything in one response)
@@ -17,13 +19,24 @@ public class PaginationDTO {
 
   private int perPage;
 
-  public PaginationDTO(int page, int perPage, PaginationConfig paginationConfig) {
-    this.page = page < 1 ? paginationConfig.getDefaultPage() : page;
-    this.perPage = perPage < 1 ? paginationConfig.getDefaultPerPage() : Math.min(perPage, MAX_PER_PAGE);
+  private PaginationDTO(int page, int perPage) {
+    this.page = page;
+    this.perPage = perPage;
   }
 
-  /** Page numbers are 1-based in the API, 0-based in Spring Data. */
+  /** Missing or < 1 values fall back to the defaults; perPage is capped at MAX_PER_PAGE. */
+  public static PaginationDTO of(Integer page, Integer perPage, int defaultPage, int defaultPerPage) {
+    int resolvedPage = page == null || page < 1 ? defaultPage : page;
+    int resolvedPerPage = perPage == null || perPage < 1 ? defaultPerPage : Math.min(perPage, MAX_PER_PAGE);
+    return new PaginationDTO(resolvedPage, resolvedPerPage);
+  }
+
   public Pageable toPageable(Sort sort) {
+    return toPageable(page, perPage, sort);
+  }
+
+  /** Page numbers are 1-based in the API/UI, 0-based in Spring Data. Values must already be normalized. */
+  public static Pageable toPageable(int page, int perPage, Sort sort) {
     return PageRequest.of(page - 1, perPage, sort);
   }
 }

@@ -10,8 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.foodorder.foodapp.config.PaginationConfig;
-import com.foodorder.foodapp.dto.pagination.PaginationDTO;
+import com.foodorder.foodapp.config.properties.PaginationProperties;
 import com.foodorder.foodapp.dto.response.ApiResponseDTO;
 import com.foodorder.foodapp.dto.response.PageResponseDTO;
 import com.foodorder.foodapp.dto.suggestion.DetailSuggestionDTO;
@@ -38,16 +37,16 @@ import org.springframework.web.bind.annotation.PutMapping;
 @SecurityRequirement(name = "bearerAuth")
 public class SuggestionsApiController {
   private final ClientSuggestionService clientSuggestionService;
-  private final PaginationConfig paginationConfig;
+  private final PaginationProperties paginationProperties;
 
   @GetMapping
   @Operation(summary = "List suggestion for user", description = "Get list of product suggestions for user")
   public ResponseEntity<?> listSuggestions(
-      @RequestParam(defaultValue = "${app.pagination.default-page}") int page,
-      @RequestParam(defaultValue = "${app.pagination.default-per-page}") int perPage,
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer perPage,
       @AuthenticationPrincipal User currentUser) {
     PageResponseDTO<DetailSuggestionDTO> response = new PageResponseDTO<>(clientSuggestionService
-        .getSuggestions(currentUser, new PaginationDTO(page, perPage, paginationConfig)));
+        .getSuggestions(currentUser, paginationProperties.resolve(page, perPage)));
 
     return ApiResponseDTO.ok(response);
   }

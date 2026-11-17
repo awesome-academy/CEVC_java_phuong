@@ -1,5 +1,7 @@
 package com.foodorder.foodapp.controller.web.admin;
 
+import com.foodorder.foodapp.dto.pagination.PaginationDTO;
+import com.foodorder.foodapp.config.properties.PaginationProperties;
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
@@ -34,6 +36,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 @AllArgsConstructor
 public class OrdersController {
   private final OrderService orderService;
+  private final PaginationProperties paginationProperties;
 
   @ModelAttribute
   private void addSelectOptionsToModel(Model model) {
@@ -46,10 +49,12 @@ public class OrdersController {
       @RequestParam(required = false) String productName,
       @RequestParam(required = false) Long orderStatusId,
       @RequestParam(required = false) Long priceLevel,
-      @RequestParam(defaultValue = "${app.pagination.default-page}") int page,
-      @RequestParam(defaultValue = "${app.pagination.default-per-page}") int perPage,
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer perPage,
       Model model) {
-    AdminSearchOrderDTO params = new AdminSearchOrderDTO(productName, orderStatusId, priceLevel, page, perPage);
+    PaginationDTO pagination = paginationProperties.resolve(page, perPage);
+    AdminSearchOrderDTO params = new AdminSearchOrderDTO(productName, orderStatusId, priceLevel, pagination.getPage(),
+        pagination.getPerPage());
     Page<ListOrderDTO> orders = orderService.getAllOrders(params);
     model.addAttribute("search", params);
     model.addAttribute("orders", orders);
@@ -75,7 +80,8 @@ public class OrdersController {
       RedirectAttributes redirectAttributes,
       Model model) {
     if (bindingResult.hasErrors()) {
-      AdminSearchOrderDTO params = new AdminSearchOrderDTO();
+      PaginationDTO defaults = paginationProperties.resolve(null, null);
+      AdminSearchOrderDTO params = new AdminSearchOrderDTO(null, null, null, defaults.getPage(), defaults.getPerPage());
       Page<ListOrderDTO> orders = orderService.getAllOrders(params);
       model.addAttribute("orders", orders);
       model.addAttribute("totalPages", orders.getTotalPages());
