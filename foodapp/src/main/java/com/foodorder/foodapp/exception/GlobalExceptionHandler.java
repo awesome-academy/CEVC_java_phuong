@@ -126,7 +126,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handleBadRequestException(BadRequestException ex) {
     String localizedMessage = messageSource.getMessage(
         ex.getMessage(),
-        null,
+        ex.getArgs(),
         LocaleContextHolder.getLocale());
 
     ErrorResponse errorResponse = new ErrorResponse(

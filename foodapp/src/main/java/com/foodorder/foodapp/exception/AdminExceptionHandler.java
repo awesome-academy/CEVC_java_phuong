@@ -45,7 +45,7 @@ public class AdminExceptionHandler {
 
   @ExceptionHandler(BadRequestException.class)
   public ModelAndView handleBadRequest(BadRequestException ex) {
-    String message = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(),
+    String message = messageSource.getMessage(ex.getMessage(), ex.getArgs(), ex.getMessage(),
         LocaleContextHolder.getLocale());
     return errorPage(HttpStatus.BAD_REQUEST, "Bad request", message);
   }
