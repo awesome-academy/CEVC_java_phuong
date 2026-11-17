@@ -16,7 +16,12 @@ public class I18nConfig implements WebMvcConfigurer {
   @Bean
   public LocaleResolver localeResolver() {
     SessionLocaleResolver slr = new SessionLocaleResolver();
-    slr.setDefaultLocale(Locale.ENGLISH);
+    // No locale in session: API reads Accept-Language (clients use tokens, no session),
+    // admin pages default to English until changed with ?lang=
+    slr.setDefaultLocaleFunction(request -> request.getRequestURI().startsWith(request.getContextPath() + "/api/")
+        && request.getHeader("Accept-Language") != null
+            ? request.getLocale()
+            : Locale.ENGLISH);
     return slr;
   }
 
@@ -29,6 +34,7 @@ public class I18nConfig implements WebMvcConfigurer {
 
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(localeChangeInterceptor());
+    // Only admin pages switch language with ?lang= (stored in session); API must not create sessions
+    registry.addInterceptor(localeChangeInterceptor()).addPathPatterns("/admin/**");
   }
 }
