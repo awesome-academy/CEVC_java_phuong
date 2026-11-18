@@ -20,6 +20,7 @@ import com.foodorder.foodapp.repository.OrderRepository;
 import com.foodorder.foodapp.repository.OrderStatusRepository;
 import com.foodorder.foodapp.repository.UserAddressRepository;
 import com.foodorder.foodapp.specification.OrderSpecification;
+import com.foodorder.foodapp.utils.PageableUtils;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -47,11 +48,11 @@ public class ClientOrderService {
   private final OrderStockService orderStockService;
   private final UserAddressRepository userAddressRepository;
 
-  public Page<DetailOrderDTO> getAllOrders(User user, SearchOrderDTO params) {
-    Pageable pageable = params.getPagination().toPageable(Sort.by("id").descending());
+  public Page<DetailOrderDTO> getAllOrders(User user, SearchOrderDTO params, Pageable pageable) {
+    Pageable sortedPageable = PageableUtils.withFixedSort(pageable, Sort.by("id").descending());
 
     Specification<Order> spec = buildSpecification(user, params);
-    Page<Order> pageResult = orderRepository.findAll(spec, pageable);
+    Page<Order> pageResult = orderRepository.findAll(spec, sortedPageable);
 
     return pageResult
         .map(order -> modelMapper.map(order,

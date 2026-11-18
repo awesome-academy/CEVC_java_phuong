@@ -1,5 +1,7 @@
 package com.foodorder.foodapp.controller.api.user;
 
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import org.springframework.http.ResponseEntity;
@@ -13,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.foodorder.foodapp.config.properties.PaginationProperties;
 import com.foodorder.foodapp.dto.order.CreateOrderDTO;
 import com.foodorder.foodapp.dto.order.DetailOrderDTO;
 import com.foodorder.foodapp.dto.order.ReasonCancelDTO;
@@ -37,18 +38,16 @@ import lombok.AllArgsConstructor;
 @SecurityRequirement(name = "bearerAuth")
 public class OrdersApiController {
   private final ClientOrderService clientOrderService;
-  private final PaginationProperties paginationProperties;
 
   @GetMapping
   @Operation(summary = "Order list", description = "Get order list for client")
   public ResponseEntity<?> getOrders(@RequestParam(required = false) String productName,
-      @RequestParam(required = false) Integer page,
-      @RequestParam(required = false) Integer perPage,
+      @ParameterObject Pageable pageable,
       @AuthenticationPrincipal User currentUser) {
-    SearchOrderDTO params = new SearchOrderDTO(productName, paginationProperties.resolve(page, perPage));
+    SearchOrderDTO params = new SearchOrderDTO(productName);
 
     PageResponseDTO<DetailOrderDTO> response = new PageResponseDTO<>(
-        clientOrderService.getAllOrders(currentUser, params));
+        clientOrderService.getAllOrders(currentUser, params, pageable));
 
     return ApiResponseDTO.ok(response);
   }

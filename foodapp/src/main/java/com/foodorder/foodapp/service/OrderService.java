@@ -24,6 +24,7 @@ import com.foodorder.foodapp.exception.BadRequestException;
 import com.foodorder.foodapp.exception.ResourceNotFoundException;
 import com.foodorder.foodapp.model.Order;
 import com.foodorder.foodapp.model.OrderStatus;
+import com.foodorder.foodapp.utils.PageableUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -39,12 +40,12 @@ public class OrderService {
   private final OrderStatusRepository orderStatusRepository;
   private final OrderStockService orderStockService;
 
-  public Page<ListOrderDTO> getAllOrders(AdminSearchOrderDTO params) {
-    Pageable pageable = params.getPagination().toPageable(Sort.by("id").descending());
+  public Page<ListOrderDTO> getAllOrders(AdminSearchOrderDTO params, Pageable pageable) {
+    Pageable sortedPageable = PageableUtils.withFixedSort(pageable, Sort.by("id").descending());
 
     Specification<Order> spec = buildSpecification(params);
 
-    Page<Order> pageResult = orderRepository.findAll(spec, pageable);
+    Page<Order> pageResult = orderRepository.findAll(spec, sortedPageable);
 
     return pageResult.map(order -> modelMapper.map(order,
         ListOrderDTO.class));

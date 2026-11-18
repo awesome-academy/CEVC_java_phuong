@@ -1,6 +1,5 @@
 package com.foodorder.foodapp.controller.web.admin;
 
-import com.foodorder.foodapp.config.properties.PaginationProperties;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
@@ -30,6 +29,7 @@ import com.foodorder.foodapp.service.CategoryService;
 import com.foodorder.foodapp.service.ProductService;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -39,7 +39,6 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class ProductsController {
   private final ProductService productService;
-  private final PaginationProperties paginationProperties;
   private final CategoryService categoryService;
   private final ModelMapper modelMapper;
 
@@ -56,12 +55,10 @@ public class ProductsController {
       @RequestParam(required = false) String name,
       @RequestParam(required = false) Long categoryId,
       @RequestParam(required = false) Long productTypeId,
-      @RequestParam(required = false) Integer page,
-      @RequestParam(required = false) Integer perPage,
+      Pageable pageable,
       Model model) {
-    SearchProductDTO params = new SearchProductDTO(name, categoryId, productTypeId,
-        paginationProperties.resolve(page, perPage));
-    Page<ListProductDTO> products = productService.getAllProducts(params);
+    SearchProductDTO params = new SearchProductDTO(name, categoryId, productTypeId);
+    Page<ListProductDTO> products = productService.getAllProducts(params, pageable);
     model.addAttribute("search", params);
     model.addAttribute("products", products);
     model.addAttribute("totalPages", products.getTotalPages());

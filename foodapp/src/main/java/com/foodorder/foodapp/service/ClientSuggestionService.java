@@ -1,6 +1,7 @@
 package com.foodorder.foodapp.service;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +12,6 @@ import org.modelmapper.ModelMapper;
 
 import lombok.AllArgsConstructor;
 
-import com.foodorder.foodapp.dto.pagination.PaginationDTO;
 import com.foodorder.foodapp.dto.suggestion.DetailSuggestionDTO;
 import com.foodorder.foodapp.dto.suggestion.CreateSuggestionDTO;
 import com.foodorder.foodapp.enums.ESuggestion;
@@ -19,6 +19,7 @@ import com.foodorder.foodapp.exception.ResourceNotFoundException;
 import com.foodorder.foodapp.model.Suggestion;
 import com.foodorder.foodapp.model.User;
 import com.foodorder.foodapp.repository.SuggestionRepository;
+import com.foodorder.foodapp.utils.PageableUtils;
 
 @Service
 @AllArgsConstructor
@@ -27,8 +28,9 @@ public class ClientSuggestionService {
   private final ImageUploadService imageUploadService;
   private final SuggestionRepository suggestionRepository;
 
-  public Page<DetailSuggestionDTO> getSuggestions(User currentUser, PaginationDTO pagination) {
-    return suggestionRepository.findByUserId(currentUser.getId(), pagination.toPageable(Sort.by("id").descending()))
+  public Page<DetailSuggestionDTO> getSuggestions(User currentUser, Pageable pageable) {
+    Pageable sortedPageable = PageableUtils.withFixedSort(pageable, Sort.by("id").descending());
+    return suggestionRepository.findByUserId(currentUser.getId(), sortedPageable)
         .map(suggestion -> modelMapper.map(suggestion, DetailSuggestionDTO.class));
   }
 

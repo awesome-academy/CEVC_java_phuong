@@ -1,7 +1,5 @@
 package com.foodorder.foodapp.dto.evaluate;
 
-import com.foodorder.foodapp.dto.pagination.PaginationDTO;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,6 +11,4 @@ public class AdminSearchEvaluateDTO {
   private String productName;
 
   private Long ratingLevel;
-
-  private PaginationDTO pagination;
 }

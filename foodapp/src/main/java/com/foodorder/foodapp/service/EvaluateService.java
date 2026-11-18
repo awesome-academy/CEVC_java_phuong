@@ -19,6 +19,7 @@ import com.foodorder.foodapp.dto.evaluate.DetailEvaluateDTO;
 import com.foodorder.foodapp.exception.ResourceNotFoundException;
 import com.foodorder.foodapp.model.Evaluate;
 import com.foodorder.foodapp.model.Product;
+import com.foodorder.foodapp.utils.PageableUtils;
 
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -30,12 +31,12 @@ public class EvaluateService {
   private final ProductRepository productRepository;
   private final EvaluateRepository evaluateRepository;
 
-  public Page<DetailEvaluateDTO> getAllEvaluates(AdminSearchEvaluateDTO params) {
-    Pageable pageable = params.getPagination().toPageable(Sort.by("id").descending());
+  public Page<DetailEvaluateDTO> getAllEvaluates(AdminSearchEvaluateDTO params, Pageable pageable) {
+    Pageable sortedPageable = PageableUtils.withFixedSort(pageable, Sort.by("id").descending());
 
     Specification<Evaluate> spec = buildSpecification(params);
 
-    Page<Evaluate> pageResult = evaluateRepository.findAll(spec, pageable);
+    Page<Evaluate> pageResult = evaluateRepository.findAll(spec, sortedPageable);
 
     return pageResult.map(evaluate -> modelMapper.map(evaluate,
         DetailEvaluateDTO.class));

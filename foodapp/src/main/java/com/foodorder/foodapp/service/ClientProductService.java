@@ -18,6 +18,7 @@ import com.foodorder.foodapp.dto.product.ClientProductDTO;
 import com.foodorder.foodapp.dto.product.SearchProductDTO;
 import com.foodorder.foodapp.exception.ResourceNotFoundException;
 import com.foodorder.foodapp.model.Product;
+import com.foodorder.foodapp.utils.PageableUtils;
 
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -28,11 +29,11 @@ public class ClientProductService {
   private final ProductRepository productRepository;
   private final ModelMapper modelMapper;
 
-  public Page<ClientProductDTO> getPublicProducts(SearchProductDTO params) {
-    Pageable pageable = params.getPagination().toPageable(Sort.by("id").descending());
+  public Page<ClientProductDTO> getPublicProducts(SearchProductDTO params, Pageable pageable) {
+    Pageable sortedPageable = PageableUtils.withFixedSort(pageable, Sort.by("id").descending());
 
     Specification<Product> spec = buildSpecification(params);
-    Page<Product> pageResult = productRepository.findAll(spec, pageable);
+    Page<Product> pageResult = productRepository.findAll(spec, sortedPageable);
 
     return pageResult.map(product -> modelMapper.map(product, ClientProductDTO.class));
   }

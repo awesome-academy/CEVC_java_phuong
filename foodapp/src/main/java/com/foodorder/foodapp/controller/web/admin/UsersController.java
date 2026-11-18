@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.foodorder.foodapp.config.properties.PaginationProperties;
 import com.foodorder.foodapp.dto.auth_provider.AuthProviderDTO;
 import com.foodorder.foodapp.dto.role.RoleDTO;
 import com.foodorder.foodapp.dto.user.CreateUserDTO;
@@ -29,6 +28,7 @@ import com.foodorder.foodapp.exception.ResourceNotFoundException;
 import com.foodorder.foodapp.service.UserService;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -39,7 +39,6 @@ import lombok.AllArgsConstructor;
 public class UsersController {
   private final UserService userService;
   private final ModelMapper modelMapper;
-  private final PaginationProperties paginationProperties;
 
   @ModelAttribute
   private void addSelectOptionsToModel(Model model) {
@@ -53,11 +52,10 @@ public class UsersController {
   public String indexUser(
       @RequestParam(required = false) String name,
       @RequestParam(required = false) Long roleId,
-      @RequestParam(required = false) Integer page,
-      @RequestParam(required = false) Integer perPage,
+      Pageable pageable,
       Model model) {
-    SearchUserDTO params = new SearchUserDTO(name, roleId, paginationProperties.resolve(page, perPage));
-    Page<ListUserDTO> users = userService.getAllUsers(params);
+    SearchUserDTO params = new SearchUserDTO(name, roleId);
+    Page<ListUserDTO> users = userService.getAllUsers(params, pageable);
 
     model.addAttribute("search", params);
     model.addAttribute("users", users);

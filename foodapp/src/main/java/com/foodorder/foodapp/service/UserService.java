@@ -29,6 +29,7 @@ import com.foodorder.foodapp.model.Role;
 import com.foodorder.foodapp.model.User;
 
 import com.foodorder.foodapp.model.AuthProvider;
+import com.foodorder.foodapp.utils.PageableUtils;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -49,8 +50,8 @@ public class UserService {
   private final OrderRepository orderRepository;
   private final PasswordEncoder passwordEncoder;
 
-  public Page<ListUserDTO> getAllUsers(SearchUserDTO params) {
-    Pageable pageable = params.getPagination().toPageable(Sort.by("id").descending());
+  public Page<ListUserDTO> getAllUsers(SearchUserDTO params, Pageable pageable) {
+    Pageable sortedPageable = PageableUtils.withFixedSort(pageable, Sort.by("id").descending());
 
     Specification<User> spec = Stream.of(
         UserSpecification.withFetch(),
@@ -59,7 +60,7 @@ public class UserService {
         UserSpecification.notDeleted()).filter(Objects::nonNull)
         .reduce((s1, s2) -> s1.and(s2))
         .orElse(null);
-    Page<User> pageResult = userRepository.findAll(spec, pageable);
+    Page<User> pageResult = userRepository.findAll(spec, sortedPageable);
 
     return pageResult.map(user -> modelMapper.map(user, ListUserDTO.class));
   }

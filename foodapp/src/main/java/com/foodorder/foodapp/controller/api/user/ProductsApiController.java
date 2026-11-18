@@ -1,6 +1,7 @@
 package com.foodorder.foodapp.controller.api.user;
 
-import com.foodorder.foodapp.config.properties.PaginationProperties;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,19 +29,17 @@ import lombok.AllArgsConstructor;
 public class ProductsApiController {
 
   private final ClientProductService clientProductService;
-  private final PaginationProperties paginationProperties;
 
   @GetMapping
   @Operation(summary = "List products", description = "Get list of products for client")
   public ResponseEntity<?> indexProduct(@RequestParam(required = false) String name,
       @RequestParam(required = false) Long categoryId,
       @RequestParam(required = false) Long productTypeId,
-      @RequestParam(required = false) Integer page,
-      @RequestParam(required = false) Integer perPage) {
-    SearchProductDTO params = new SearchProductDTO(name, categoryId, productTypeId,
-        paginationProperties.resolve(page, perPage));
+      @ParameterObject Pageable pageable) {
+    SearchProductDTO params = new SearchProductDTO(name, categoryId, productTypeId);
 
-    PageResponseDTO<ClientProductDTO> response = new PageResponseDTO<>(clientProductService.getPublicProducts(params));
+    PageResponseDTO<ClientProductDTO> response = new PageResponseDTO<>(
+        clientProductService.getPublicProducts(params, pageable));
 
     return ApiResponseDTO.ok(response);
   }

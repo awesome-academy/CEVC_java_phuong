@@ -1,6 +1,5 @@
 package com.foodorder.foodapp.controller.web.admin;
 
-import com.foodorder.foodapp.config.properties.PaginationProperties;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
@@ -26,6 +25,7 @@ import com.foodorder.foodapp.exception.BadRequestException;
 import com.foodorder.foodapp.exception.ResourceNotFoundException;
 import com.foodorder.foodapp.service.CategoryService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -35,7 +35,6 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class CategoriesController {
   private final CategoryService categoryService;
-  private final PaginationProperties paginationProperties;
   private final ModelMapper modelMapper;
 
   @ModelAttribute
@@ -47,11 +46,10 @@ public class CategoriesController {
   @GetMapping
   public String indexCategory(
       @RequestParam(required = false) String name,
-      @RequestParam(required = false) Integer page,
-      @RequestParam(required = false) Integer perPage,
+      Pageable pageable,
       Model model) {
-    SearchCategoryDTO params = new SearchCategoryDTO(name, paginationProperties.resolve(page, perPage));
-    Page<ListCategoryDTO> categories = categoryService.getAllCategories(params);
+    SearchCategoryDTO params = new SearchCategoryDTO(name);
+    Page<ListCategoryDTO> categories = categoryService.getAllCategories(params, pageable);
     model.addAttribute("search", params);
     model.addAttribute("categories", categories);
     model.addAttribute("totalPages", categories.getTotalPages());
