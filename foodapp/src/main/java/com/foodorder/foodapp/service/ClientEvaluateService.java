@@ -17,6 +17,8 @@ import lombok.AllArgsConstructor;
 import com.foodorder.foodapp.dto.evaluate.ClientDetailEvaluateDTO;
 import com.foodorder.foodapp.dto.evaluate.ClientEvaluateSearchDTO;
 import com.foodorder.foodapp.dto.evaluate.ClientListEvaluateDTO;
+import com.foodorder.foodapp.dto.evaluate.ClientMyEvaluateDTO;
+import com.foodorder.foodapp.dto.evaluate.ClientMyEvaluateSearchDTO;
 import com.foodorder.foodapp.dto.evaluate.CreateEvaluateDTO;
 import com.foodorder.foodapp.exception.BadRequestException;
 import com.foodorder.foodapp.exception.ResourceNotFoundException;
@@ -59,6 +61,23 @@ public class ClientEvaluateService {
     Page<Evaluate> pageResult = evaluateRepository.findAll(spec, sortedPageable);
 
     return pageResult.map(evaluate -> modelMapper.map(evaluate, ClientListEvaluateDTO.class));
+  }
+
+  /** The user's own evaluates on every product, hidden ones included. */
+  public Page<ClientMyEvaluateDTO> getMyEvaluates(User currentUser, Long productId, Pageable pageable) {
+    Pageable sortedPageable = PageableUtils.withFixedSort(pageable,
+        Sort.by("createdAt").descending().and(Sort.by("id").descending()));
+    ClientMyEvaluateSearchDTO params = new ClientMyEvaluateSearchDTO(currentUser.getId(), productId);
+
+    Specification<Evaluate> spec = Stream.of(
+        EvaluateSpecification.withFetch(),
+        EvaluateSpecification.hasUser(params.getUserId()),
+        EvaluateSpecification.hasProduct(params.getProductId()))
+        .reduce((s1, s2) -> s1.and(s2))
+        .orElse(null);
+
+    return evaluateRepository.findAll(spec, sortedPageable)
+        .map(evaluate -> modelMapper.map(evaluate, ClientMyEvaluateDTO.class));
   }
 
   @Transactional

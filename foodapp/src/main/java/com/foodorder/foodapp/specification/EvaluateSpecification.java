@@ -28,6 +28,15 @@ public class EvaluateSpecification {
     };
   }
 
+  public static Specification<Evaluate> hasUser(Long userId) {
+    return (root, query, cb) -> {
+      if (userId == null) {
+        return null;
+      }
+      return cb.equal(root.get(Evaluate_.user).get(BaseModel_.id), userId);
+    };
+  }
+
   public static Specification<Evaluate> isShow() {
     return (root, query, cb) -> {
       return cb.isTrue(root.get(Evaluate_.isShow));
