@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -41,12 +42,11 @@ public class EvaluatesController {
     return "admin/evaluates/index";
   }
 
-  @GetMapping("/{id}/hide-evaluate")
-  public String hideEvaluate(
+  @PostMapping("/{id}/toggle-display")
+  public String toggleDisplay(
       @NonNull @PathVariable Long id,
-      RedirectAttributes redirectAttributes,
-      Model model) {
-    evaluateService.updateEvaluateDisplayStatus(id);
+      RedirectAttributes redirectAttributes) {
+    evaluateService.toggleDisplay(id);
     redirectAttributes.addFlashAttribute("successMessage",
         MessageCode.UPDATE_SUCCESS.getCode());
 

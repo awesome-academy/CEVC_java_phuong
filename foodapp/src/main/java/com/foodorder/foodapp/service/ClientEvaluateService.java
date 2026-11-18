@@ -41,6 +41,7 @@ public class ClientEvaluateService {
   private final ProductRepository productRepository;
   private final OrderRepository orderRepository;
   private final ImageUploadService imageUploadService;
+  private final ProductRatingService productRatingService;
 
   /** Returns the user's own evaluate even when it was hidden by an admin (isShow tells the client). */
   public ClientDetailEvaluateDTO getEvaluate(User currentUser, Long productId) {
@@ -122,7 +123,7 @@ public class ClientEvaluateService {
       evaluate = evaluateRepository.save(evaluate);
       imageUploadService.deleteImage(oldImagePath, newImagePath != null);
 
-      caculateAvgRating(product);
+      productRatingService.recalculate(product.getId());
 
       return modelMapper.map(evaluate, ClientDetailEvaluateDTO.class);
     } catch (Exception e) {
@@ -142,7 +143,7 @@ public class ClientEvaluateService {
 
     evaluateRepository.delete(evaluate);
 
-    caculateAvgRating(product);
+    productRatingService.recalculate(product.getId());
   }
 
   /** A hidden evaluate is read-only for its owner: editing or deleting it would bypass moderation. */
@@ -150,19 +151,6 @@ public class ClientEvaluateService {
     if (!Boolean.TRUE.equals(evaluate.getIsShow())) {
       throw new BadRequestException("evaluate.hidden");
     }
-  }
-
-  private void caculateAvgRating(Product product) {
-    double avgRating = evaluateRepository
-        .findByProductIdAndIsShowTrue(
-            product.getId())
-        .stream()
-        .mapToInt(Evaluate::getRating)
-        .average()
-        .orElse(0.0);
-
-    product.setAverageRating((float) avgRating);
-    productRepository.save(product);
   }
 
   private Specification<Evaluate> buildSpecification(Long productId) {

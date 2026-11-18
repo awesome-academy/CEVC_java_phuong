@@ -100,8 +100,7 @@
                         </td>
                         <td th:text="${evaluate.createdAt}"></td>
                         <td class="text-center">
-                          <a th:href="@{/admin/evaluates/{id}/hide-evaluate(id=${evaluate.id})}"
-                            class="btn btn-sm btn-danger">Hide</a>
+                          <form th:replace="~{admin/evaluates/toggle_display_form :: form(${evaluate})}"></form>
                         </td>
                       </tr>
                     </tbody>

@@ -8,7 +8,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.foodorder.foodapp.repository.EvaluateRepository;
-import com.foodorder.foodapp.repository.ProductRepository;
 import com.foodorder.foodapp.specification.EvaluateSpecification;
 
 import jakarta.transaction.Transactional;
@@ -18,7 +17,6 @@ import com.foodorder.foodapp.dto.evaluate.AdminSearchEvaluateDTO;
 import com.foodorder.foodapp.dto.evaluate.DetailEvaluateDTO;
 import com.foodorder.foodapp.exception.ResourceNotFoundException;
 import com.foodorder.foodapp.model.Evaluate;
-import com.foodorder.foodapp.model.Product;
 import com.foodorder.foodapp.utils.PageableUtils;
 
 import java.util.Objects;
@@ -28,7 +26,7 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 public class EvaluateService {
   private final ModelMapper modelMapper;
-  private final ProductRepository productRepository;
+  private final ProductRatingService productRatingService;
   private final EvaluateRepository evaluateRepository;
 
   public Page<DetailEvaluateDTO> getAllEvaluates(AdminSearchEvaluateDTO params, Pageable pageable) {
@@ -53,27 +51,15 @@ public class EvaluateService {
         .orElse(null);
   }
 
+  /** Flips show/hide of an evaluate and recalculates the product average rating. */
   @Transactional
-  public void updateEvaluateDisplayStatus(Long id) {
+  public void toggleDisplay(Long id) {
     Evaluate evaluate = evaluateRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("evaluate.not.found"));
 
-    Long productId = evaluate.getProduct().getId();
-
-    Product product = productRepository.findByIdForUpdate(productId)
-        .orElseThrow(() -> new ResourceNotFoundException("product.not.found"));
-
-    evaluate.setIsShow(false);
+    evaluate.setIsShow(!Boolean.TRUE.equals(evaluate.getIsShow()));
     evaluateRepository.save(evaluate);
 
-    double avgRating = evaluateRepository
-        .findByProductIdAndIsShowTrue(productId)
-        .stream()
-        .mapToInt(Evaluate::getRating)
-        .average()
-        .orElse(0.0);
-
-    product.setAverageRating((float) avgRating);
-    productRepository.save(product);
+    productRatingService.recalculate(evaluate.getProduct().getId());
   }
 }
