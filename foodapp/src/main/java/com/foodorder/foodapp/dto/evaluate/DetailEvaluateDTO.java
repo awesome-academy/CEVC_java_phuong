@@ -22,7 +22,7 @@ public class DetailEvaluateDTO {
 
   private EvaluateProductDTO product;
 
-  private EvaluateUserDTO user;
+  private AdminEvaluateUserDTO user;
 
   private LocalDateTime createdAt;
 }

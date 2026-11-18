@@ -40,6 +40,13 @@ public class EvaluateService {
         DetailEvaluateDTO.class));
   }
 
+  public DetailEvaluateDTO getEvaluateById(Long id) {
+    Evaluate evaluate = evaluateRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("evaluate.not.found"));
+
+    return modelMapper.map(evaluate, DetailEvaluateDTO.class);
+  }
+
   private Specification<Evaluate> buildSpecification(AdminSearchEvaluateDTO params) {
     return Stream.of(
         EvaluateSpecification.hasProduct(params.getProductId()),

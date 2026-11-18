@@ -46,6 +46,13 @@ public class EvaluatesController {
     return "admin/evaluates/index";
   }
 
+  @GetMapping("/{id}")
+  public String detailEvaluate(@NonNull @PathVariable Long id, Model model) {
+    model.addAttribute("evaluate", evaluateService.getEvaluateById(id));
+
+    return "admin/evaluates/detail";
+  }
+
   @PostMapping("/{id}/toggle-display")
   public String toggleDisplay(
       @NonNull @PathVariable Long id,

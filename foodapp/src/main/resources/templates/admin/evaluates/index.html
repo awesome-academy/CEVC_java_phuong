@@ -99,7 +99,9 @@
                     </thead>
                     <tbody>
                       <tr class="align-middle" th:each="evaluate, iterStat : ${evaluates}">
-                        <td th:text="${evaluate.id}"></td>
+                        <td>
+                          <a th:href="@{/admin/evaluates/{id}(id=${evaluate.id})}" th:text="${evaluate.id}"></a>
+                        </td>
                         <td>
                           <img th:if="${evaluate.image}" th:src="@{${evaluate.image}}" class="img-thumbnail">
                         </td>
