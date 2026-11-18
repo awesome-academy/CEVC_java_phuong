@@ -58,7 +58,7 @@ public class ClientProductService {
         .orElseThrow(() -> new ResourceNotFoundException("product.not.found"));
 
     long evaluateCount = evaluateRepository.countByProductIdAndIsShowTrue(id);
-    ClientDetailProductDTO productDTO =  modelMapper.map(product, ClientDetailProductDTO.class);
+    ClientDetailProductDTO productDTO = modelMapper.map(product, ClientDetailProductDTO.class);
     productDTO.setEvaluateCount(evaluateCount);
 
     return productDTO;

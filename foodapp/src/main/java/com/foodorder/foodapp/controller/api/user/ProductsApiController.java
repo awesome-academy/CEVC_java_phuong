@@ -56,14 +56,13 @@ public class ProductsApiController {
   }
 
   @GetMapping("/{id}/evaluates")
-  @Operation(summary = "Get list evaluates",  description = "Get list evaluate of a product by ID")
-  public ResponseEntity<?> idxProductEvaluates(@PathVariable Long id, 
-       @RequestParam(defaultValue = "${app.pagination.default-page}") int page,
-      @RequestParam(defaultValue = "${app.pagination.default-per-page}") int perPage) {
-      ClientEvaluateSearchDTO params = new ClientEvaluateSearchDTO(id, page, perPage);
-      PageResponseDTO<ClientListEvaluateDTO> response =  new PageResponseDTO<>(clientEvaluateService.getEvaluates(params));
+  @Operation(summary = "List product evaluates", description = "Get visible evaluates of a product, newest first")
+  public ResponseEntity<?> indexProductEvaluates(@PathVariable Long id,
+      @ParameterObject Pageable pageable) {
+    ClientEvaluateSearchDTO params = new ClientEvaluateSearchDTO(id);
+    PageResponseDTO<ClientListEvaluateDTO> response = new PageResponseDTO<>(
+        clientEvaluateService.getEvaluates(params, pageable));
 
-      return ApiResponseDTO.ok(response);
+    return ApiResponseDTO.ok(response);
   }
-  
 }

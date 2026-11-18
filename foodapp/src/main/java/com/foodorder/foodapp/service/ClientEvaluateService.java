@@ -1,15 +1,11 @@
 package com.foodorder.foodapp.service;
 
-import com.foodorder.foodapp.config.ModelMapperConfig;
-
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -31,6 +27,7 @@ import com.foodorder.foodapp.repository.EvaluateRepository;
 import com.foodorder.foodapp.repository.OrderRepository;
 import com.foodorder.foodapp.repository.ProductRepository;
 import com.foodorder.foodapp.specification.EvaluateSpecification;
+import com.foodorder.foodapp.utils.PageableUtils;
 
 import jakarta.transaction.Transactional;
 
@@ -43,7 +40,6 @@ public class ClientEvaluateService {
   private final OrderRepository orderRepository;
   private final ImageUploadService imageUploadService;
 
-
   public ClientDetailEvaluateDTO getEvaluate(User currentUser, Long productId) {
     Evaluate evaluate = evaluateRepository.findByProductIdAndUserIdAndIsShowTrue(productId, currentUser.getId())
         .orElseThrow(() -> new ResourceNotFoundException("evaluate.not.found"));
@@ -51,17 +47,17 @@ public class ClientEvaluateService {
     return modelMapper.map(evaluate, ClientDetailEvaluateDTO.class);
   }
 
-  public Page<ClientListEvaluateDTO> getEvaluates(ClientEvaluateSearchDTO params) {
+  public Page<ClientListEvaluateDTO> getEvaluates(ClientEvaluateSearchDTO params, Pageable pageable) {
     productRepository.findByIdAndIsActiveTrueAndDeletedAtIsNull(params.getProductId())
         .orElseThrow(() -> new ResourceNotFoundException("product.not.found"));
 
-    int pageIndex = Math.max(0, params.getPage() - 1);
-    Pageable pageable =  PageRequest.of(pageIndex, params.getPerPage(), Sort.by("createdAt").descending());
+    Pageable sortedPageable = PageableUtils.withFixedSort(pageable,
+        Sort.by("createdAt").descending().and(Sort.by("id").descending()));
 
     Specification<Evaluate> spec = buildSpecification(params.getProductId());
+    Page<Evaluate> pageResult = evaluateRepository.findAll(spec, sortedPageable);
 
-    Page<Evaluate> pageResult = evaluateRepository.findAll(spec, pageable);
-    return pageResult.map(product -> modelMapper.map(product, ClientListEvaluateDTO.class));
+    return pageResult.map(evaluate -> modelMapper.map(evaluate, ClientListEvaluateDTO.class));
   }
 
   @Transactional
@@ -132,11 +128,11 @@ public class ClientEvaluateService {
 
   private Specification<Evaluate> buildSpecification(Long productId) {
     return Stream.of(
-      EvaluateSpecification.withFetch(),
-      EvaluateSpecification.isShow(),
-      EvaluateSpecification.hasProduct(productId))
-      .filter(Objects::nonNull)
-      .reduce((s1, s2) -> s1.and(s2))
-      .orElse(null);
+        EvaluateSpecification.withFetch(),
+        EvaluateSpecification.isShow(),
+        EvaluateSpecification.hasProduct(productId))
+        .filter(Objects::nonNull)
+        .reduce((s1, s2) -> s1.and(s2))
+        .orElse(null);
   }
 }
