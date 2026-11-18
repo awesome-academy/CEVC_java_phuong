@@ -8,7 +8,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdminSearchEvaluateDTO {
-  private String productName;
+  private Long productId;
 
   private Long ratingLevel;
+
+  /** null = all, true = shown only, false = hidden only. */
+  private Boolean isShow;
 }

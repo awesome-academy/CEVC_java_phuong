@@ -42,8 +42,8 @@ public class EvaluateService {
 
   private Specification<Evaluate> buildSpecification(AdminSearchEvaluateDTO params) {
     return Stream.of(
-        EvaluateSpecification.hasProductName(params.getProductName()),
-        EvaluateSpecification.isShow(),
+        EvaluateSpecification.hasProduct(params.getProductId()),
+        EvaluateSpecification.hasShowStatus(params.getIsShow()),
         EvaluateSpecification.hasRatingLevel(params.getRatingLevel()),
         EvaluateSpecification.withFetch())
         .filter(Objects::nonNull)

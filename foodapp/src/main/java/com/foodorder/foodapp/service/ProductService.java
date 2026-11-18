@@ -19,6 +19,7 @@ import lombok.AllArgsConstructor;
 import com.foodorder.foodapp.dto.product.CreateProductDTO;
 import com.foodorder.foodapp.dto.product.DetailProductDTO;
 import com.foodorder.foodapp.dto.product.ListProductDTO;
+import com.foodorder.foodapp.dto.product.ProductOptionDTO;
 import com.foodorder.foodapp.dto.product.SearchProductDTO;
 import com.foodorder.foodapp.dto.product.UpdateProductDTO;
 import com.foodorder.foodapp.dto.product_type.ProductTypeDTO;
@@ -64,6 +65,13 @@ public class ProductService {
   public List<ProductTypeDTO> getAllProductTypes() {
     return productTypeRepository.findAll().stream()
         .map(productType -> modelMapper.map(productType, ProductTypeDTO.class))
+        .collect(Collectors.toList());
+  }
+
+  /** All products (hidden and deleted included) so old evaluates can still be filtered by product. */
+  public List<ProductOptionDTO> getProductSelectOptions() {
+    return productRepository.findAll(Sort.by("name")).stream()
+        .map(product -> modelMapper.map(product, ProductOptionDTO.class))
         .collect(Collectors.toList());
   }
 
