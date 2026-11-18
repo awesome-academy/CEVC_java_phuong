@@ -24,6 +24,7 @@ import io.micrometer.common.lang.NonNull;
 import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import lombok.AllArgsConstructor;
 
@@ -41,11 +42,10 @@ public class SuggestionsController {
   @GetMapping
   public String indexSuggestion(
       @RequestParam(required = false) String status,
-      @RequestParam(defaultValue = "${app.pagination.default-page}") int page,
-      @RequestParam(defaultValue = "${app.pagination.default-per-page}") int perPage,
+      Pageable pageable,
       Model model) {
-    AdminSearchSuggestionDTO params = new AdminSearchSuggestionDTO(status, page, perPage);
-    Page<DetailSuggestionDTO> suggestions = suggestionService.getAllSuggestions(params);
+    AdminSearchSuggestionDTO params = new AdminSearchSuggestionDTO(status);
+    Page<DetailSuggestionDTO> suggestions = suggestionService.getAllSuggestions(params, pageable);
     model.addAttribute("search", params);
     model.addAttribute("suggestions", suggestions);
     model.addAttribute("totalPages", suggestions.getTotalPages());

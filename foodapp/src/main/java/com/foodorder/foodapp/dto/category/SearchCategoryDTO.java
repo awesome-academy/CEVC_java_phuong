@@ -9,8 +9,4 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SearchCategoryDTO {
   private String name;
-
-  private int page;
-
-  private int perPage;
 }

@@ -5,7 +5,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.lang.NonNull;
 
 import com.foodorder.foodapp.repository.CategoryRepository;
@@ -21,6 +20,7 @@ import com.foodorder.foodapp.dto.category.UpdateCategoryDTO;
 import com.foodorder.foodapp.exception.BadRequestException;
 import com.foodorder.foodapp.exception.ResourceNotFoundException;
 import com.foodorder.foodapp.model.Category;
+import com.foodorder.foodapp.utils.PageableUtils;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,15 +30,14 @@ public class CategoryService {
   private final CategoryRepository categoryRepository;
   private final ModelMapper modelMapper;
 
-  public Page<ListCategoryDTO> getAllCategories(SearchCategoryDTO params) {
-    int pageIndex = Math.max(0, params.getPage() - 1);
-    Pageable pageable = PageRequest.of(pageIndex, params.getPerPage(), Sort.by("id").descending());
+  public Page<ListCategoryDTO> getAllCategories(SearchCategoryDTO params, Pageable pageable) {
+    Pageable sortedPageable = PageableUtils.withFixedSort(pageable, Sort.by("id").descending());
 
     Page<Category> pageResult;
     if (params.getName() != null && !params.getName().isBlank()) {
-      pageResult = categoryRepository.findByNameContainingIgnoreCase(params.getName(), pageable);
+      pageResult = categoryRepository.findByNameContainingIgnoreCase(params.getName(), sortedPageable);
     } else {
-      pageResult = categoryRepository.findAll(pageable);
+      pageResult = categoryRepository.findAll(sortedPageable);
     }
     return pageResult.map(category -> modelMapper.map(category, ListCategoryDTO.class));
   }

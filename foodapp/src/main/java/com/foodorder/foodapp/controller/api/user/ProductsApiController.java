@@ -1,5 +1,7 @@
 package com.foodorder.foodapp.controller.api.user;
 
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,11 +35,11 @@ public class ProductsApiController {
   public ResponseEntity<?> indexProduct(@RequestParam(required = false) String name,
       @RequestParam(required = false) Long categoryId,
       @RequestParam(required = false) Long productTypeId,
-      @RequestParam(defaultValue = "${app.pagination.default-page}") int page,
-      @RequestParam(defaultValue = "${app.pagination.default-per-page}") int perPage) {
-    SearchProductDTO params = new SearchProductDTO(name, categoryId, productTypeId, page, perPage);
+      @ParameterObject Pageable pageable) {
+    SearchProductDTO params = new SearchProductDTO(name, categoryId, productTypeId);
 
-    PageResponseDTO<ClientProductDTO> response = new PageResponseDTO<>(clientProductService.getPublicProducts(params));
+    PageResponseDTO<ClientProductDTO> response = new PageResponseDTO<>(
+        clientProductService.getPublicProducts(params, pageable));
 
     return ApiResponseDTO.ok(response);
   }

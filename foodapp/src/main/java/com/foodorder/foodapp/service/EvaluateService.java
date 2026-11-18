@@ -6,7 +6,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.domain.PageRequest;
 
 import com.foodorder.foodapp.repository.EvaluateRepository;
 import com.foodorder.foodapp.repository.ProductRepository;
@@ -20,6 +19,7 @@ import com.foodorder.foodapp.dto.evaluate.DetailEvaluateDTO;
 import com.foodorder.foodapp.exception.ResourceNotFoundException;
 import com.foodorder.foodapp.model.Evaluate;
 import com.foodorder.foodapp.model.Product;
+import com.foodorder.foodapp.utils.PageableUtils;
 
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -31,14 +31,12 @@ public class EvaluateService {
   private final ProductRepository productRepository;
   private final EvaluateRepository evaluateRepository;
 
-  public Page<DetailEvaluateDTO> getAllEvaluates(AdminSearchEvaluateDTO params) {
-    int pageIndex = Math.max(0, params.getPage() - 1);
-    Pageable pageable = PageRequest.of(pageIndex, params.getPerPage(),
-        Sort.by("id").descending());
+  public Page<DetailEvaluateDTO> getAllEvaluates(AdminSearchEvaluateDTO params, Pageable pageable) {
+    Pageable sortedPageable = PageableUtils.withFixedSort(pageable, Sort.by("id").descending());
 
     Specification<Evaluate> spec = buildSpecification(params);
 
-    Page<Evaluate> pageResult = evaluateRepository.findAll(spec, pageable);
+    Page<Evaluate> pageResult = evaluateRepository.findAll(spec, sortedPageable);
 
     return pageResult.map(evaluate -> modelMapper.map(evaluate,
         DetailEvaluateDTO.class));

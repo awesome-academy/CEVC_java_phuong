@@ -25,6 +25,7 @@ import com.foodorder.foodapp.exception.BadRequestException;
 import com.foodorder.foodapp.exception.ResourceNotFoundException;
 import com.foodorder.foodapp.service.CategoryService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -45,11 +46,10 @@ public class CategoriesController {
   @GetMapping
   public String indexCategory(
       @RequestParam(required = false) String name,
-      @RequestParam(defaultValue = "${app.pagination.default-page}") int page,
-      @RequestParam(defaultValue = "${app.pagination.default-per-page}") int perPage,
+      Pageable pageable,
       Model model) {
-    SearchCategoryDTO params = new SearchCategoryDTO(name, page, perPage);
-    Page<ListCategoryDTO> categories = categoryService.getAllCategories(params);
+    SearchCategoryDTO params = new SearchCategoryDTO(name);
+    Page<ListCategoryDTO> categories = categoryService.getAllCategories(params, pageable);
     model.addAttribute("search", params);
     model.addAttribute("categories", categories);
     model.addAttribute("totalPages", categories.getTotalPages());

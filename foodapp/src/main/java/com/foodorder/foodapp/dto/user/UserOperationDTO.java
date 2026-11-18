@@ -2,6 +2,7 @@ package com.foodorder.foodapp.dto.user;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.foodorder.foodapp.validation.EmailOwner;
 import com.foodorder.foodapp.validation.FileSize;
 
 import jakarta.validation.constraints.Email;
@@ -15,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserOperationDTO {
+public class UserOperationDTO implements EmailOwner {
   @NotBlank(message = "{validation.user.full_name.required}")
   @Size(max = 100, message = "{validation.user.full_name.max}")
   private String fullName;

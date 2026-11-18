@@ -13,8 +13,4 @@ public class SearchProductDTO {
   private Long categoryId;
 
   private Long productTypeId;
-
-  private int page;
-
-  private int perPage;
 }

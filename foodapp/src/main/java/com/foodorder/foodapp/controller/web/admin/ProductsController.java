@@ -29,6 +29,7 @@ import com.foodorder.foodapp.service.CategoryService;
 import com.foodorder.foodapp.service.ProductService;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -54,11 +55,10 @@ public class ProductsController {
       @RequestParam(required = false) String name,
       @RequestParam(required = false) Long categoryId,
       @RequestParam(required = false) Long productTypeId,
-      @RequestParam(defaultValue = "${app.pagination.default-page}") int page,
-      @RequestParam(defaultValue = "${app.pagination.default-per-page}") int perPage,
+      Pageable pageable,
       Model model) {
-    SearchProductDTO params = new SearchProductDTO(name, categoryId, productTypeId, page, perPage);
-    Page<ListProductDTO> products = productService.getAllProducts(params);
+    SearchProductDTO params = new SearchProductDTO(name, categoryId, productTypeId);
+    Page<ListProductDTO> products = productService.getAllProducts(params, pageable);
     model.addAttribute("search", params);
     model.addAttribute("products", products);
     model.addAttribute("totalPages", products.getTotalPages());

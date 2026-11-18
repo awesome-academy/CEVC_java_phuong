@@ -16,6 +16,7 @@ import com.foodorder.foodapp.service.EvaluateService;
 import io.micrometer.common.lang.NonNull;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import lombok.AllArgsConstructor;
 
@@ -29,11 +30,10 @@ public class EvaluatesController {
   public String indexEvaluate(
       @RequestParam(required = false) String productName,
       @RequestParam(required = false) Long ratingLevel,
-      @RequestParam(defaultValue = "${app.pagination.default-page}") int page,
-      @RequestParam(defaultValue = "${app.pagination.default-per-page}") int perPage,
+      Pageable pageable,
       Model model) {
-    AdminSearchEvaluateDTO params = new AdminSearchEvaluateDTO(productName, ratingLevel, page, perPage);
-    Page<DetailEvaluateDTO> evaluates = evaluateService.getAllEvaluates(params);
+    AdminSearchEvaluateDTO params = new AdminSearchEvaluateDTO(productName, ratingLevel);
+    Page<DetailEvaluateDTO> evaluates = evaluateService.getAllEvaluates(params, pageable);
     model.addAttribute("search", params);
     model.addAttribute("evaluates", evaluates);
     model.addAttribute("totalPages", evaluates.getTotalPages());

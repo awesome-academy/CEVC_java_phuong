@@ -3,6 +3,8 @@ package com.foodorder.foodapp.specification;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.foodorder.foodapp.model.Evaluate;
+import com.foodorder.foodapp.model.Evaluate_;
+import com.foodorder.foodapp.model.Product_;
 
 import jakarta.persistence.criteria.JoinType;
 
@@ -12,13 +14,13 @@ public class EvaluateSpecification {
       if (productName == null || productName.isBlank()) {
         return null;
       }
-      return cb.like(cb.lower(root.get("product").get("name")), "%" + productName.toLowerCase() + "%");
+      return cb.like(cb.lower(root.get(Evaluate_.product).get(Product_.name)), "%" + productName.toLowerCase() + "%");
     };
   }
 
   public static Specification<Evaluate> isShow() {
     return (root, query, cb) -> {
-      return cb.isTrue(root.get("isShow"));
+      return cb.isTrue(root.get(Evaluate_.isShow));
     };
   }
 
@@ -30,7 +32,7 @@ public class EvaluateSpecification {
 
       int rating = ratingLevel.intValue();
       if (rating >= 1 && rating <= 5) {
-        return cb.equal(root.get("rating"), rating);
+        return cb.equal(root.get(Evaluate_.rating), rating);
       } else {
         return null;
       }
@@ -40,11 +42,11 @@ public class EvaluateSpecification {
   public static Specification<Evaluate> withFetch() {
     return (root, query, cb) -> {
       if (Evaluate.class.equals(query.getResultType())) {
-        root.fetch("product", JoinType.LEFT);
-        root.fetch("user", JoinType.LEFT);
+        root.fetch(Evaluate_.product, JoinType.LEFT);
+        root.fetch(Evaluate_.user, JoinType.LEFT);
         query.distinct(true);
       } else {
-        root.join("product", JoinType.LEFT);
+        root.join(Evaluate_.product, JoinType.LEFT);
         query.distinct(true);
       }
       return null;

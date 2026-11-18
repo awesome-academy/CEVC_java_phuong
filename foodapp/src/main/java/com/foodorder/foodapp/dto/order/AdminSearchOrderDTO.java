@@ -13,8 +13,4 @@ public class AdminSearchOrderDTO {
   private Long orderStatusId;
 
   private Long priceLevel;
-
-  private int page = 1;
-
-  private int perPage = 5;
 }

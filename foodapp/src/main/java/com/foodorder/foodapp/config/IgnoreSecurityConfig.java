@@ -1,5 +1,7 @@
 package com.foodorder.foodapp.config;
 
+import com.foodorder.foodapp.config.properties.UploadProperties;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,16 +13,16 @@ import com.foodorder.foodapp.constants.IgnoreSecurityCheckUrl;
 @Configuration
 public class IgnoreSecurityConfig {
 
-  private final EnvProperties envProperties;
+  private final UploadProperties uploadProperties;
 
-  public IgnoreSecurityConfig(EnvProperties envProperties) {
-    this.envProperties = envProperties;
+  public IgnoreSecurityConfig(UploadProperties uploadProperties) {
+    this.uploadProperties = uploadProperties;
   }
 
   @Bean
   public List<String> publicStaticUrls() {
     List<String> urls = new ArrayList<>(IgnoreSecurityCheckUrl.PUBLIC_STATIC_URLS);
-    urls.add(envProperties.getFolder() + "**");
+    urls.add(uploadProperties.folder() + "**");
     return urls;
   }
 

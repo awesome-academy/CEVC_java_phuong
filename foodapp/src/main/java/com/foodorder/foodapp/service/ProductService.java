@@ -6,7 +6,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.lang.NonNull;
 
 import com.foodorder.foodapp.repository.CategoryRepository;
@@ -27,6 +26,7 @@ import com.foodorder.foodapp.exception.BadRequestException;
 import com.foodorder.foodapp.exception.ResourceNotFoundException;
 import com.foodorder.foodapp.model.Category;
 import com.foodorder.foodapp.model.Product;
+import com.foodorder.foodapp.utils.PageableUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -45,9 +45,8 @@ public class ProductService {
   private final OrderRepository orderRepository;
   private final ImageUploadService imageUploadService;
 
-  public Page<ListProductDTO> getAllProducts(SearchProductDTO params) {
-    int pageIndex = Math.max(0, params.getPage() - 1);
-    Pageable pageable = PageRequest.of(pageIndex, params.getPerPage(), Sort.by("id").descending());
+  public Page<ListProductDTO> getAllProducts(SearchProductDTO params, Pageable pageable) {
+    Pageable sortedPageable = PageableUtils.withFixedSort(pageable, Sort.by("id").descending());
 
     Specification<Product> spec = Stream.of(
         ProductSpecification.withFetch(),
@@ -57,7 +56,7 @@ public class ProductService {
         ProductSpecification.notDeleted()).filter(Objects::nonNull)
         .reduce((s1, s2) -> s1.and(s2))
         .orElse(null);
-    Page<Product> pageResult = productRepository.findAll(spec, pageable);
+    Page<Product> pageResult = productRepository.findAll(spec, sortedPageable);
 
     return pageResult.map(product -> modelMapper.map(product, ListProductDTO.class));
   }

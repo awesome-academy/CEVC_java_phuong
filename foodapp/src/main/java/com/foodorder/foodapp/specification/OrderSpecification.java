@@ -3,6 +3,10 @@ package com.foodorder.foodapp.specification;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.foodorder.foodapp.model.Order;
+import com.foodorder.foodapp.model.BaseModel_;
+import com.foodorder.foodapp.model.OrderItem_;
+import com.foodorder.foodapp.model.Order_;
+import com.foodorder.foodapp.model.Product_;
 
 import jakarta.persistence.criteria.JoinType;
 
@@ -16,13 +20,13 @@ public class OrderSpecification {
       query.distinct(true);
 
       // Join Order -> OrderItem
-      var orderItemsJoin = root.join("orderItems", JoinType.LEFT);
+      var orderItemsJoin = root.join(Order_.orderItems, JoinType.LEFT);
 
       // Join OrderItem -> Product
-      var productJoin = orderItemsJoin.join("product", JoinType.LEFT);
+      var productJoin = orderItemsJoin.join(OrderItem_.product, JoinType.LEFT);
 
       return cb.like(
-          cb.lower(productJoin.get("name")),
+          cb.lower(productJoin.get(Product_.name)),
           "%" + productName.toLowerCase() + "%");
     };
   }
@@ -32,7 +36,7 @@ public class OrderSpecification {
       if (userId == null) {
         return null;
       }
-      return cb.equal(root.get("user").get("id"), userId);
+      return cb.equal(root.get(Order_.user).get(BaseModel_.id), userId);
     };
   }
 
@@ -41,7 +45,7 @@ public class OrderSpecification {
       if (orderStatusId == null) {
         return null;
       }
-      return cb.equal(root.get("orderStatus").get("id"), orderStatusId);
+      return cb.equal(root.get(Order_.orderStatus).get(BaseModel_.id), orderStatusId);
     };
   }
 
@@ -53,11 +57,11 @@ public class OrderSpecification {
 
       switch (priceLevel.intValue()) {
         case 1:
-          return cb.lessThan(root.get("totalPrice"), 100_000);
+          return cb.lessThan(root.get(Order_.totalPrice), 100_000);
         case 2:
-          return cb.between(root.get("totalPrice"), 100_000, 1_000_000);
+          return cb.between(root.get(Order_.totalPrice), 100_000, 1_000_000);
         case 3:
-          return cb.greaterThan(root.get("totalPrice"), 1_000_000);
+          return cb.greaterThan(root.get(Order_.totalPrice), 1_000_000);
         default:
           return null;
       }
@@ -67,9 +71,9 @@ public class OrderSpecification {
   public static Specification<Order> withFetch() {
     return (root, query, cb) -> {
       if (Order.class.equals(query.getResultType())) {
-        root.fetch("orderStatus", JoinType.LEFT);
-        root.fetch("user", JoinType.LEFT);
-        root.fetch("orderAddress", JoinType.LEFT);
+        root.fetch(Order_.orderStatus, JoinType.LEFT);
+        root.fetch(Order_.user, JoinType.LEFT);
+        root.fetch(Order_.orderAddress, JoinType.LEFT);
       }
 
       return null;

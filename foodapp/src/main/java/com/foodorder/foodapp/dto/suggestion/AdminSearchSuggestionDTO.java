@@ -9,8 +9,4 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AdminSearchSuggestionDTO {
   private String status;
-
-  private int page = 1;
-
-  private int perPage = 5;
 }

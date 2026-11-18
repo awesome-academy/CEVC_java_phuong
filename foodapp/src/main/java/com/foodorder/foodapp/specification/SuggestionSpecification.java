@@ -3,6 +3,7 @@ package com.foodorder.foodapp.specification;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.foodorder.foodapp.model.Suggestion;
+import com.foodorder.foodapp.model.Suggestion_;
 
 import jakarta.persistence.criteria.JoinType;
 
@@ -12,16 +13,17 @@ public class SuggestionSpecification {
       if (status == null || status.isBlank()) {
         return null;
       }
-      return cb.equal(cb.lower(root.get("status")), status.toLowerCase());
+      // status is an enum stored as text: compare as text, case-insensitive (unknown value -> no rows)
+      return cb.equal(cb.lower(root.get(Suggestion_.status).as(String.class)), status.toLowerCase());
     };
   }
 
   public static Specification<Suggestion> withFetch() {
     return (root, query, cb) -> {
       if (Suggestion.class.equals(query.getResultType())) {
-        root.fetch("user", JoinType.LEFT);
+        root.fetch(Suggestion_.user, JoinType.LEFT);
       } else {
-        root.join("user", JoinType.LEFT);
+        root.join(Suggestion_.user, JoinType.LEFT);
       }
       return null;
     };

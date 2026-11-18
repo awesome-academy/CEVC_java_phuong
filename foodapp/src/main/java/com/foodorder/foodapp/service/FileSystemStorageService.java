@@ -1,6 +1,6 @@
 package com.foodorder.foodapp.service;
 
-import org.springframework.beans.factory.annotation.Value;
+import com.foodorder.foodapp.config.properties.UploadProperties;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -15,11 +15,9 @@ public class FileSystemStorageService implements FilesStorageService {
   private final Path rootLocation;
   private final String folder;
 
-  public FileSystemStorageService(
-      @Value("${app.upload.location}") String uploadLocation,
-      @Value("${app.upload.folder}") String folder) {
-    this.rootLocation = Paths.get(uploadLocation).toAbsolutePath().normalize();
-    this.folder = folder;
+  public FileSystemStorageService(UploadProperties uploadProperties) {
+    this.rootLocation = Paths.get(uploadProperties.location()).toAbsolutePath().normalize();
+    this.folder = uploadProperties.folder();
     init();
   }
 

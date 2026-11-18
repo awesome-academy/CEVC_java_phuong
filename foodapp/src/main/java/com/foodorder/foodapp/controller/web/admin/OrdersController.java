@@ -25,6 +25,7 @@ import io.micrometer.common.lang.NonNull;
 import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -46,11 +47,10 @@ public class OrdersController {
       @RequestParam(required = false) String productName,
       @RequestParam(required = false) Long orderStatusId,
       @RequestParam(required = false) Long priceLevel,
-      @RequestParam(defaultValue = "${app.pagination.default-page}") int page,
-      @RequestParam(defaultValue = "${app.pagination.default-per-page}") int perPage,
+      Pageable pageable,
       Model model) {
-    AdminSearchOrderDTO params = new AdminSearchOrderDTO(productName, orderStatusId, priceLevel, page, perPage);
-    Page<ListOrderDTO> orders = orderService.getAllOrders(params);
+    AdminSearchOrderDTO params = new AdminSearchOrderDTO(productName, orderStatusId, priceLevel);
+    Page<ListOrderDTO> orders = orderService.getAllOrders(params, pageable);
     model.addAttribute("search", params);
     model.addAttribute("orders", orders);
     model.addAttribute("totalPages", orders.getTotalPages());
@@ -72,17 +72,11 @@ public class OrdersController {
       @NonNull @PathVariable Long id,
       @Valid @ModelAttribute("order") AdminUpdateOrderStatusDTO updateOrderStatusDTO,
       BindingResult bindingResult,
-      RedirectAttributes redirectAttributes,
-      Model model) {
+      RedirectAttributes redirectAttributes) {
     if (bindingResult.hasErrors()) {
-      AdminSearchOrderDTO params = new AdminSearchOrderDTO();
-      Page<ListOrderDTO> orders = orderService.getAllOrders(params);
-      model.addAttribute("orders", orders);
-      model.addAttribute("totalPages", orders.getTotalPages());
-      model.addAttribute("search", params);
-
-      model.addAttribute("failedMessage", MessageCode.UPDATE_FAILED.getCode());
-      return "admin/orders/index";
+      // The status modal shows no field errors, only a toast, so redirect like the other branches
+      redirectAttributes.addFlashAttribute("failedMessage", MessageCode.UPDATE_FAILED.getCode());
+      return "redirect:/admin/orders";
     }
 
     try {

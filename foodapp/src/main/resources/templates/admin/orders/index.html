@@ -151,30 +151,30 @@
                           <div>
                             <select class="form-select form-select-sm" name="perPage"
                               onchange="document.getElementById('perPageForm').submit()">
-                              <option value="5" th:selected="*{perPage} == 5">5</option>
-                              <option value="10" th:selected="*{perPage} == 10">10</option>
-                              <option value="15" th:selected="*{perPage} == 15">15</option>
+                              <option value="5" th:selected="${orders.size} == 5">5</option>
+                              <option value="10" th:selected="${orders.size} == 10">10</option>
+                              <option value="15" th:selected="${orders.size} == 15">15</option>
                             </select>
                           </div>
                         </div>
                       </form>
                     </div>
                     <div class="col-sm-6">
-                      <ul class="pagination pagination-sm float-end" th:if="${totalPages > 1}">
-                        <li class="page-item" th:classappend="${search.page} == ${1} ? 'disabled'">
+                      <ul class="pagination pagination-sm float-end" th:if="${totalPages > 1}" th:with="currentPage=${orders.number + 1}, perPage=${orders.size}">
+                        <li class="page-item" th:classappend="${currentPage} == ${1} ? 'disabled'">
                           <a class="page-link"
-                            th:href="@{/admin/orders(page=${search.page - 1}, perPage=${search.perPage}, productName=${search.productName}, orderStatus=${search.orderStatusId}, priceLevel=${search.priceLevel})}">&laquo;</a>
+                            th:href="@{/admin/orders(page=${currentPage - 1}, perPage=${perPage}, productName=${search.productName}, orderStatus=${search.orderStatusId}, priceLevel=${search.priceLevel})}">&laquo;</a>
                         </li>
                         <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages-1)}"
-                          th:classappend="${i + 1} == ${search.page} ? 'active'">
+                          th:classappend="${i + 1} == ${currentPage} ? 'active'">
                           <a class="page-link"
-                            th:href="@{/admin/orders(page=${i + 1}, perPage=${search.perPage}, productName=${search.productName}, orderStatus=${search.orderStatusId}, priceLevel=${search.priceLevel})}"
+                            th:href="@{/admin/orders(page=${i + 1}, perPage=${perPage}, productName=${search.productName}, orderStatus=${search.orderStatusId}, priceLevel=${search.priceLevel})}"
                             th:text="${i + 1}">
                           </a>
                         </li>
-                        <li class="page-item" th:classappend="${search.page} == ${totalPages} ? 'disabled'">
+                        <li class="page-item" th:classappend="${currentPage} == ${totalPages} ? 'disabled'">
                           <a class="page-link"
-                            th:href="@{/admin/orders(page=${search.page + 1}, perPage=${search.perPage}, productName=${search.productName}, orderStatus=${search.orderStatusId}, priceLevel=${search.priceLevel})}">
+                            th:href="@{/admin/orders(page=${currentPage + 1}, perPage=${perPage}, productName=${search.productName}, orderStatus=${search.orderStatusId}, priceLevel=${search.priceLevel})}">
                             &raquo;
                           </a>
                         </li>

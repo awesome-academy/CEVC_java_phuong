@@ -11,8 +11,4 @@ public class AdminSearchEvaluateDTO {
   private String productName;
 
   private Long ratingLevel;
-
-  private int page = 1;
-
-  private int perPage = 5;
 }

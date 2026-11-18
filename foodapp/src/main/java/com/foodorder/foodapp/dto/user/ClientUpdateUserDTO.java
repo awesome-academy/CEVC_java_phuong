@@ -21,4 +21,9 @@ public class ClientUpdateUserDTO extends UserOperationDTO {
 
   @Pattern(regexp = RegexConstants.PW_OPTIONAL_REGEX, message = "{validation.user.password.invalid}")
   private String password;
+
+  @Override
+  public Long getEditingUserId() {
+    return id;
+  }
 }
