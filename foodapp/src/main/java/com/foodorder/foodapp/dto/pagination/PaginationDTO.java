@@ -31,12 +31,8 @@ public class PaginationDTO {
     return new PaginationDTO(resolvedPage, resolvedPerPage);
   }
 
+  /** Page numbers are 1-based in the API/UI, 0-based in Spring Data. */
   public Pageable toPageable(Sort sort) {
-    return toPageable(page, perPage, sort);
-  }
-
-  /** Page numbers are 1-based in the API/UI, 0-based in Spring Data. Values must already be normalized. */
-  public static Pageable toPageable(int page, int perPage, Sort sort) {
     return PageRequest.of(page - 1, perPage, sort);
   }
 }

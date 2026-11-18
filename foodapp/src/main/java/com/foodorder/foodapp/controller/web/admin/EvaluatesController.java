@@ -1,6 +1,5 @@
 package com.foodorder.foodapp.controller.web.admin;
 
-import com.foodorder.foodapp.dto.pagination.PaginationDTO;
 import com.foodorder.foodapp.config.properties.PaginationProperties;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,9 +34,8 @@ public class EvaluatesController {
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer perPage,
       Model model) {
-    PaginationDTO pagination = paginationProperties.resolve(page, perPage);
-    AdminSearchEvaluateDTO params = new AdminSearchEvaluateDTO(productName, ratingLevel, pagination.getPage(),
-        pagination.getPerPage());
+    AdminSearchEvaluateDTO params = new AdminSearchEvaluateDTO(productName, ratingLevel,
+        paginationProperties.resolve(page, perPage));
     Page<DetailEvaluateDTO> evaluates = evaluateService.getAllEvaluates(params);
     model.addAttribute("search", params);
     model.addAttribute("evaluates", evaluates);

@@ -1,5 +1,7 @@
 package com.foodorder.foodapp.dto.suggestion;
 
+import com.foodorder.foodapp.dto.pagination.PaginationDTO;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,7 +12,5 @@ import lombok.NoArgsConstructor;
 public class AdminSearchSuggestionDTO {
   private String status;
 
-  private int page = 1;
-
-  private int perPage = 5;
+  private PaginationDTO pagination;
 }

@@ -1,6 +1,5 @@
 package com.foodorder.foodapp.controller.web.admin;
 
-import com.foodorder.foodapp.dto.pagination.PaginationDTO;
 import com.foodorder.foodapp.config.properties.PaginationProperties;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Controller;
@@ -47,9 +46,7 @@ public class SuggestionsController {
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer perPage,
       Model model) {
-    PaginationDTO pagination = paginationProperties.resolve(page, perPage);
-    AdminSearchSuggestionDTO params = new AdminSearchSuggestionDTO(status, pagination.getPage(),
-        pagination.getPerPage());
+    AdminSearchSuggestionDTO params = new AdminSearchSuggestionDTO(status, paginationProperties.resolve(page, perPage));
     Page<DetailSuggestionDTO> suggestions = suggestionService.getAllSuggestions(params);
     model.addAttribute("search", params);
     model.addAttribute("suggestions", suggestions);

@@ -1,6 +1,5 @@
 package com.foodorder.foodapp.controller.api.user;
 
-import com.foodorder.foodapp.dto.pagination.PaginationDTO;
 import com.foodorder.foodapp.config.properties.PaginationProperties;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,9 +37,8 @@ public class ProductsApiController {
       @RequestParam(required = false) Long productTypeId,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer perPage) {
-    PaginationDTO pagination = paginationProperties.resolve(page, perPage);
-    SearchProductDTO params = new SearchProductDTO(name, categoryId, productTypeId, pagination.getPage(),
-        pagination.getPerPage());
+    SearchProductDTO params = new SearchProductDTO(name, categoryId, productTypeId,
+        paginationProperties.resolve(page, perPage));
 
     PageResponseDTO<ClientProductDTO> response = new PageResponseDTO<>(clientProductService.getPublicProducts(params));
 

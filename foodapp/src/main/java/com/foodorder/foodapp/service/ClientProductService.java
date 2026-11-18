@@ -1,6 +1,5 @@
 package com.foodorder.foodapp.service;
 
-import com.foodorder.foodapp.dto.pagination.PaginationDTO;
 import org.springframework.stereotype.Service;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +29,7 @@ public class ClientProductService {
   private final ModelMapper modelMapper;
 
   public Page<ClientProductDTO> getPublicProducts(SearchProductDTO params) {
-    Pageable pageable = PaginationDTO.toPageable(params.getPage(), params.getPerPage(), Sort.by("id").descending());
+    Pageable pageable = params.getPagination().toPageable(Sort.by("id").descending());
 
     Specification<Product> spec = buildSpecification(params);
     Page<Product> pageResult = productRepository.findAll(spec, pageable);

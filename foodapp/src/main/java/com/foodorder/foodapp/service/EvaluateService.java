@@ -1,6 +1,5 @@
 package com.foodorder.foodapp.service;
 
-import com.foodorder.foodapp.dto.pagination.PaginationDTO;
 import org.springframework.stereotype.Service;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +31,7 @@ public class EvaluateService {
   private final EvaluateRepository evaluateRepository;
 
   public Page<DetailEvaluateDTO> getAllEvaluates(AdminSearchEvaluateDTO params) {
-    Pageable pageable = PaginationDTO.toPageable(params.getPage(), params.getPerPage(), Sort.by("id").descending());
+    Pageable pageable = params.getPagination().toPageable(Sort.by("id").descending());
 
     Specification<Evaluate> spec = buildSpecification(params);
 

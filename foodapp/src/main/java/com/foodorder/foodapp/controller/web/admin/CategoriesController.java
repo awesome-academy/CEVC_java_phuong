@@ -1,6 +1,5 @@
 package com.foodorder.foodapp.controller.web.admin;
 
-import com.foodorder.foodapp.dto.pagination.PaginationDTO;
 import com.foodorder.foodapp.config.properties.PaginationProperties;
 import java.util.List;
 
@@ -51,8 +50,7 @@ public class CategoriesController {
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer perPage,
       Model model) {
-    PaginationDTO pagination = paginationProperties.resolve(page, perPage);
-    SearchCategoryDTO params = new SearchCategoryDTO(name, pagination.getPage(), pagination.getPerPage());
+    SearchCategoryDTO params = new SearchCategoryDTO(name, paginationProperties.resolve(page, perPage));
     Page<ListCategoryDTO> categories = categoryService.getAllCategories(params);
     model.addAttribute("search", params);
     model.addAttribute("categories", categories);

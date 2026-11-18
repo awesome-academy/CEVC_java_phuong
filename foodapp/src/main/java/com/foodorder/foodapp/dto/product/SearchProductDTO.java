@@ -1,5 +1,7 @@
 package com.foodorder.foodapp.dto.product;
 
+import com.foodorder.foodapp.dto.pagination.PaginationDTO;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +16,5 @@ public class SearchProductDTO {
 
   private Long productTypeId;
 
-  private int page;
-
-  private int perPage;
+  private PaginationDTO pagination;
 }

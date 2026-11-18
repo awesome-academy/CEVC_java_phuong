@@ -1,6 +1,5 @@
 package com.foodorder.foodapp.controller.web.admin;
 
-import com.foodorder.foodapp.dto.pagination.PaginationDTO;
 import com.foodorder.foodapp.config.properties.PaginationProperties;
 import java.util.List;
 
@@ -52,9 +51,8 @@ public class OrdersController {
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer perPage,
       Model model) {
-    PaginationDTO pagination = paginationProperties.resolve(page, perPage);
-    AdminSearchOrderDTO params = new AdminSearchOrderDTO(productName, orderStatusId, priceLevel, pagination.getPage(),
-        pagination.getPerPage());
+    AdminSearchOrderDTO params = new AdminSearchOrderDTO(productName, orderStatusId, priceLevel,
+        paginationProperties.resolve(page, perPage));
     Page<ListOrderDTO> orders = orderService.getAllOrders(params);
     model.addAttribute("search", params);
     model.addAttribute("orders", orders);
@@ -80,8 +78,7 @@ public class OrdersController {
       RedirectAttributes redirectAttributes,
       Model model) {
     if (bindingResult.hasErrors()) {
-      PaginationDTO defaults = paginationProperties.resolve(null, null);
-      AdminSearchOrderDTO params = new AdminSearchOrderDTO(null, null, null, defaults.getPage(), defaults.getPerPage());
+      AdminSearchOrderDTO params = new AdminSearchOrderDTO(null, null, null, paginationProperties.resolve(null, null));
       Page<ListOrderDTO> orders = orderService.getAllOrders(params);
       model.addAttribute("orders", orders);
       model.addAttribute("totalPages", orders.getTotalPages());
