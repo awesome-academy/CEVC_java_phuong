@@ -40,8 +40,9 @@ public class ClientEvaluateService {
   private final OrderRepository orderRepository;
   private final ImageUploadService imageUploadService;
 
+  /** Returns the user's own evaluate even when it was hidden by an admin (isShow tells the client). */
   public ClientDetailEvaluateDTO getEvaluate(User currentUser, Long productId) {
-    Evaluate evaluate = evaluateRepository.findByProductIdAndUserIdAndIsShowTrue(productId, currentUser.getId())
+    Evaluate evaluate = evaluateRepository.findByProductIdAndUserId(productId, currentUser.getId())
         .orElseThrow(() -> new ResourceNotFoundException("evaluate.not.found"));
 
     return modelMapper.map(evaluate, ClientDetailEvaluateDTO.class);
@@ -63,8 +64,14 @@ public class ClientEvaluateService {
   @Transactional
   public ClientDetailEvaluateDTO createEvaluate(User currentUser, Long productId,
       CreateEvaluateDTO createEvaluateDTO) {
+    // Lock the product: the evaluates table has no unique (product_id, user_id), so two
+    // concurrent requests of the same user could otherwise both insert a new evaluate.
     Product product = productRepository.findByIdForUpdate(productId)
         .orElseThrow(() -> new ResourceNotFoundException("product.not.found"));
+
+    if (!Boolean.TRUE.equals(product.getIsActive()) || product.getDeletedAt() != null) {
+      throw new ResourceNotFoundException("product.not.found");
+    }
 
     boolean existsOrderCompleted = orderRepository
         .existsOrderCompletedByUserIdAndProductId(currentUser.getId(), productId);
@@ -73,8 +80,13 @@ public class ClientEvaluateService {
       throw new BadRequestException("evaluate.create.not.allowed");
     }
 
-    Evaluate evaluate = evaluateRepository.findByProductIdAndUserIdAndIsShowTrue(productId, currentUser.getId())
+    // Look up hidden evaluates too, otherwise a hidden one is treated as missing and the
+    // user could publish a new evaluate around the admin's moderation.
+    Evaluate evaluate = evaluateRepository.findByProductIdAndUserId(productId, currentUser.getId())
         .orElse(new Evaluate());
+    if (evaluate.getId() != null) {
+      assertEditable(evaluate);
+    }
     String newImagePath = null;
     String oldImagePath = evaluate.getImage();
 
@@ -105,12 +117,20 @@ public class ClientEvaluateService {
     Product product = productRepository.findByIdForUpdate(productId)
         .orElseThrow(() -> new ResourceNotFoundException("product.not.found"));
 
-    Evaluate evaluate = evaluateRepository.findByProductIdAndUserIdAndIsShowTrue(productId, currentUser.getId())
+    Evaluate evaluate = evaluateRepository.findByProductIdAndUserId(productId, currentUser.getId())
         .orElseThrow(() -> new ResourceNotFoundException("evaluate.not.found"));
+    assertEditable(evaluate);
 
     evaluateRepository.delete(evaluate);
 
     caculateAvgRating(product);
+  }
+
+  /** A hidden evaluate is read-only for its owner: editing or deleting it would bypass moderation. */
+  private void assertEditable(Evaluate evaluate) {
+    if (!Boolean.TRUE.equals(evaluate.getIsShow())) {
+      throw new BadRequestException("evaluate.hidden");
+    }
   }
 
   private void caculateAvgRating(Product product) {

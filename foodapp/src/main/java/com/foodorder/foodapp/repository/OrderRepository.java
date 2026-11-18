@@ -59,7 +59,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
             o.orderItems oi
         WHERE
             oi.product.id = :productId
-            AND o.orderStatus.id = 4
+            AND o.orderStatus.name = 'COMPLETED'
             AND o.user.id = :userId
       """)
   boolean existsOrderCompletedByUserIdAndProductId(@Param("userId") Long userId, @Param("productId") Long productId);
