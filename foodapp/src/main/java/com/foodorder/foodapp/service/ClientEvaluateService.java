@@ -84,8 +84,9 @@ public class ClientEvaluateService {
   @Transactional
   public ClientDetailEvaluateDTO createEvaluate(User currentUser, Long productId,
       CreateEvaluateDTO createEvaluateDTO) {
-    // Lock the product: the evaluates table has no unique (product_id, user_id), so two
-    // concurrent requests of the same user could otherwise both insert a new evaluate.
+    // Lock the product: all evaluate writes on one product (client and admin) run one at a time,
+    // so the average rating is never computed from stale data, and a double submit sees the
+    // first insert instead of hitting the UNIQUE (product_id, user_id) constraint.
     Product product = productRepository.findByIdForUpdate(productId)
         .orElseThrow(() -> new ResourceNotFoundException("product.not.found"));
 
