@@ -116,7 +116,7 @@
                         </td>
                         <td th:text="${#temporals.format(evaluate.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
                         <td class="text-center">
-                          <form th:replace="~{admin/evaluates/toggle_display_form :: form(${evaluate})}"></form>
+                          <form th:replace="~{admin/evaluates/display_form :: form(${evaluate})}"></form>
                         </td>
                       </tr>
                     </tbody>

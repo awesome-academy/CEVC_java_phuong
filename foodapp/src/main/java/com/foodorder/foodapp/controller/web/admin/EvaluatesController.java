@@ -53,11 +53,12 @@ public class EvaluatesController {
     return "admin/evaluates/detail";
   }
 
-  @PostMapping("/{id}/toggle-display")
-  public String toggleDisplay(
+  @PostMapping("/{id}/display")
+  public String updateDisplay(
       @NonNull @PathVariable Long id,
+      @RequestParam boolean show,
       RedirectAttributes redirectAttributes) {
-    evaluateService.toggleDisplay(id);
+    evaluateService.updateDisplay(id, show);
     redirectAttributes.addFlashAttribute("successMessage",
         MessageCode.UPDATE_SUCCESS.getCode());
 

@@ -61,7 +61,9 @@ public class EvaluateService {
   }
 
   /**
-   * Flips show/hide of an evaluate and recalculates the product average rating.
+   * Sets show/hide of an evaluate to the wanted state and recalculates the product average rating.
+   * Setting a state (not flipping it) keeps the admin's intent when the page was stale: clicking
+   * "Hide" twice, or on an evaluate another admin already hid, still leaves it hidden.
    *
    * Takes the same product row lock as the client create/update/delete, then reads the evaluate,
    * so every write on one product runs one at a time. Without it a concurrent client write could
@@ -69,7 +71,7 @@ public class EvaluateService {
    * when the evaluate was just deleted.
    */
   @Transactional
-  public void toggleDisplay(Long id) {
+  public void updateDisplay(Long id, boolean show) {
     Long productId = evaluateRepository.findProductIdById(id)
         .orElseThrow(() -> new ResourceNotFoundException("evaluate.not.found"));
 
@@ -79,7 +81,11 @@ public class EvaluateService {
     Evaluate evaluate = evaluateRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("evaluate.not.found"));
 
-    evaluate.setIsShow(!Boolean.TRUE.equals(evaluate.getIsShow()));
+    if (Boolean.valueOf(show).equals(evaluate.getIsShow())) {
+      return;
+    }
+
+    evaluate.setIsShow(show);
     evaluateRepository.save(evaluate);
 
     productRatingService.recalculate(productId);

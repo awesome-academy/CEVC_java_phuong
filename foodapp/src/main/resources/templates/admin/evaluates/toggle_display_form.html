@@ -1,9 +1,0 @@
-<!-- Show/Hide toggle for an evaluate (POST + CSRF, confirm first).
-     Usage: th:replace="~{admin/evaluates/toggle_display_form :: form(${evaluate})}" -->
-<form th:fragment="form(evaluate)" class="d-inline" method="post"
-  th:action="@{/admin/evaluates/{id}/toggle-display(id=${evaluate.id})}"
-  th:data-confirm="${evaluate.isShow} ? 'Hide this evaluate?' : 'Show this evaluate?'"
-  onsubmit="return confirm(this.dataset.confirm)">
-  <button type="submit" class="btn btn-sm" th:classappend="${evaluate.isShow} ? 'btn-danger' : 'btn-success'"
-    th:text="${evaluate.isShow} ? 'Hide' : 'Show'"></button>
-</form>
