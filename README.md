@@ -23,6 +23,18 @@ DB_PASSWORD=postgres
 JWT_SECRET=<openssl rand -base64 32>
 ```
 
+2.3 Thông báo đơn hàng (tuỳ chọn, để trống thì bỏ qua kênh đó)
+
+```
+# Tin nhắn Chatwork mỗi khi có đơn mới
+CHATWORK_API_TOKEN=<API token>
+CHATWORK_ROOM_ID=<id trong URL của room, #!rid...>
+
+# Email cho tất cả user ADMIN: khi có đơn mới, và báo cáo tháng trước lúc 08:00 ngày 1.
+# Local: Mailpit trong docker-compose bắt mọi email, xem tại http://localhost:8025
+MAIL_ENABLED=true
+```
+
 ## 3. Database (PostgreSQL bằng Docker)
 
 ```

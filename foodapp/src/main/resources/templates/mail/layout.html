@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<!--
+  Shared layout of every admin email: page, heading and footer. An email template only writes its
+  own content:
+    <html th:replace="~{mail/layout :: mail(|Title|, ~{::section})}">
+    <section> ...content... </section>
+    </html>
+  Styles stay inline (style attribute) because many mail clients drop <style> blocks.
+  Money: ${@money.vnd(amount)} (MoneyFormat bean).
+-->
+<html th:fragment="mail(title, content)" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${title}">Foodapp</title>
+</head>
+
+<body style="margin: 0; padding: 16px; font-family: Arial, sans-serif; font-size: 14px; color: #212529;">
+  <h2 style="margin: 0 0 16px;" th:text="${title}">Title</h2>
+
+  <th:block th:replace="${content}"></th:block>
+
+  <p style="margin-top: 24px; color: #6c757d; font-size: 12px;">
+    Sent automatically by Foodapp. Please do not reply to this email.
+  </p>
+</body>
+
+</html>

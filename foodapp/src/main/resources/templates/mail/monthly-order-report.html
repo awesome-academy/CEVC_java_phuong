@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<!-- Monthly order report email (AdminMailService.sendMonthlyReport). Variable: report (MonthlyOrderReport) -->
+<html xmlns:th="http://www.thymeleaf.org"
+  th:replace="~{mail/layout :: mail(|Order report ${#temporals.format(report.month.atDay(1), 'MM/yyyy')}|, ~{::section})}">
+
+<section>
+  <p>
+    <strong>Orders:</strong> <span th:text="${report.totalOrders}"></span><br>
+    <strong>Revenue (completed orders):</strong> <span th:text="${@money.vnd(report.revenue)}"></span>
+  </p>
+
+  <p th:if="${report.totalOrders == 0}">No orders this month.</p>
+
+  <div th:unless="${report.totalOrders == 0}">
+    <h3>By status</h3>
+    <table cellpadding="6" cellspacing="0" border="1" style="border-collapse: collapse;">
+      <thead>
+        <tr>
+          <th align="left">Status</th>
+          <th align="right">Orders</th>
+          <th align="right">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="status : ${report.byStatus}">
+          <td th:text="${status.status}"></td>
+          <td align="right" th:text="${status.orders}"></td>
+          <td align="right" th:text="${@money.vnd(status.amount)}"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Top products (cancelled orders excluded)</h3>
+    <table cellpadding="6" cellspacing="0" border="1" style="border-collapse: collapse;">
+      <thead>
+        <tr>
+          <th align="left">#</th>
+          <th align="left">Product</th>
+          <th align="right">Quantity</th>
+          <th align="right">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="product, stat : ${report.topProducts}">
+          <td th:text="${stat.count}"></td>
+          <td th:text="${product.name}"></td>
+          <td align="right" th:text="${product.quantity}"></td>
+          <td align="right" th:text="${@money.vnd(product.amount)}"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+</html>

@@ -33,6 +33,35 @@ spring:
     jdbc:
       initialize-schema: never
 
+  # @Async order notifications: on shutdown, finish the queued ones instead of dropping them
+  task:
+    execution:
+      shutdown:
+        await-termination: true
+        await-termination-period: 30s
+
+  # Timeouts of outgoing HTTP calls (Chatwork): a slow API must not hold notification threads
+  http:
+    client:
+      connect-timeout: 5s
+      read-timeout: 5s
+
+  # SMTP for admin emails (#18). Local default: Mailpit from docker-compose (UI http://localhost:8025)
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${MAIL_SMTP_AUTH:false}
+          starttls:
+            enable: ${MAIL_SMTP_STARTTLS:false}
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
 server:
   port: 8080
 
@@ -62,3 +91,15 @@ app:
     secret: ${JWT_SECRET}
     access-token-validity: 7200000 # 2 hours (ms)
     refresh-token-validity: 604800000 # 7 days (ms)
+  # Order notifications and monthly report (#18); a channel left unset is skipped
+  notification:
+    zone: Asia/Ho_Chi_Minh
+    # Monthly order report: 08:00 on the 1st, for the whole previous month
+    monthly-report-cron: ${MONTHLY_REPORT_CRON:0 0 8 1 * *}
+    chatwork:
+      base-url: https://api.chatwork.com/v2
+      api-token: ${CHATWORK_API_TOKEN:}
+      room-id: ${CHATWORK_ROOM_ID:}
+    mail:
+      enabled: ${MAIL_ENABLED:false}
+      from: ${MAIL_FROM:foodapp@localhost}

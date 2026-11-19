@@ -19,6 +19,7 @@ import com.foodorder.foodapp.repository.CartRepository;
 import com.foodorder.foodapp.repository.OrderRepository;
 import com.foodorder.foodapp.repository.OrderStatusRepository;
 import com.foodorder.foodapp.repository.UserAddressRepository;
+import com.foodorder.foodapp.service.notification.OrderPlacedEvent;
 import com.foodorder.foodapp.specification.OrderSpecification;
 import com.foodorder.foodapp.utils.PageableUtils;
 
@@ -31,6 +32,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -47,6 +49,7 @@ public class ClientOrderService {
   private final OrderStatusRepository orderStatusRepository;
   private final OrderStockService orderStockService;
   private final UserAddressRepository userAddressRepository;
+  private final ApplicationEventPublisher eventPublisher;
 
   public Page<DetailOrderDTO> getAllOrders(User user, SearchOrderDTO params, Pageable pageable) {
     Pageable sortedPageable = PageableUtils.withFixedSort(pageable, Sort.by("id").descending());
@@ -130,6 +133,9 @@ public class ClientOrderService {
     // Clear cart
     cart.getCartItems().clear();
     cartRepository.save(cart);
+
+    // Chatwork + admin email, sent after commit on another thread (OrderPlacedNotificationListener)
+    eventPublisher.publishEvent(new OrderPlacedEvent(order.getId()));
 
     return modelMapper.map(order, DetailOrderDTO.class);
   }
