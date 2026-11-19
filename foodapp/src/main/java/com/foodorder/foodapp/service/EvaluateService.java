@@ -18,7 +18,6 @@ import com.foodorder.foodapp.dto.evaluate.AdminSearchEvaluateDTO;
 import com.foodorder.foodapp.dto.evaluate.DetailEvaluateDTO;
 import com.foodorder.foodapp.exception.ResourceNotFoundException;
 import com.foodorder.foodapp.model.Evaluate;
-import com.foodorder.foodapp.model.Product;
 import com.foodorder.foodapp.utils.PageableUtils;
 
 import java.util.Objects;
@@ -28,8 +27,9 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 public class EvaluateService {
   private final ModelMapper modelMapper;
-  private final ProductRepository productRepository;
+  private final ProductRatingService productRatingService;
   private final EvaluateRepository evaluateRepository;
+  private final ProductRepository productRepository;
 
   public Page<DetailEvaluateDTO> getAllEvaluates(AdminSearchEvaluateDTO params, Pageable pageable) {
     Pageable sortedPageable = PageableUtils.withFixedSort(pageable, Sort.by("id").descending());
@@ -42,10 +42,17 @@ public class EvaluateService {
         DetailEvaluateDTO.class));
   }
 
+  public DetailEvaluateDTO getEvaluateById(Long id) {
+    Evaluate evaluate = evaluateRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("evaluate.not.found"));
+
+    return modelMapper.map(evaluate, DetailEvaluateDTO.class);
+  }
+
   private Specification<Evaluate> buildSpecification(AdminSearchEvaluateDTO params) {
     return Stream.of(
-        EvaluateSpecification.hasProductName(params.getProductName()),
-        EvaluateSpecification.isShow(),
+        EvaluateSpecification.hasProduct(params.getProductId()),
+        EvaluateSpecification.hasShowStatus(params.getIsShow()),
         EvaluateSpecification.hasRatingLevel(params.getRatingLevel()),
         EvaluateSpecification.withFetch())
         .filter(Objects::nonNull)
@@ -53,27 +60,34 @@ public class EvaluateService {
         .orElse(null);
   }
 
+  /**
+   * Sets show/hide of an evaluate to the wanted state and recalculates the product average rating.
+   * Setting a state (not flipping it) keeps the admin's intent when the page was stale: clicking
+   * "Hide" twice, or on an evaluate another admin already hid, still leaves it hidden.
+   *
+   * Takes the same product row lock as the client create/update/delete, then reads the evaluate,
+   * so every write on one product runs one at a time. Without it a concurrent client write could
+   * be overwritten by a stale average, by the stale evaluate this method saves, or fail with 500
+   * when the evaluate was just deleted.
+   */
   @Transactional
-  public void updateEvaluateDisplayStatus(Long id) {
+  public void updateDisplay(Long id, boolean show) {
+    Long productId = evaluateRepository.findProductIdById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("evaluate.not.found"));
+
+    productRepository.findByIdForUpdate(productId);
+
+    // First load of the entity in this transaction, so it reflects writes committed before the lock
     Evaluate evaluate = evaluateRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("evaluate.not.found"));
 
-    Long productId = evaluate.getProduct().getId();
+    if (Boolean.valueOf(show).equals(evaluate.getIsShow())) {
+      return;
+    }
 
-    Product product = productRepository.findByIdForUpdate(productId)
-        .orElseThrow(() -> new ResourceNotFoundException("product.not.found"));
-
-    evaluate.setIsShow(false);
+    evaluate.setIsShow(show);
     evaluateRepository.save(evaluate);
 
-    double avgRating = evaluateRepository
-        .findByProductIdAndIsShowTrue(productId)
-        .stream()
-        .mapToInt(Evaluate::getRating)
-        .average()
-        .orElse(0.0);
-
-    product.setAverageRating((float) avgRating);
-    productRepository.save(product);
+    productRatingService.recalculate(productId);
   }
 }

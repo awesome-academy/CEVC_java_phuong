@@ -1,0 +1,11 @@
+<!-- Show/Hide button for an evaluate (POST + CSRF, confirm first). Sends the wanted state
+     (show=true|false), so a stale page or a second tab can never flip it the other way.
+     Usage: th:replace="~{admin/evaluates/display_form :: form(${evaluate})}" -->
+<form th:fragment="form(evaluate)" class="d-inline" method="post"
+  th:action="@{/admin/evaluates/{id}/display(id=${evaluate.id})}"
+  th:data-confirm="${evaluate.isShow} ? 'Hide this evaluate?' : 'Show this evaluate?'"
+  onsubmit="return confirm(this.dataset.confirm)">
+  <input type="hidden" name="show" th:value="${!evaluate.isShow}" />
+  <button type="submit" class="btn btn-sm" th:classappend="${evaluate.isShow} ? 'btn-danger' : 'btn-success'"
+    th:text="${evaluate.isShow} ? 'Hide' : 'Show'"></button>
+</form>

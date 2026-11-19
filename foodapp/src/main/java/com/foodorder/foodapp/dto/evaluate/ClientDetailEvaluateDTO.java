@@ -15,4 +15,6 @@ public class ClientDetailEvaluateDTO {
   private Integer rating;
 
   private String image;
+
+  private Boolean isShow;
 }

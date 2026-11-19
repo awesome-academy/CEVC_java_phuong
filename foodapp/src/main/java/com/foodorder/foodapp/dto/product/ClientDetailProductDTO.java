@@ -32,4 +32,6 @@ public class ClientDetailProductDTO {
   private String image;
 
   private Float averageRating;
+
+  private Long evaluateCount;
 }

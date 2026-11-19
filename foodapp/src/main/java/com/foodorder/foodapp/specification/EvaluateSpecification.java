@@ -2,25 +2,44 @@ package com.foodorder.foodapp.specification;
 
 import org.springframework.data.jpa.domain.Specification;
 
+import com.foodorder.foodapp.model.BaseModel_;
 import com.foodorder.foodapp.model.Evaluate;
 import com.foodorder.foodapp.model.Evaluate_;
-import com.foodorder.foodapp.model.Product_;
 
 import jakarta.persistence.criteria.JoinType;
 
 public class EvaluateSpecification {
-  public static Specification<Evaluate> hasProductName(String productName) {
+  public static Specification<Evaluate> hasProduct(Long productId) {
     return (root, query, cb) -> {
-      if (productName == null || productName.isBlank()) {
+      if (productId == null) {
         return null;
       }
-      return cb.like(cb.lower(root.get(Evaluate_.product).get(Product_.name)), "%" + productName.toLowerCase() + "%");
+      return cb.equal(root.get(Evaluate_.product).get(BaseModel_.id), productId);
+    };
+  }
+
+  public static Specification<Evaluate> hasUser(Long userId) {
+    return (root, query, cb) -> {
+      if (userId == null) {
+        return null;
+      }
+      return cb.equal(root.get(Evaluate_.user).get(BaseModel_.id), userId);
     };
   }
 
   public static Specification<Evaluate> isShow() {
     return (root, query, cb) -> {
       return cb.isTrue(root.get(Evaluate_.isShow));
+    };
+  }
+
+  /** null = no filter (shown and hidden). */
+  public static Specification<Evaluate> hasShowStatus(Boolean isShow) {
+    return (root, query, cb) -> {
+      if (isShow == null) {
+        return null;
+      }
+      return cb.equal(root.get(Evaluate_.isShow), isShow);
     };
   }
 

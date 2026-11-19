@@ -45,14 +45,17 @@
               <div class="card">
                 <div class="card-header">
                   <div class="row">
-                    <div class="col-sm-6">
+                    <div class="col-12">
                       <form th:action="@{/admin/evaluates}" th:object="${search}" method="get">
                         <div class="d-flex gap-4 align-items-center">
                           <div class="filter-box d-flex gap-2 align-items-center">
                             <div>Filter by:</div>
                             <div>
-                              <input type="text" class="form-control" placeholder="Input product name..."
-                                name="productName" th:value="*{productName}" />
+                              <select class="form-select" th:field="*{productId}">
+                                <option value="">--Product--</option>
+                                <option th:each="product : ${products}" th:value="${product.id}"
+                                  th:text="${product.name}"></option>
+                              </select>
                             </div>
                             <div>
                               <select class="form-select" th:field="*{ratingLevel}">
@@ -62,6 +65,13 @@
                                 <option value="3">3</option>
                                 <option value="4">4</option>
                                 <option value="5">5</option>
+                              </select>
+                            </div>
+                            <div>
+                              <select class="form-select" th:field="*{isShow}">
+                                <option value="">--All statuses--</option>
+                                <option value="true">Shown</option>
+                                <option value="false">Hidden</option>
                               </select>
                             </div>
                           </div>
@@ -82,26 +92,31 @@
                         <th>Full name</th>
                         <th>Content</th>
                         <th style="width: 150px">Rating</th>
-                        <th style="width: 250px">Created At</th>
+                        <th style="width: 100px">Status</th>
+                        <th style="width: 180px">Created At</th>
                         <th style="width: 100px" class="text-center">Action</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr class="align-middle" th:each="evaluate, iterStat : ${evaluates}">
-                        <td th:text="${evaluate.id}"></td>
+                        <td>
+                          <a th:href="@{/admin/evaluates/{id}(id=${evaluate.id})}" th:text="${evaluate.id}"></a>
+                        </td>
                         <td>
                           <img th:if="${evaluate.image}" th:src="@{${evaluate.image}}" class="img-thumbnail">
                         </td>
                         <td th:text="${evaluate.product?.name}"></td>
                         <td th:text="${evaluate.user?.fullName}"></td>
-                        <td th:text="${evaluate.content}"></td>
+                        <td th:text="${#strings.abbreviate(evaluate.content, 80)}" th:title="${evaluate.content}"></td>
                         <td>
                           <th:block th:replace="~{admin/layouts/rating :: stars(${evaluate.rating})}"></th:block>
                         </td>
-                        <td th:text="${evaluate.createdAt}"></td>
+                        <td>
+                          <span th:replace="~{admin/evaluates/status_badge :: badge(${evaluate.isShow})}"></span>
+                        </td>
+                        <td th:text="${#temporals.format(evaluate.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
                         <td class="text-center">
-                          <a th:href="@{/admin/evaluates/{id}/hide-evaluate(id=${evaluate.id})}"
-                            class="btn btn-sm btn-danger">Hide</a>
+                          <form th:replace="~{admin/evaluates/display_form :: form(${evaluate})}"></form>
                         </td>
                       </tr>
                     </tbody>
@@ -112,8 +127,9 @@
                   <div class="row">
                     <div class="col-sm-6">
                       <form th:action="@{/admin/evaluates}" th:object="${search}" method="get" id="perPageForm">
-                        <input type="hidden" name="productName" th:value="${search.productName}" />
+                        <input type="hidden" name="productId" th:value="${search.productId}" />
                         <input type="hidden" name="ratingLevel" th:value="${search.ratingLevel}" />
+                        <input type="hidden" name="isShow" th:value="${search.isShow}" />
                         <div class="per-page-box d-flex gap-2 align-items-center">
                           <div>Per page:</div>
                           <div>
@@ -131,18 +147,18 @@
                       <ul class="pagination pagination-sm float-end" th:if="${totalPages > 1}" th:with="currentPage=${evaluates.number + 1}, perPage=${evaluates.size}">
                         <li class="page-item" th:classappend="${currentPage} == ${1} ? 'disabled'">
                           <a class="page-link"
-                            th:href="@{/admin/evaluates(page=${currentPage - 1}, perPage=${perPage}, productName=${search.productName}, ratingLevel=${search.ratingLevel})}">&laquo;</a>
+                            th:href="@{/admin/evaluates(page=${currentPage - 1}, perPage=${perPage}, productId=${search.productId}, ratingLevel=${search.ratingLevel}, isShow=${search.isShow})}">&laquo;</a>
                         </li>
                         <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages-1)}"
                           th:classappend="${i + 1} == ${currentPage} ? 'active'">
                           <a class="page-link"
-                            th:href="@{/admin/evaluates(page=${i + 1}, perPage=${perPage}, productName=${search.productName}, ratingLevel=${search.ratingLevel})}"
+                            th:href="@{/admin/evaluates(page=${i + 1}, perPage=${perPage}, productId=${search.productId}, ratingLevel=${search.ratingLevel}, isShow=${search.isShow})}"
                             th:text="${i + 1}">
                           </a>
                         </li>
                         <li class="page-item" th:classappend="${currentPage} == ${totalPages} ? 'disabled'">
                           <a class="page-link"
-                            th:href="@{/admin/evaluates(page=${currentPage + 1}, perPage=${perPage}, productName=${search.productName}, ratingLevel=${search.ratingLevel})}">
+                            th:href="@{/admin/evaluates(page=${currentPage + 1}, perPage=${perPage}, productId=${search.productId}, ratingLevel=${search.ratingLevel}, isShow=${search.isShow})}">
                             &raquo;
                           </a>
                         </li>

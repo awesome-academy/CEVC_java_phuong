@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -12,6 +13,7 @@ import com.foodorder.foodapp.dto.evaluate.AdminSearchEvaluateDTO;
 import com.foodorder.foodapp.dto.evaluate.DetailEvaluateDTO;
 import com.foodorder.foodapp.enums.MessageCode;
 import com.foodorder.foodapp.service.EvaluateService;
+import com.foodorder.foodapp.service.ProductService;
 
 import io.micrometer.common.lang.NonNull;
 
@@ -25,28 +27,38 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class EvaluatesController {
   private final EvaluateService evaluateService;
+  private final ProductService productService;
 
   @GetMapping
   public String indexEvaluate(
-      @RequestParam(required = false) String productName,
+      @RequestParam(required = false) Long productId,
       @RequestParam(required = false) Long ratingLevel,
+      @RequestParam(required = false) Boolean isShow,
       Pageable pageable,
       Model model) {
-    AdminSearchEvaluateDTO params = new AdminSearchEvaluateDTO(productName, ratingLevel);
+    AdminSearchEvaluateDTO params = new AdminSearchEvaluateDTO(productId, ratingLevel, isShow);
     Page<DetailEvaluateDTO> evaluates = evaluateService.getAllEvaluates(params, pageable);
     model.addAttribute("search", params);
+    model.addAttribute("products", productService.getProductSelectOptions());
     model.addAttribute("evaluates", evaluates);
     model.addAttribute("totalPages", evaluates.getTotalPages());
 
     return "admin/evaluates/index";
   }
 
-  @GetMapping("/{id}/hide-evaluate")
-  public String hideEvaluate(
+  @GetMapping("/{id}")
+  public String detailEvaluate(@NonNull @PathVariable Long id, Model model) {
+    model.addAttribute("evaluate", evaluateService.getEvaluateById(id));
+
+    return "admin/evaluates/detail";
+  }
+
+  @PostMapping("/{id}/display")
+  public String updateDisplay(
       @NonNull @PathVariable Long id,
-      RedirectAttributes redirectAttributes,
-      Model model) {
-    evaluateService.updateEvaluateDisplayStatus(id);
+      @RequestParam boolean show,
+      RedirectAttributes redirectAttributes) {
+    evaluateService.updateDisplay(id, show);
     redirectAttributes.addFlashAttribute("successMessage",
         MessageCode.UPDATE_SUCCESS.getCode());
 

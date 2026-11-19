@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Detail evaluate</title>
+  <th:block th:replace="~{admin/layouts/static :: css_links}"></th:block>
+</head>
+
+<body class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">
+  <!--begin::App Wrapper-->
+  <div class="app-wrapper">
+    <!--begin::Header-->
+    <th:block th:replace="~{admin/layouts/header :: header}"></th:block>
+    <!--end::Header-->
+    <!--begin::Sidebar-->
+    <th:block th:replace="~{admin/layouts/sidebar :: sidebar}"></th:block>
+    <!--end::Sidebar-->
+    <!--begin::App Main-->
+    <main class="app-main">
+      <!--begin::App Content Header-->
+      <div class="app-content-header">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-sm-6">
+              <h3 class="mb-0">Detail evaluate</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--end::App Content Header-->
+      <div class="app-content">
+        <div class="container-fluid">
+          <div class="row g-4">
+            <div class="col-md-9">
+              <div class="card card-primary card-outline mb-4">
+                <div class="card-body">
+                  <div class="mb-3">
+                    <label class="form-label fw-bold">ID: </label>
+                    <p th:text="${evaluate.id}"></p>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label fw-bold">User: </label>
+                    <div class="d-flex gap-2 align-items-center">
+                      <img th:if="${evaluate.user?.avatar}" th:src="@{${evaluate.user.avatar}}" class="img-thumbnail">
+                      <span th:text="${evaluate.user?.fullName}"></span>
+                      <span class="text-secondary" th:text="${evaluate.user?.email}"></span>
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label fw-bold">Product: </label>
+                    <div class="d-flex gap-2 align-items-center">
+                      <img th:if="${evaluate.product?.image}" th:src="@{${evaluate.product.image}}" class="img-thumbnail">
+                      <span th:text="${evaluate.product?.name}"></span>
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label fw-bold">Rating: </label>
+                    <div th:replace="~{admin/layouts/rating :: stars(${evaluate.rating})}"></div>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label fw-bold">Content: </label>
+                    <p th:text="${evaluate.content}" style="white-space: pre-line;"></p>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label fw-bold">Image: </label>
+                    <div>
+                      <img th:if="${evaluate.image}" th:src="@{${evaluate.image}}" class="image-medium">
+                      <p th:unless="${evaluate.image}">N/A</p>
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label fw-bold">Status: </label>
+                    <p><span th:replace="~{admin/evaluates/status_badge :: badge(${evaluate.isShow})}"></span></p>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label fw-bold">Created At: </label>
+                    <p th:text="${#temporals.format(evaluate.createdAt, 'dd/MM/yyyy HH:mm')}"></p>
+                  </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between align-items-center">
+                  <a th:href="@{/admin/evaluates}">Back to index</a>
+                  <form th:replace="~{admin/evaluates/display_form :: form(${evaluate})}"></form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <!--end::App Main-->
+    <!--begin::Footer-->
+    <th:block th:replace="~{admin/layouts/footer :: footer}"></th:block>
+    <!--end::Footer-->
+  </div>
+  <!--end::App Wrapper-->
+  <th:block th:replace="~{admin/layouts/static :: js_scripts}"></th:block>
+</body>
+
+</html>

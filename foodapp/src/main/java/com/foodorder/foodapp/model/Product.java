@@ -10,10 +10,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Data
 @EqualsAndHashCode(callSuper=false)
@@ -48,7 +50,10 @@ public class Product extends BaseModel {
   @Column(length = 255)
   private String image;
 
-  @Column(nullable = false)
+  // Written only by ProductRepository.updateAverageRating (and 0 on insert, see onCreate):
+  // saving a Product loaded earlier (edit form, delete) must not put back a stale average
+  @Column(nullable = false, updatable = false)
+  @Setter(AccessLevel.NONE)
   private Float averageRating;
 
   @Column(name = "is_active", nullable = false)

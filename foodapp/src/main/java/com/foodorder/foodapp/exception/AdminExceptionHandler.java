@@ -7,6 +7,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -48,6 +49,13 @@ public class AdminExceptionHandler {
     String message = messageSource.getMessage(ex.getMessage(), ex.getArgs(), ex.getMessage(),
         LocaleContextHolder.getLocale());
     return errorPage(HttpStatus.BAD_REQUEST, "Bad request", message);
+  }
+
+  // A form posted without a required field (e.g. "show" on the evaluate Show/Hide form)
+  @ExceptionHandler(MissingServletRequestParameterException.class)
+  public ModelAndView handleMissingParameter(MissingServletRequestParameterException ex) {
+    return errorPage(HttpStatus.BAD_REQUEST, "Bad request",
+        "Missing parameter: " + ex.getParameterName());
   }
 
   @ExceptionHandler(Exception.class)
