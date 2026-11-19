@@ -14,6 +14,7 @@ import com.foodorder.foodapp.repository.ProductRepository;
 import com.foodorder.foodapp.repository.ProductTypeRepository;
 import com.foodorder.foodapp.specification.ProductSpecification;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 import com.foodorder.foodapp.dto.product.CreateProductDTO;
@@ -45,6 +46,7 @@ public class ProductService {
   private final ModelMapper modelMapper;
   private final OrderRepository orderRepository;
   private final ImageUploadService imageUploadService;
+  private final OrderStockService orderStockService;
 
   public Page<ListProductDTO> getAllProducts(SearchProductDTO params, Pageable pageable) {
     Pageable sortedPageable = PageableUtils.withFixedSort(pageable, Sort.by("id").descending());
@@ -153,6 +155,15 @@ public class ProductService {
       imageUploadService.deleteImage(newImagePath);
       throw e;
     }
+  }
+
+  /** Adds {@code amount} units to the product stock (admin restock action). */
+  @Transactional
+  public void restockProduct(Long id, int amount) {
+    Product product = productRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("product.not.found"));
+
+    orderStockService.addStock(product, amount);
   }
 
   public void deleteProduct(Long id) {
