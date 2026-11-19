@@ -52,7 +52,6 @@ public class CategoriesController {
     Page<ListCategoryDTO> categories = categoryService.getAllCategories(params, pageable);
     model.addAttribute("search", params);
     model.addAttribute("categories", categories);
-    model.addAttribute("totalPages", categories.getTotalPages());
 
     return "admin/categories/index";
   }

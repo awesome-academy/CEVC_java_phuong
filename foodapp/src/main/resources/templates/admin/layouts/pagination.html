@@ -1,0 +1,17 @@
+<!-- Shared admin pagination: first, last and current ± 2 pages, gaps shown as "…".
+     Links keep the current query string (filters, perPage) and only change "page".
+     Usage: <ul th:replace="~{admin/layouts/pagination :: pagination(${orders})}"></ul> -->
+<ul th:fragment="pagination(page)" class="pagination pagination-sm float-end" th:if="${page.totalPages > 1}"
+  th:with="current=${page.number + 1}, total=${page.totalPages}">
+  <li class="page-item" th:classappend="${current == 1} ? 'disabled'">
+    <a class="page-link" th:href="${@paginationLinks.url(current - 1)}">&laquo;</a>
+  </li>
+  <li class="page-item" th:each="n : ${@paginationLinks.window(current, total)}"
+    th:classappend="${n == null} ? 'disabled' : (${n == current} ? 'active' : '')">
+    <span th:if="${n == null}" class="page-link">&hellip;</span>
+    <a th:unless="${n == null}" class="page-link" th:href="${@paginationLinks.url(n)}" th:text="${n}"></a>
+  </li>
+  <li class="page-item" th:classappend="${current == total} ? 'disabled'">
+    <a class="page-link" th:href="${@paginationLinks.url(current + 1)}">&raquo;</a>
+  </li>
+</ul>

@@ -48,7 +48,6 @@ public class SuggestionsController {
     Page<DetailSuggestionDTO> suggestions = suggestionService.getAllSuggestions(params, pageable);
     model.addAttribute("search", params);
     model.addAttribute("suggestions", suggestions);
-    model.addAttribute("totalPages", suggestions.getTotalPages());
 
     return "admin/suggestions/index";
   }

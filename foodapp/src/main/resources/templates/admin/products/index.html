@@ -130,6 +130,8 @@
                     <div class="col-sm-6">
                       <form th:action="@{/admin/products}" th:object="${search}" method="get" id="perPageForm">
                         <input type="hidden" name="name" th:value="${search.name}" />
+                        <input type="hidden" name="categoryId" th:value="${search.categoryId}" />
+                        <input type="hidden" name="productTypeId" th:value="${search.productTypeId}" />
                         <div class="per-page-box d-flex gap-2 align-items-center">
                           <div>Per page:</div>
                           <div>
@@ -144,25 +146,7 @@
                       </form>
                     </div>
                     <div class="col-sm-6">
-                      <ul class="pagination pagination-sm float-end" th:if="${totalPages > 1}" th:with="currentPage=${products.number + 1}, perPage=${products.size}">
-                        <li class="page-item" th:classappend="${currentPage} == ${1} ? 'disabled'">
-                          <a class="page-link"
-                            th:href="@{/admin/products(page=${currentPage - 1}, perPage=${perPage}, name=${search.name})}">&laquo;</a>
-                        </li>
-                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages-1)}"
-                          th:classappend="${i + 1} == ${currentPage} ? 'active'">
-                          <a class="page-link"
-                            th:href="@{/admin/products(page=${i + 1}, perPage=${perPage}, name=${search.name})}"
-                            th:text="${i + 1}">
-                          </a>
-                        </li>
-                        <li class="page-item" th:classappend="${currentPage} == ${totalPages} ? 'disabled'">
-                          <a class="page-link"
-                            th:href="@{/admin/products(page=${currentPage + 1}, perPage=${perPage}, name=${search.name})}">
-                            &raquo;
-                          </a>
-                        </li>
-                      </ul>
+                      <ul th:replace="~{admin/layouts/pagination :: pagination(${products})}"></ul>
                     </div>
                   </div>
                 </div>

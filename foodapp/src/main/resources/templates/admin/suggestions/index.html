@@ -127,25 +127,7 @@
                       </form>
                     </div>
                     <div class="col-sm-6">
-                      <ul class="pagination pagination-sm float-end" th:if="${totalPages > 1}" th:with="currentPage=${suggestions.number + 1}, perPage=${suggestions.size}">
-                        <li class="page-item" th:classappend="${currentPage} == ${1} ? 'disabled'">
-                          <a class="page-link"
-                            th:href="@{/admin/suggestions(page=${currentPage - 1}, perPage=${perPage}, status=${search.status})}">&laquo;</a>
-                        </li>
-                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages-1)}"
-                          th:classappend="${i + 1} == ${currentPage} ? 'active'">
-                          <a class="page-link"
-                            th:href="@{/admin/suggestions(page=${i + 1}, perPage=${perPage}, status=${search.status})}"
-                            th:text="${i + 1}">
-                          </a>
-                        </li>
-                        <li class="page-item" th:classappend="${currentPage} == ${totalPages} ? 'disabled'">
-                          <a class="page-link"
-                            th:href="@{/admin/suggestions(page=${currentPage + 1}, perPage=${perPage}, status=${search.status})}">
-                            &raquo;
-                          </a>
-                        </li>
-                      </ul>
+                      <ul th:replace="~{admin/layouts/pagination :: pagination(${suggestions})}"></ul>
                     </div>
                   </div>
                 </div>

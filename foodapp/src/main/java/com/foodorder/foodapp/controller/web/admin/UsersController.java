@@ -59,7 +59,6 @@ public class UsersController {
 
     model.addAttribute("search", params);
     model.addAttribute("users", users);
-    model.addAttribute("totalPages", users.getTotalPages());
 
     return "admin/users/index";
   }

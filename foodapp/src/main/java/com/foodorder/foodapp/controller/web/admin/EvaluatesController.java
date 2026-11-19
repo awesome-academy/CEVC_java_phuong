@@ -41,7 +41,6 @@ public class EvaluatesController {
     model.addAttribute("search", params);
     model.addAttribute("products", productService.getProductSelectOptions());
     model.addAttribute("evaluates", evaluates);
-    model.addAttribute("totalPages", evaluates.getTotalPages());
 
     return "admin/evaluates/index";
   }
