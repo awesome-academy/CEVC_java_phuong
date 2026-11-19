@@ -18,6 +18,8 @@ import jakarta.persistence.LockModeType;
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
   Optional<Product> findByIdAndIsActiveTrueAndDeletedAtIsNull(Long id);
 
+  Optional<Product> findByIdAndDeletedAtIsNull(Long id);
+
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("SELECT p FROM Product p WHERE p.id = :id")
   Optional<Product> findByIdForUpdate(@Param("id") Long id);

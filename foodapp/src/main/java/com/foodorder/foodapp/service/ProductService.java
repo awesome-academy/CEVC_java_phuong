@@ -118,6 +118,9 @@ public class ProductService {
     }
   }
 
+  // Transactional: the product stays managed from findById to flush, so @DynamicUpdate leaves out
+  // the untouched quantity instead of merging back a copy read before a concurrent order
+  @Transactional
   public DetailProductDTO updateProduct(UpdateProductDTO updateProductDTO) {
     Long categoryId = updateProductDTO.getCategoryId();
     Long productTypeId = updateProductDTO.getProductTypeId();
@@ -147,7 +150,8 @@ public class ProductService {
         exitProduct.setProductType(productType);
       }
 
-      exitProduct = productRepository.save(exitProduct);
+      // Flush now so a DB error is caught below (new image removed) before the old image is deleted
+      exitProduct = productRepository.saveAndFlush(exitProduct);
       imageUploadService.deleteImage(oldImagePath, newImagePath != null);
 
       return modelMapper.map(exitProduct, DetailProductDTO.class);
@@ -160,7 +164,8 @@ public class ProductService {
   /** Adds {@code amount} units to the product stock (admin restock action). */
   @Transactional
   public void restockProduct(Long id, int amount) {
-    Product product = productRepository.findById(id)
+    // A deleted product can no longer be sold, so it cannot be restocked either
+    Product product = productRepository.findByIdAndDeletedAtIsNull(id)
         .orElseThrow(() -> new ResourceNotFoundException("product.not.found"));
 
     orderStockService.addStock(product, amount);
