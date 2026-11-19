@@ -26,8 +26,13 @@ public class AuthService {
       throw new UnauthorizedException("validation.user.email_or_password.invalid");
     }
 
-    String accessToken = jwtService.generateAccessToken(email);
-    String refreshToken = jwtService.generateRefreshToken(email);
+    return issueTokens(user);
+  }
+
+  /** Access + refresh token pair of a user who has proved who they are (password or social login). */
+  public JwtResponseDTO issueTokens(User user) {
+    String accessToken = jwtService.generateAccessToken(user.getEmail());
+    String refreshToken = jwtService.generateRefreshToken(user.getEmail());
 
     return new JwtResponseDTO(user.getId(), user.getEmail(), accessToken, refreshToken);
   }

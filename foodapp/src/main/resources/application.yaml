@@ -55,6 +55,10 @@ logging:
       clean-history-on-start: false
 
 app:
+  # Social login (#20): POST /api/auth/social/{provider}; a provider without credentials is refused
+  social-auth:
+    google:
+      client-id: ${GOOGLE_CLIENT_ID:}
   upload:
     folder: /${UPLOAD_FOLDER}/
     location: ${APP_UPLOAD_LOCATION}/${UPLOAD_FOLDER}

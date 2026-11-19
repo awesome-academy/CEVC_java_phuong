@@ -95,3 +95,13 @@ App chạy tại: http://localhost:8080
 - OpenAPI JSON: http://localhost:8080/v3/api-docs
 
 - Swagger: http://localhost:8080/swagger-ui/index.html
+
+### Đăng nhập bằng Google (API)
+
+`POST /api/auth/social/google` với body `{"token": "<Google ID token>"}` trả về cặp JWT giống `/api/auth/login`.
+
+1. Google Cloud Console → APIs & Services → Credentials → Create OAuth client ID (loại *Web application*).
+2. Đặt `GOOGLE_CLIENT_ID=<client id>` trong `.env`.
+3. Client đăng nhập Google bằng chính client id đó (Google Identity Services trên web, Google Sign-In trên mobile) rồi gửi ID token (`credential`) lên API.
+
+Chi tiết request/response và mã lỗi xem trên Swagger, mục **auth**.
