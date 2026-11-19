@@ -1,4 +1,4 @@
-package com.foodorder.foodapp.utils;
+package com.foodorder.foodapp.controller.web;
 
 import java.util.ArrayList;
 import java.util.List;
