@@ -14,6 +14,10 @@ import com.foodorder.foodapp.model.Evaluate;
 public interface EvaluateRepository extends JpaRepository<Evaluate, Long>, JpaSpecificationExecutor<Evaluate> {
   Optional<Evaluate> findByProductIdAndUserId(Long productId, Long userId);
 
+  /** Product id only, without loading the evaluate into the persistence context. */
+  @Query("SELECT e.product.id FROM Evaluate e WHERE e.id = :id")
+  Optional<Long> findProductIdById(@Param("id") Long id);
+
   @Query("SELECT COALESCE(AVG(e.rating), 0) FROM Evaluate e WHERE e.product.id = :productId AND e.isShow = true")
   double averageVisibleRating(@Param("productId") Long productId);
 

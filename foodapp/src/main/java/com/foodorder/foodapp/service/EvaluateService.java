@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.foodorder.foodapp.repository.EvaluateRepository;
+import com.foodorder.foodapp.repository.ProductRepository;
 import com.foodorder.foodapp.specification.EvaluateSpecification;
 
 import jakarta.transaction.Transactional;
@@ -28,6 +29,7 @@ public class EvaluateService {
   private final ModelMapper modelMapper;
   private final ProductRatingService productRatingService;
   private final EvaluateRepository evaluateRepository;
+  private final ProductRepository productRepository;
 
   public Page<DetailEvaluateDTO> getAllEvaluates(AdminSearchEvaluateDTO params, Pageable pageable) {
     Pageable sortedPageable = PageableUtils.withFixedSort(pageable, Sort.by("id").descending());
@@ -58,15 +60,28 @@ public class EvaluateService {
         .orElse(null);
   }
 
-  /** Flips show/hide of an evaluate and recalculates the product average rating. */
+  /**
+   * Flips show/hide of an evaluate and recalculates the product average rating.
+   *
+   * Takes the same product row lock as the client create/update/delete, then reads the evaluate,
+   * so every write on one product runs one at a time. Without it a concurrent client write could
+   * be overwritten by a stale average, by the stale evaluate this method saves, or fail with 500
+   * when the evaluate was just deleted.
+   */
   @Transactional
   public void toggleDisplay(Long id) {
+    Long productId = evaluateRepository.findProductIdById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("evaluate.not.found"));
+
+    productRepository.findByIdForUpdate(productId);
+
+    // First load of the entity in this transaction, so it reflects writes committed before the lock
     Evaluate evaluate = evaluateRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("evaluate.not.found"));
 
     evaluate.setIsShow(!Boolean.TRUE.equals(evaluate.getIsShow()));
     evaluateRepository.save(evaluate);
 
-    productRatingService.recalculate(evaluate.getProduct().getId());
+    productRatingService.recalculate(productId);
   }
 }
