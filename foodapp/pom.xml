@@ -28,6 +28,11 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+		<!-- Boot 3.5.7 manages 1.21.3, which uses Docker API 1.32 and fails on Docker Engine 29+
+		     (minimum API 1.40). 1.21.4 negotiates the API version. Remove once Boot manages >= 1.21.4. -->
+		<!-- Empty unless -Pcoverage sets the JaCoCo agent; surefire's argLine starts with @{argLine} -->
+		<argLine></argLine>
+		<testcontainers.version>1.21.4</testcontainers.version>
 	</properties>
 	<dependencies>
 
@@ -154,6 +159,23 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- @WithMockUser / csrf() for MockMvc tests of the secured admin and API controllers -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- Integration tests run against a throwaway PostgreSQL container (see src/test/.../support) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-testcontainers</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>test</scope>
+		</dependency>
     <dependency>
       <groupId>io.jsonwebtoken</groupId>
       <artifactId>jjwt-api</artifactId>
@@ -178,6 +200,53 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+
+			<!-- Lombok and the JPA metamodel generator are annotation processors: enable processing
+			     explicitly (javac warns that implicit processing will be disabled in a future release) -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<proc>full</proc>
+				</configuration>
+			</plugin>
+
+			<!-- Mockito as a JVM agent at test start (Mockito's recommended setup): self-attaching at
+			     runtime prints JVM warnings and will be disallowed by future JDKs.
+			     dependency:properties exposes the jar path as ${org.mockito:mockito-core:jar}. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>properties</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<!-- @{argLine}: the JaCoCo agent with -Pcoverage, empty otherwise.
+					     -Xshare:off: class data sharing does not apply with an agent and only prints a warning.
+					     Fixed locale so assertions on i18n messages give the same result on every machine. -->
+					<argLine>@{argLine} -javaagent:${org.mockito:mockito-core:jar} -Xshare:off -Duser.language=en -Duser.country=US</argLine>
+					<!-- One line per test (with its result) instead of one line per class -->
+					<statelessTestsetInfoReporter
+						implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
+						<theme>UNICODE</theme>
+					</statelessTestsetInfoReporter>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>me.fabriciorby</groupId>
+						<artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+						<version>1.5.1</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 
 			<!-- Flyway Maven Plugin for manual migration -->
@@ -206,5 +275,44 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<!-- Coverage, opt-in because instrumenting classes adds ~4 s to every test run:
+		     ./mvnw test -Pcoverage  ->  target/site/jacoco/index.html -->
+		<profile>
+			<id>coverage</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<version>0.8.13</version>
+						<executions>
+							<execution>
+								<id>prepare-agent</id>
+								<goals>
+									<goal>prepare-agent</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>report</id>
+								<phase>test</phase>
+								<goals>
+									<goal>report</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<excludes>
+								<!-- Generated JPA metamodel (Product_ ...) and the main class: nothing to test -->
+								<exclude>**/*_.class</exclude>
+								<exclude>com/foodorder/foodapp/FoodappApplication.class</exclude>
+							</excludes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 </project>
