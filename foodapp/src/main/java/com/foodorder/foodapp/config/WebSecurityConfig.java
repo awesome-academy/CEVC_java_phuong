@@ -63,7 +63,8 @@ public class WebSecurityConfig {
             .loginProcessingUrl("/admin/login")
             .usernameParameter("email")
             .passwordParameter("password")
-            .defaultSuccessUrl("/admin/users")
+            // Statistics is the admin home; a protected page opened before login still wins
+            .defaultSuccessUrl("/admin/statistics")
             // Redirect only: failureUrl() would store the exception in the (JDBC) session,
             // and since Spring Security 6.5 it carries the typed password
             .failureHandler((request, response, exception) -> response

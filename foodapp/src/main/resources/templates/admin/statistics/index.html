@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+<!-- Order statistics by month (#19). Model: report (MonthlyOrderReport), previousMonth, nextMonth (null for the
+     current month), monthOptions (month picker, newest first). Money: #numbers.formatInteger(value, 1, 'POINT') + ' ₫' -->
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
@@ -20,26 +22,140 @@
     <main class="app-main">
       <!--begin::App Content Header-->
       <div class="app-content-header">
-        <!--begin::Container-->
         <div class="container-fluid">
-          <!--begin::Row-->
-          <div class="row">
+          <div class="row align-items-center">
             <div class="col-sm-6">
               <h3 class="mb-0">Statistics</h3>
             </div>
+            <!--begin::Month picker-->
+            <div class="col-sm-6 d-flex justify-content-sm-end gap-2 mt-2 mt-sm-0">
+              <a class="btn btn-outline-secondary" th:href="@{/admin/statistics(month=${previousMonth})}"
+                title="Previous month">&laquo;</a>
+              <!-- Shown as MM-yyyy (an input type="month" shows a browser-dependent month name); still sends yyyy-MM -->
+              <form th:action="@{/admin/statistics}" method="get" id="month-form">
+                <select class="form-select" name="month" aria-label="Month"
+                  onchange="document.getElementById('month-form').submit()">
+                  <option th:each="option : ${monthOptions}" th:value="${option}"
+                    th:text="${#temporals.format(option.atDay(1), 'MM-yyyy')}"
+                    th:selected="${option == report.month}"></option>
+                </select>
+              </form>
+              <a class="btn btn-outline-secondary" th:if="${nextMonth != null}"
+                th:href="@{/admin/statistics(month=${nextMonth})}" title="Next month">&raquo;</a>
+              <span class="btn btn-outline-secondary disabled" th:if="${nextMonth == null}">&raquo;</span>
+            </div>
+            <!--end::Month picker-->
           </div>
-          <!--end::Row-->
         </div>
-        <!--end::Container-->
       </div>
       <!--end::App Content Header-->
       <!--begin::App Content-->
       <div class="app-content">
-        <!--begin::Container-->
         <div class="container-fluid">
-          Statistics content
+          <!--begin::Totals-->
+          <div class="row">
+            <div class="col-md-6 col-lg-3">
+              <div class="card mb-4">
+                <div class="card-body">
+                  <div class="text-secondary">Orders</div>
+                  <div class="fs-3 fw-bold" id="total-orders" th:text="${report.totalOrders}">0</div>
+                  <div class="small text-secondary"
+                    th:text="|Placed in ${#temporals.format(report.month.atDay(1), 'MM/yyyy')}|"></div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+              <div class="card mb-4">
+                <div class="card-body">
+                  <div class="text-secondary">Revenue</div>
+                  <div class="fs-3 fw-bold" id="revenue"
+                    th:text="|${#numbers.formatInteger(report.revenue, 1, 'POINT')} ₫|">0 ₫</div>
+                  <div class="small text-secondary">Completed orders only</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!--end::Totals-->
+
+          <div class="card" th:if="${report.totalOrders == 0}">
+            <div class="card-body text-center text-secondary">No orders in this month.</div>
+          </div>
+
+          <div class="row" th:unless="${report.totalOrders == 0}">
+            <!--begin::By status-->
+            <div class="col-lg-5">
+              <div class="card mb-4">
+                <div class="card-header">
+                  <h3 class="card-title">Orders by status</h3>
+                </div>
+                <div class="card-body p-0">
+                  <table class="table table-striped mb-0" id="by-status">
+                    <thead>
+                      <tr>
+                        <th>Status</th>
+                        <th class="text-end">Orders</th>
+                        <th class="text-end">Share</th>
+                        <th class="text-end">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr th:each="status : ${report.byStatus}">
+                        <td>
+                          <span class="badge" th:text="${status.status}" th:classappend="
+                              ${status.status == 'COMPLETED' ? ' text-bg-success' :
+                              (status.status == 'CANCELLED' ? ' text-bg-danger' : ' text-bg-secondary')}"></span>
+                        </td>
+                        <td class="text-end" th:text="${status.orders}"></td>
+                        <td class="text-end"
+                          th:text="|${#numbers.formatDecimal(status.orders * 100.0 / report.totalOrders, 1, 1)}%|"></td>
+                        <td class="text-end"
+                          th:text="|${#numbers.formatInteger(status.amount, 1, 'POINT')} ₫|"></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <!--end::By status-->
+            <!--begin::Top products-->
+            <div class="col-lg-7">
+              <div class="card mb-4">
+                <div class="card-header">
+                  <h3 class="card-title">Top products</h3>
+                  <div class="card-tools small text-secondary">Cancelled orders excluded</div>
+                </div>
+                <div class="card-body p-0">
+                  <table class="table table-striped mb-0" id="top-products">
+                    <thead>
+                      <tr>
+                        <th style="width: 40px">#</th>
+                        <th>Product</th>
+                        <th class="text-end">Quantity</th>
+                        <th class="text-end">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr th:each="product, stat : ${report.topProducts}">
+                        <td th:text="${stat.count}"></td>
+                        <td>
+                          <a th:href="@{/admin/products/{id}(id=${product.productId})}"
+                            th:text="${product.name}"></a>
+                        </td>
+                        <td class="text-end" th:text="${product.quantity}"></td>
+                        <td class="text-end"
+                          th:text="|${#numbers.formatInteger(product.amount, 1, 'POINT')} ₫|"></td>
+                      </tr>
+                      <tr th:if="${#lists.isEmpty(report.topProducts)}">
+                        <td colspan="4" class="text-center text-secondary">No products sold.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <!--end::Top products-->
+          </div>
         </div>
-        <!--end::Container-->
       </div>
       <!--end::App Content-->
     </main>
@@ -49,13 +165,7 @@
     <!--end::Footer-->
   </div>
   <!--end::App Wrapper-->
-  <!--begin::Script-->
-  <!--begin::Third Party Plugin(OverlayScrollbars)-->
   <th:block th:replace="~{admin/layouts/static :: js_scripts}"></th:block>
-  <!--end::OverlayScrollbars Configure-->
-  <!-- OPTIONAL SCRIPTS -->
-  <!-- sortablejs -->
-  <!--end::Script-->
 </body>
 
 </html>
