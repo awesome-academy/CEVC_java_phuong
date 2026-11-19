@@ -141,7 +141,7 @@ public class UsersController {
     return "redirect:/admin/users";
   }
 
-  @GetMapping("/{id}/delete")
+  @PostMapping("/{id}/delete")
   public String deleteUser(
       @PathVariable Long id,
       RedirectAttributes redirectAttributes,

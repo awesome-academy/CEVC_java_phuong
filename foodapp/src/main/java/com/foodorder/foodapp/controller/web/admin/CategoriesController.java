@@ -126,7 +126,7 @@ public class CategoriesController {
     return "redirect:/admin/categories";
   }
 
-  @GetMapping("/{id}/delete")
+  @PostMapping("/{id}/delete")
   public String deleteCategory(
       @PathVariable Long id,
       RedirectAttributes redirectAttributes,

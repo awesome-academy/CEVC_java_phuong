@@ -165,7 +165,7 @@ public class ProductsController {
     model.addAttribute("restock", new RestockProductDTO());
   }
 
-  @GetMapping("/{id}/delete")
+  @PostMapping("/{id}/delete")
   public String deleteProduct(
       @PathVariable Long id,
       RedirectAttributes redirectAttributes,

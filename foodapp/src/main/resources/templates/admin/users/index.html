@@ -103,8 +103,7 @@
                         <td th:text="${user.createdAt}"></td>
                         <td>
                           <a th:href="@{/admin/users/{id}/edit(id=${user.id})}" class="btn btn-sm btn-primary">Edit</a>
-                          <a th:href="@{/admin/users/{id}/delete(id=${user.id})}"
-                            class="btn btn-sm btn-danger">Delete</a>
+                          <form th:replace="~{admin/layouts/delete_form :: form(@{/admin/users/{id}/delete(id=${user.id})})}"></form>
                         </td>
                       </tr>
                     </tbody>
