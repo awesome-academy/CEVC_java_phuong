@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @NoArgsConstructor
@@ -20,6 +21,7 @@ public class UpdateUserDTO extends UserOperationDTO {
   private Long id;
 
   @Pattern(regexp = RegexConstants.PW_OPTIONAL_REGEX, message = "{validation.user.password.invalid}")
+  @ToString.Exclude // never in logs (Spring DEBUG logs request/response bodies)
   private String password;
 
   @NotNull(message = "{validation.user.role.required}")
