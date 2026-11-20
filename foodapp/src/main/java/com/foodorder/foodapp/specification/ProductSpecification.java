@@ -33,6 +33,34 @@ public class ProductSpecification {
     };
   }
 
+  public static Specification<Product> hasMinPrice(Integer minPrice) {
+    return (root, query, cb) -> {
+      if (minPrice == null) {
+        return null;
+      }
+      return cb.greaterThanOrEqualTo(root.get(Product_.price), minPrice);
+    };
+  }
+
+  public static Specification<Product> hasMaxPrice(Integer maxPrice) {
+    return (root, query, cb) -> {
+      if (maxPrice == null) {
+        return null;
+      }
+      return cb.lessThanOrEqualTo(root.get(Product_.price), maxPrice);
+    };
+  }
+
+  /** Uses the stored average_rating column; products without evaluates have 0. */
+  public static Specification<Product> hasMinRating(Integer minRating) {
+    return (root, query, cb) -> {
+      if (minRating == null) {
+        return null;
+      }
+      return cb.greaterThanOrEqualTo(root.get(Product_.averageRating), minRating.floatValue());
+    };
+  }
+
   public static Specification<Product> notDeleted() {
     return (root, query, cb) -> {
       return cb.isNull(root.get(Product_.deletedAt));

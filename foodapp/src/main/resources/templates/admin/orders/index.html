@@ -144,7 +144,7 @@
                     <div class="col-sm-6">
                       <form th:action="@{/admin/orders}" th:object="${search}" method="get" id="perPageForm">
                         <input type="hidden" name="productName" th:value="${search.productName}" />
-                        <input type="hidden" name="orderStatus" th:value="${search.orderStatusId}" />
+                        <input type="hidden" name="orderStatusId" th:value="${search.orderStatusId}" />
                         <input type="hidden" name="priceLevel" th:value="${search.priceLevel}" />
                         <div class="per-page-box d-flex gap-2 align-items-center">
                           <div>Per page:</div>
@@ -160,25 +160,7 @@
                       </form>
                     </div>
                     <div class="col-sm-6">
-                      <ul class="pagination pagination-sm float-end" th:if="${totalPages > 1}" th:with="currentPage=${orders.number + 1}, perPage=${orders.size}">
-                        <li class="page-item" th:classappend="${currentPage} == ${1} ? 'disabled'">
-                          <a class="page-link"
-                            th:href="@{/admin/orders(page=${currentPage - 1}, perPage=${perPage}, productName=${search.productName}, orderStatus=${search.orderStatusId}, priceLevel=${search.priceLevel})}">&laquo;</a>
-                        </li>
-                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages-1)}"
-                          th:classappend="${i + 1} == ${currentPage} ? 'active'">
-                          <a class="page-link"
-                            th:href="@{/admin/orders(page=${i + 1}, perPage=${perPage}, productName=${search.productName}, orderStatus=${search.orderStatusId}, priceLevel=${search.priceLevel})}"
-                            th:text="${i + 1}">
-                          </a>
-                        </li>
-                        <li class="page-item" th:classappend="${currentPage} == ${totalPages} ? 'disabled'">
-                          <a class="page-link"
-                            th:href="@{/admin/orders(page=${currentPage + 1}, perPage=${perPage}, productName=${search.productName}, orderStatus=${search.orderStatusId}, priceLevel=${search.priceLevel})}">
-                            &raquo;
-                          </a>
-                        </li>
-                      </ul>
+                      <ul th:replace="~{admin/layouts/pagination :: pagination(${orders})}"></ul>
                     </div>
                   </div>
                 </div>

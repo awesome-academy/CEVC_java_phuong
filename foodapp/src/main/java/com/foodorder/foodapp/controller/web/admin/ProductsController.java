@@ -61,7 +61,6 @@ public class ProductsController {
     Page<ListProductDTO> products = productService.getAllProducts(params, pageable);
     model.addAttribute("search", params);
     model.addAttribute("products", products);
-    model.addAttribute("totalPages", products.getTotalPages());
 
     return "admin/products/index";
   }

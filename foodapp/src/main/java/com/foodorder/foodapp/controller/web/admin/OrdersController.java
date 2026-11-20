@@ -53,7 +53,6 @@ public class OrdersController {
     Page<ListOrderDTO> orders = orderService.getAllOrders(params, pageable);
     model.addAttribute("search", params);
     model.addAttribute("orders", orders);
-    model.addAttribute("totalPages", orders.getTotalPages());
 
     return "admin/orders/index";
   }

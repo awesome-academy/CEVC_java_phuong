@@ -16,9 +16,13 @@ import lombok.AllArgsConstructor;
 
 import com.foodorder.foodapp.dto.product.ClientDetailProductDTO;
 import com.foodorder.foodapp.dto.product.ClientProductDTO;
-import com.foodorder.foodapp.dto.product.SearchProductDTO;
+import com.foodorder.foodapp.dto.product.ClientSearchProductDTO;
+import com.foodorder.foodapp.enums.EProductSort;
+import com.foodorder.foodapp.exception.BadRequestException;
 import com.foodorder.foodapp.exception.ResourceNotFoundException;
+import com.foodorder.foodapp.model.BaseModel_;
 import com.foodorder.foodapp.model.Product;
+import com.foodorder.foodapp.model.Product_;
 import com.foodorder.foodapp.utils.PageableUtils;
 
 import java.util.Objects;
@@ -31,8 +35,15 @@ public class ClientProductService {
   private final EvaluateRepository evaluateRepository;
   private final ModelMapper modelMapper;
 
-  public Page<ClientProductDTO> getPublicProducts(SearchProductDTO params, Pageable pageable) {
-    Pageable sortedPageable = PageableUtils.withFixedSort(pageable, Sort.by("id").descending());
+  public Page<ClientProductDTO> getPublicProducts(ClientSearchProductDTO params, EProductSort sortBy,
+      Pageable pageable) {
+    if (params.getMinPrice() != null && params.getMaxPrice() != null
+        && params.getMinPrice() > params.getMaxPrice()) {
+      throw new BadRequestException("validation.product.price.range");
+    }
+
+    EProductSort sort = sortBy != null ? sortBy : EProductSort.NEWEST;
+    Pageable sortedPageable = PageableUtils.withFixedSort(pageable, toSort(sort));
 
     Specification<Product> spec = buildSpecification(params);
     Page<Product> pageResult = productRepository.findAll(spec, sortedPageable);
@@ -40,12 +51,32 @@ public class ClientProductService {
     return pageResult.map(product -> modelMapper.map(product, ClientProductDTO.class));
   }
 
-  private Specification<Product> buildSpecification(SearchProductDTO params) {
+  /**
+   * Columns of each sort option, from the metamodel so renaming a Product field breaks the build.
+   * No default branch: adding an option to EProductSort without a case here does not compile.
+   * id is the tie-breaker, so products with equal values keep a stable order across pages.
+   */
+  private static Sort toSort(EProductSort sortBy) {
+    Sort idDesc = Sort.by(BaseModel_.ID).descending();
+    return switch (sortBy) {
+      case NEWEST -> idDesc;
+      case NAME_ASC -> Sort.by(Product_.NAME).ascending().and(idDesc);
+      case NAME_DESC -> Sort.by(Product_.NAME).descending().and(idDesc);
+      case PRICE_ASC -> Sort.by(Product_.PRICE).ascending().and(idDesc);
+      case PRICE_DESC -> Sort.by(Product_.PRICE).descending().and(idDesc);
+      case RATING_DESC -> Sort.by(Product_.AVERAGE_RATING).descending().and(idDesc);
+    };
+  }
+
+  private Specification<Product> buildSpecification(ClientSearchProductDTO params) {
     return Stream.of(
         ProductSpecification.withFetch(),
         ProductSpecification.hasName(params.getName()),
         ProductSpecification.hasCategory(params.getCategoryId()),
         ProductSpecification.hasProductType(params.getProductTypeId()),
+        ProductSpecification.hasMinPrice(params.getMinPrice()),
+        ProductSpecification.hasMaxPrice(params.getMaxPrice()),
+        ProductSpecification.hasMinRating(params.getMinRating()),
         ProductSpecification.notDeleted(),
         ProductSpecification.isActive())
         .filter(Objects::nonNull)
