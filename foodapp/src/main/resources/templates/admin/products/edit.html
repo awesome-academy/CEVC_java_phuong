@@ -96,11 +96,9 @@
                     </div>
                   </div>
                   <div class="mb-3">
-                    <label for="quantity" class="form-label fw-bold">Quantity <span class="text-danger">*</span></label>
-                    <input type="number" class="form-control" th:field="*{quantity}" placeholder="Input quantity" />
-                    <div th:if="${#fields.hasErrors('quantity')}" class="error-detail">
-                      <span th:errors="*{quantity}" class="text-danger"></span>
-                    </div>
+                    <label class="form-label fw-bold">Quantity</label>
+                    <!-- Read-only: saving this form never writes stock; use "Restock" to add units -->
+                    <p class="form-control-plaintext mb-0" th:text="${currentStock}"></p>
                   </div>
                   <div class="mb-3 d-flex flex-row align-items-center gap-3">
                     <label for="isActive" class="form-label mb-0 fw-bold">Is Active <span
@@ -142,6 +140,27 @@
             <!--end::Quick Example-->
           </div>
           <!--end::Col-->
+          <!--begin::Restock (separate form: adds to the current stock, see OrderStockService.addStock)-->
+          <div class="col-md-3">
+            <div class="card card-success card-outline mb-4">
+              <div class="card-header">
+                <div class="card-title">Restock</div>
+              </div>
+              <form th:action="@{/admin/products/{id}/restock(id=${product.id})}" th:object="${restock}" method="post"
+                onsubmit="return confirm('Add ' + this.amount.value + ' to the stock?')">
+                <div class="card-body">
+                  <p class="mb-2">Current stock: <strong th:text="${currentStock}"></strong></p>
+                  <label for="amount" class="form-label fw-bold">Add quantity <span class="text-danger">*</span></label>
+                  <input type="number" class="form-control" th:field="*{amount}" min="1" max="100000" required
+                    placeholder="e.g. 20" />
+                </div>
+                <div class="card-footer">
+                  <button type="submit" class="btn btn-success">Add to stock</button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <!--end::Restock-->
         </div>
         <!--end::Row-->
       </div>

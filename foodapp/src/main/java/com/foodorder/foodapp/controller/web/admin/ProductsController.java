@@ -20,6 +20,7 @@ import com.foodorder.foodapp.dto.product.CreateProductDTO;
 import com.foodorder.foodapp.dto.product.DetailProductDTO;
 import com.foodorder.foodapp.dto.product.ListProductDTO;
 import com.foodorder.foodapp.dto.product.SearchProductDTO;
+import com.foodorder.foodapp.dto.product.RestockProductDTO;
 import com.foodorder.foodapp.dto.product.UpdateProductDTO;
 import com.foodorder.foodapp.dto.product_type.ProductTypeDTO;
 import com.foodorder.foodapp.enums.MessageCode;
@@ -116,6 +117,7 @@ public class ProductsController {
     }
 
     model.addAttribute("product", updateProductDTO);
+    addRestockFormToModel(product, model);
 
     return "admin/products/edit";
   }
@@ -129,6 +131,7 @@ public class ProductsController {
       Model model) {
     if (bindingResult.hasErrors()) {
       model.addAttribute("failedMessage", MessageCode.UPDATE_FAILED.getCode());
+      addRestockFormToModel(productService.getProductById(id), model);
 
       return "admin/products/edit";
     }
@@ -139,7 +142,29 @@ public class ProductsController {
     return "redirect:/admin/products";
   }
 
-  @GetMapping("/{id}/delete")
+  @PostMapping("/{id}/restock")
+  public String restockProduct(
+      @NonNull @PathVariable Long id,
+      @Valid RestockProductDTO restockProductDTO,
+      BindingResult bindingResult,
+      RedirectAttributes redirectAttributes) {
+    if (bindingResult.hasErrors()) {
+      redirectAttributes.addFlashAttribute("failedMessage", "validation.product.restock.amount.range");
+    } else {
+      productService.restockProduct(id, restockProductDTO.getAmount());
+      redirectAttributes.addFlashAttribute("successMessage", MessageCode.UPDATE_SUCCESS.getCode());
+    }
+
+    return "redirect:/admin/products/" + id + "/edit";
+  }
+
+  /** Current stock (read-only on the edit form) and an empty restock form. */
+  private void addRestockFormToModel(DetailProductDTO product, Model model) {
+    model.addAttribute("currentStock", product.getQuantity());
+    model.addAttribute("restock", new RestockProductDTO());
+  }
+
+  @PostMapping("/{id}/delete")
   public String deleteProduct(
       @PathVariable Long id,
       RedirectAttributes redirectAttributes,

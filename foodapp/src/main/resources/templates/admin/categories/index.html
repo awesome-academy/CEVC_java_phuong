@@ -89,8 +89,7 @@
                         <td>
                           <a th:href="@{/admin/categories/{id}/edit(id=${category.id})}"
                             class="btn btn-sm btn-primary">Edit</a>
-                          <a th:href="@{/admin/categories/{id}/delete(id=${category.id})}"
-                            class="btn btn-sm btn-danger">Delete</a>
+                          <form th:replace="~{admin/layouts/delete_form :: form(@{/admin/categories/{id}/delete(id=${category.id})})}"></form>
                         </td>
                       </tr>
                     </tbody>

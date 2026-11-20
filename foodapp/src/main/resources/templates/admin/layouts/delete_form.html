@@ -1,0 +1,7 @@
+<!-- Delete button as a POST form (CSRF token added by th:action), confirm first.
+     A GET link would delete on any visit, e.g. an <img src> on another site or a prefetched URL.
+     Usage: <form th:replace="~{admin/layouts/delete_form :: form(@{/admin/users/{id}/delete(id=${user.id})})}"></form> -->
+<form th:fragment="form(action)" class="d-inline" method="post" th:action="${action}"
+  onsubmit="return confirm('Delete this item?')">
+  <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+</form>

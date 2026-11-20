@@ -1,0 +1,13 @@
+<!-- Test logging. Covers the lines logged before Spring Boot starts (test context bootstrap),
+     which application-test.yaml cannot reach; after startup the levels in application-test.yaml apply. -->
+<configuration>
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <root level="WARN">
+    <appender-ref ref="CONSOLE" />
+  </root>
+</configuration>

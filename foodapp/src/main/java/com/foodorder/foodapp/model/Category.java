@@ -34,7 +34,9 @@ public class Category extends BaseModel {
   @JsonManagedReference
   private List<Category> children;
 
-  @OneToMany(mappedBy = "category", cascade = CascadeType.REMOVE)
+  // No cascade: deleting a category must never delete its products (CategoryService refuses
+  // to delete a category that still has products)
+  @OneToMany(mappedBy = "category")
   @JsonManagedReference
   private List<Product> products;
 

@@ -17,7 +17,7 @@ import jakarta.persistence.LockModeType;
 import lombok.AllArgsConstructor;
 
 /**
- * Stock changes shared by admin and client order flows. Both directions lock products the same way:
+ * Stock changes shared by admin and client order flows (and the admin restock action). Both directions lock products the same way:
  * in productId order (concurrent orders wait instead of deadlocking) and re-read under the lock.
  */
 @Service
@@ -56,6 +56,15 @@ public class OrderStockService {
 
       product.setQuantity(product.getQuantity() + item.getQuantity());
     }
+  }
+
+  /**
+   * Adds stock from the admin "restock" action. Uses the same lock-then-reread as orders, so the
+   * amount is added to the current stock instead of to a value read before a concurrent order.
+   */
+  public void addStock(Product product, int amount) {
+    Product locked = lockAndRefresh(product);
+    locked.setQuantity(locked.getQuantity() + amount);
   }
 
   /**

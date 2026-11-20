@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import org.hibernate.annotations.DynamicUpdate;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -23,6 +25,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Table(name = "products")
+// UPDATE only the columns that changed: stock and rating are written by several flows (orders,
+// restock, rating recalculation), so saving a Product loaded earlier must not put old values back
+@DynamicUpdate
 public class Product extends BaseModel {
 
   @ManyToOne

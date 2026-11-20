@@ -1,0 +1,31 @@
+# Profile "test", activated by @IntegrationTest (src/test/.../support/IntegrationTest.java).
+# Replaces application-dev.yaml for tests: no .env needed, the datasource comes from the
+# Testcontainers PostgreSQL container (@ServiceConnection), not from DB_URL.
+# Shared file: change it only for something every test needs.
+
+spring:
+  main:
+    banner-mode: off
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  jpa:
+    hibernate:
+      ddl-auto: validate                    # Flyway creates the schema, Hibernate only checks it
+    open-in-view: false                     # Services must not rely on the web request session
+
+# Quiet test output: startup INFO (Testcontainers, Flyway, Hibernate) and the DEBUG web logging of
+# application.yaml hide the test results. Warnings and errors still show; to debug one test, raise
+# a level here locally (e.g. org.hibernate.SQL: DEBUG).
+logging:
+  level:
+    root: WARN
+    '[org.springframework.web]': WARN
+
+# Values for the ${...} placeholders of application.yaml that normally come from .env
+JWT_SECRET: dGVzdC1vbmx5LWp3dC1zZWNyZXQtZm9yLWludGVncmF0aW9uLXRlc3RzLW5vdC1mb3ItcHJvZA==
+UPLOAD_FOLDER: test-uploads
+APP_UPLOAD_LOCATION: target
+LOG_PATH: target/test-logs

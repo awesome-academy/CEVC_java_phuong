@@ -93,7 +93,10 @@ public class CategoryService {
       throw new BadRequestException("category.product.exists");
     }
 
-    categoryRepository.detachChildren(id);
+    // Detach children through the entities, not a bulk UPDATE: children already loaded in this
+    // transaction would still point at the deleted parent and the flush fails (TransientObjectException)
+    category.getChildren().forEach(child -> child.setParent(null));
+    category.getChildren().clear();
     categoryRepository.delete(category);
   }
 }
